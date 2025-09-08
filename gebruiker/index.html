@@ -1,13 +1,103 @@
 <!doctype html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport"
-          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+        content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Activadis</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
 </head>
+
 <body>
-    <h1>Activadis</h1>
+    <nav>
+        <div>
+            <a href="../index.html"><i class="fas fa-home"></i></a>
+            <a href="../activiteiten/index.html">Activiteiten</a>
+        </div>
+        <div>
+            <a href="../login">Login</a>
+        </div>
+    </nav>
+    <main>
+        <div class="events">
+            <div class="event">
+                <div class="event-info">
+                    <h2 class="event-title">EVENT</h2>
+                    <h3 class="location">LOCATIE</h3>
+                    <p class="date">20-11-2052</p>
+                    <p class="description">Lorem ipsum, dolor sit amet consectetur adipisicing elit. Modi, maxime.</p>
+                </div>
+                <div class="icons">
+                    <button>Deelnemen</button>
+                </div>
+            </div>
+        </div>
+    </main>
+    <script>
+        const events = [
+            {
+                title: "Wandeling in het park",
+                location: "Vondelpark, Amsterdam",
+                date: "2024-07-15",
+                description: "Geniet van een ontspannen wandeling door het prachtige Vondelpark.",
+            },
+            {
+                title: "Museumbezoek",
+                location: "Rijksmuseum, Amsterdam",
+                date: "2024-08-05",
+                description: "Ontdek de meesterwerken van de Nederlandse kunst in het Rijksmuseum.",
+            },
+            {
+                title: "Kookworkshop",
+                location: "Culinaire Studio, Rotterdam",
+                date: "2024-09-10",
+                description: "Leer nieuwe recepten en kooktechnieken in een gezellige kookworkshop.",
+            },
+            {
+                title: "Kookworkshop",
+                location: "Culinaire Studio, Rotterdam",
+                date: "2024-09-10",
+                description: "Leer nieuwe recepten en kooktechnieken in een gezellige kookworkshop.",
+            },
+            {
+                title: "Kookworkshop",
+                location: "Culinaire Studio, Rotterdam",
+                date: "2024-09-10",
+                description: "Leer nieuwe recepten en kooktechnieken in een gezellige kookworkshop.",
+            },
+            {
+                title: "Kookworkshop",
+                location: "Culinaire Studio, Rotterdam",
+                date: "2024-09-10",
+                description: "Leer nieuwe recepten en kooktechnieken in een gezellige kookworkshop.",
+            },
+        ];
+
+        const eventsContainer = document.querySelector('.events');
+        eventsContainer.innerHTML = '';
+
+        events.forEach(event => {
+            const eventElement = document.createElement('div');
+            eventElement.classList.add('event');
+
+            eventElement.innerHTML = `
+                <div class="event-info">
+                    <h2 class="event-title">${event.title}</h2>
+                    <h3 class="location">${event.location}</h3>
+                    <p class="date">${new Date(event.date).toLocaleDateString()}</p>
+                    <p class="description">${event.description}</p>
+                </div>
+                <div class="icons">
+                    <button>Deelnemen</button>
+                </div>
+            `;
+
+            eventsContainer.appendChild(eventElement);
+        });
+    </script>
 </body>
+
 </html>
