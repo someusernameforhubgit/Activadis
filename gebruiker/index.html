@@ -38,66 +38,65 @@
         </div>
     </main>
     <script>
-        const events = [
-            {
-                title: "Wandeling in het park",
-                location: "Vondelpark, Amsterdam",
-                date: "2024-07-15",
-                description: "Geniet van een ontspannen wandeling door het prachtige Vondelpark.",
-            },
-            {
-                title: "Museumbezoek",
-                location: "Rijksmuseum, Amsterdam",
-                date: "2024-08-05",
-                description: "Ontdek de meesterwerken van de Nederlandse kunst in het Rijksmuseum.",
-            },
-            {
-                title: "Kookworkshop",
-                location: "Culinaire Studio, Rotterdam",
-                date: "2024-09-10",
-                description: "Leer nieuwe recepten en kooktechnieken in een gezellige kookworkshop.",
-            },
-            {
-                title: "Kookworkshop",
-                location: "Culinaire Studio, Rotterdam",
-                date: "2024-09-10",
-                description: "Leer nieuwe recepten en kooktechnieken in een gezellige kookworkshop.",
-            },
-            {
-                title: "Kookworkshop",
-                location: "Culinaire Studio, Rotterdam",
-                date: "2024-09-10",
-                description: "Leer nieuwe recepten en kooktechnieken in een gezellige kookworkshop.",
-            },
-            {
-                title: "Kookworkshop",
-                location: "Culinaire Studio, Rotterdam",
-                date: "2024-09-10",
-                description: "Leer nieuwe recepten en kooktechnieken in een gezellige kookworkshop.",
-            },
-        ];
+        // Helper functions for text handling
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
 
-        const eventsContainer = document.querySelector('.events');
-        eventsContainer.innerHTML = '';
+        function formatTextWithNewlines(text) {
+            if (!text) return '';
+            return escapeHtml(text).replace(/\n/g, '<br>');
+        }
 
-        events.forEach(event => {
-            const eventElement = document.createElement('div');
-            eventElement.classList.add('event');
+        // Load events from API
+        async function loadEvents() {
+            try {
+                const response = await fetch('/api/activiteit');
+                const events = await response.json();
+                displayEvents(events);
+            } catch (error) {
+                console.error('Error loading events:', error);
+                // Fallback to dummy data if API fails
+                displayEvents([
+                    {
+                        naam: "Wandeling in het park",
+                        locatie: "Vondelpark, Amsterdam",
+                        begin: "2024-07-15",
+                        omschrijving: "Geniet van een ontspannen wandeling door het prachtige Vondelpark.",
+                    }
+                ]);
+            }
+        }
 
-            eventElement.innerHTML = `
-                <div class="event-info">
-                    <h2 class="event-title">${event.title}</h2>
-                    <h3 class="location">${event.location}</h3>
-                    <p class="date">${new Date(event.date).toLocaleDateString()}</p>
-                    <p class="description">${event.description}</p>
-                </div>
-                <div class="icons">
-                    <button>Deelnemen</button>
-                </div>
-            `;
+        function displayEvents(events) {
+            const eventsContainer = document.querySelector('.events');
+            eventsContainer.innerHTML = '';
 
-            eventsContainer.appendChild(eventElement);
-        });
+            events.forEach(event => {
+                const eventElement = document.createElement('div');
+                eventElement.classList.add('event');
+
+                eventElement.innerHTML = `
+                    <div class="event-info">
+                        <h2 class="event-title">${escapeHtml(event.naam || event.title)}</h2>
+                        <h3 class="location">${escapeHtml(event.locatie || event.location)}</h3>
+                        <p class="date">${new Date(event.begin || event.date).toLocaleDateString()}</p>
+                        <p class="description">${formatTextWithNewlines(event.omschrijving || event.description)}</p>
+                    </div>
+                    <div class="icons">
+                        <button>Deelnemen</button>
+                    </div>
+                `;
+
+                eventsContainer.appendChild(eventElement);
+            });
+        }
+
+        // Load events when page loads
+        document.addEventListener('DOMContentLoaded', loadEvents);
     </script>
 </body>
 

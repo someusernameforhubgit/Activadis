@@ -14,11 +14,13 @@
     --background-color: #f4f4f4;
 
     --main-padding: 20px;
+    --header-main-height: 44px;
 }
 
 body {
     font-family: 'Poppins', sans-serif;
     height: 100vh;
+    padding-top: var(--header-main-height);
 
     display: flex;
     flex-direction: column;
@@ -32,9 +34,13 @@ body {
 }
 
 header {
-    position: relative;
-    background-color: rgba(128, 128, 128, 0.6);
+    top: 0;
+    position: fixed;
+    width: 100%;
+    background-color: rgba(128, 128, 128, 0.5);
     padding: 10px 0;
+    backdrop-filter: blur(10px);
+    z-index: 1000;
 
     .container {
         display: flex;
@@ -51,20 +57,22 @@ header {
 #mainContainer {
     flex: 1;
     width: 100%;
-    height: 100%;
+    /* height: 100%; */
     max-width: calc(1600px + var(--main-padding) * 2);
     margin: 0 auto;
     padding: var(--main-padding);
 
-    overflow-y: auto;
+    /* overflow-y: auto; */
 
     display: flex;
     gap: calc(var(--main-padding) * 1.5);
 
     #sidebar {
+        position: sticky;
+        top: calc(var(--header-main-height) + var(--main-padding));
         width: 300px;
-        background-color: white;
-        border-radius: 8px;
+        height: fit-content;
+        max-height: 100%;
         box-shadow: 0 4px 20px -5px rgba(0, 0, 0, 0.2);
         padding: var(--main-padding);
         /* padding: calc(var(--main-padding) / 2) var(--main-padding); */
@@ -99,8 +107,10 @@ header {
     }
 
     #sideContent {
+        position: sticky;
+        top: calc(var(--header-main-height) + var(--main-padding));
         width: 300px;
-        height: 100%;
+        height: calc(100vh - var(--header-main-height) - var(--main-padding) * 2);
         background-color: white;
         border-left: 1px solid #ddd;
         padding: var(--main-padding);

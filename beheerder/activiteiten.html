@@ -1,0 +1,368 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="/css/style.css">
+    <title>Activadis - Activiteiten Beheer</title>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="left">
+                <p><b>Activadis</b>: Activiteiten Beheer</p>
+            </div>
+        </div>
+    </header>
+    <section id="mainContainer">
+        <aside id="sidebar">
+            <h1>Navigatie</h1>
+            <ul>
+                <li><a href="/beheerder/index.html">Dashboard</a></li>
+                <li><a href="/beheerder/gebruikers.html">Gebruikers</a></li>
+                <li><a href="/beheerder/activiteiten.html">Activiteiten</a></li>
+                <li><a href="/beheerder/instellingen.html">Instellingen</a></li>
+            </ul>
+        </aside>
+        <main id="mainContent">
+            <h2>Activiteiten Beheer</h2>
+            
+            <div class="actions">
+                <button onclick="showAddForm()">Nieuwe Activiteit Toevoegen</button>
+            </div>
+
+            <div id="add-form" style="display: none; margin: 20px 0; padding: 20px; border: 1px solid #ccc;">
+                <h3>Nieuwe Activiteit</h3>
+                <div style="margin-bottom: 10px;">
+                    <label>Naam:</label><br>
+                    <input type="text" id="new-naam" style="width: 100%;" required>
+                </div>
+                <div style="margin-bottom: 10px;">
+                    <label>Locatie:</label><br>
+                    <input type="text" id="new-locatie" style="width: 100%;" required>
+                </div>
+                <div style="margin-bottom: 10px;">
+                    <label>Eten:</label><br>
+                    <input type="text" id="new-eten" style="width: 100%;" required>
+                </div>
+                <div style="margin-bottom: 10px;">
+                    <label>Omschrijving:</label><br>
+                    <textarea id="new-omschrijving" style="width: 100%; height: 80px;" required></textarea>
+                </div>
+                <div style="margin-bottom: 10px;">
+                    <label>Begin datum/tijd:</label><br>
+                    <input type="datetime-local" id="new-begin" style="width: 100%;" required>
+                </div>
+                <div style="margin-bottom: 10px;">
+                    <label>Eind datum/tijd:</label><br>
+                    <input type="datetime-local" id="new-eind" style="width: 100%;" required>
+                </div>
+                <div style="margin-bottom: 10px;">
+                    <label>Kosten (€):</label><br>
+                    <input type="number" id="new-kost" step="0.01" style="width: 100%;" required>
+                </div>
+                <div style="margin-bottom: 10px;">
+                    <label>Maximum deelnemers:</label><br>
+                    <input type="number" id="new-max" style="width: 100%;" required>
+                </div>
+                <div style="margin-bottom: 10px;">
+                    <label>Minimum deelnemers:</label><br>
+                    <input type="number" id="new-min" style="width: 100%;" required>
+                </div>
+                <div style="margin-bottom: 10px;">
+                    <label>Afbeelding URL:</label><br>
+                    <input type="url" id="new-afbeelding" style="width: 100%;" required>
+                </div>
+                <div>
+                    <button onclick="createActiviteit()">Toevoegen</button>
+                    <button onclick="hideAddForm()">Annuleren</button>
+                </div>
+            </div>
+
+            <div id="activiteiten-list">
+                <h3>Alle Activiteiten</h3>
+                <div id="activiteiten-container"></div>
+            </div>
+        </main>
+        <div id="sideContent">
+            <h3>Activiteit Stats</h3>
+            <div id="activity-stats">
+                <p>Totaal activiteiten: <span id="total-activities">-</span></p>
+                <p>Komende activiteiten: <span id="upcoming-count">-</span></p>
+                <p>Afgelopen activiteiten: <span id="past-count">-</span></p>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        const API_URL = '/api/activiteit';
+
+        // Helper functions for text handling
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function formatTextWithNewlines(text) {
+            if (!text) return '';
+            return escapeHtml(text).replace(/\n/g, '<br>');
+        }
+
+        function unescapeHtml(html) {
+            const div = document.createElement('div');
+            div.innerHTML = html;
+            return div.textContent || div.innerText || '';
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadActiviteiten();
+        });
+
+        async function loadActiviteiten() {
+            try {
+                const response = await fetch(API_URL);
+                const activiteiten = await response.json();
+                
+                displayActiviteiten(activiteiten);
+                updateStats(activiteiten);
+            } catch (error) {
+                console.error('Error loading activiteiten:', error);
+            }
+        }
+
+        function displayActiviteiten(activiteiten) {
+            const container = document.getElementById('activiteiten-container');
+            container.innerHTML = '';
+
+            activiteiten.forEach(act => {
+                const div = document.createElement('div');
+                div.style.border = '1px solid #ddd';
+                div.style.margin = '10px 0';
+                div.style.padding = '15px';
+                div.style.borderRadius = '5px';
+                
+                const beginDate = new Date(act.begin);
+                const eindDate = new Date(act.eind);
+                
+                div.innerHTML = `
+                    <h4>${escapeHtml(act.naam)}</h4>
+                    <p><strong>Locatie:</strong> ${escapeHtml(act.locatie)}</p>
+                    <p><strong>Omschrijving:</strong> ${formatTextWithNewlines(act.omschrijving)}</p>
+                    <p><strong>Datum:</strong> ${beginDate.toLocaleString()} - ${eindDate.toLocaleString()}</p>
+                    <p><strong>Eten:</strong> ${escapeHtml(act.eten)}</p>
+                    <p><strong>Kosten:</strong> €${act.kost}</p>
+                    <p><strong>Deelnemers:</strong> ${act.min} - ${act.max}</p>
+                    <p><strong>Afbeelding:</strong> <a href="${act.afbeelding}" target="_blank">Bekijk</a></p>
+                    <div style="margin-top: 10px;">
+                        <button onclick="editActiviteit(${act.id})">Bewerken</button>
+                        <button onclick="deleteActiviteit(${act.id})">Verwijderen</button>
+                    </div>
+                    
+                    <!-- Edit form (hidden by default) -->
+                    <div id="edit-form-${act.id}" style="display: none; margin-top: 15px; padding: 15px; background-color: #f9f9f9; border-radius: 5px;">
+                        <h4>Bewerk Activiteit</h4>
+                        <div style="margin-bottom: 10px;">
+                            <label>Naam:</label><br>
+                            <input type="text" id="edit-naam-${act.id}" style="width: 100%;" value="${escapeHtml(act.naam)}">
+                        </div>
+                        <div style="margin-bottom: 10px;">
+                            <label>Locatie:</label><br>
+                            <input type="text" id="edit-locatie-${act.id}" style="width: 100%;" value="${escapeHtml(act.locatie)}">
+                        </div>
+                        <div style="margin-bottom: 10px;">
+                            <label>Eten:</label><br>
+                            <input type="text" id="edit-eten-${act.id}" style="width: 100%;" value="${escapeHtml(act.eten)}">
+                        </div>
+                        <div style="margin-bottom: 10px;">
+                            <label>Omschrijving:</label><br>
+                            <textarea id="edit-omschrijving-${act.id}" style="width: 100%; height: 60px;">${escapeHtml(act.omschrijving)}</textarea>
+                        </div>
+                        <div style="margin-bottom: 10px;">
+                            <label>Begin datum/tijd:</label><br>
+                            <input type="datetime-local" id="edit-begin-${act.id}" style="width: 100%;" value="${new Date(act.begin).toISOString().slice(0, 16)}">
+                        </div>
+                        <div style="margin-bottom: 10px;">
+                            <label>Eind datum/tijd:</label><br>
+                            <input type="datetime-local" id="edit-eind-${act.id}" style="width: 100%;" value="${new Date(act.eind).toISOString().slice(0, 16)}">
+                        </div>
+                        <div style="margin-bottom: 10px;">
+                            <label>Kosten (€):</label><br>
+                            <input type="number" id="edit-kost-${act.id}" step="0.01" style="width: 100%;" value="${act.kost}">
+                        </div>
+                        <div style="margin-bottom: 10px;">
+                            <label>Maximum deelnemers:</label><br>
+                            <input type="number" id="edit-max-${act.id}" style="width: 100%;" value="${act.max}">
+                        </div>
+                        <div style="margin-bottom: 10px;">
+                            <label>Minimum deelnemers:</label><br>
+                            <input type="number" id="edit-min-${act.id}" style="width: 100%;" value="${act.min}">
+                        </div>
+                        <div style="margin-bottom: 10px;">
+                            <label>Afbeelding URL:</label><br>
+                            <input type="url" id="edit-afbeelding-${act.id}" style="width: 100%;" value="${escapeHtml(act.afbeelding)}">
+                        </div>
+                        <div>
+                            <button onclick="saveActiviteit(${act.id})">Opslaan</button>
+                            <button onclick="cancelEdit(${act.id})">Annuleren</button>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function updateStats(activiteiten) {
+            const now = new Date();
+            const totalActivities = activiteiten.length;
+            const upcomingCount = activiteiten.filter(act => new Date(act.begin) > now).length;
+            const pastCount = totalActivities - upcomingCount;
+
+            document.getElementById('total-activities').textContent = totalActivities;
+            document.getElementById('upcoming-count').textContent = upcomingCount;
+            document.getElementById('past-count').textContent = pastCount;
+        }
+
+        function showAddForm() {
+            document.getElementById('add-form').style.display = 'block';
+        }
+
+        function hideAddForm() {
+            document.getElementById('add-form').style.display = 'none';
+            clearForm();
+        }
+
+        function clearForm() {
+            ['new-naam', 'new-locatie', 'new-eten', 'new-omschrijving', 'new-begin', 'new-eind', 'new-kost', 'new-max', 'new-min', 'new-afbeelding'].forEach(id => {
+                document.getElementById(id).value = '';
+            });
+        }
+
+        async function createActiviteit() {
+            const data = {
+                naam: document.getElementById('new-naam').value,
+                locatie: document.getElementById('new-locatie').value,
+                eten: document.getElementById('new-eten').value,
+                omschrijving: document.getElementById('new-omschrijving').value,
+                begin: document.getElementById('new-begin').value,
+                eind: document.getElementById('new-eind').value,
+                kost: parseFloat(document.getElementById('new-kost').value),
+                max: parseInt(document.getElementById('new-max').value),
+                min: parseInt(document.getElementById('new-min').value),
+                afbeelding: document.getElementById('new-afbeelding').value
+            };
+
+            // Validate required fields
+            for (const [key, value] of Object.entries(data)) {
+                if (!value && value !== 0) {
+                    alert(`Vul het veld "${key}" in!`);
+                    return;
+                }
+            }
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    alert('Activiteit toegevoegd!');
+                    hideAddForm();
+                    loadActiviteiten();
+                } else {
+                    const error = await response.text();
+                    alert('Error: ' + error);
+                }
+            } catch (error) {
+                console.error('Error creating activiteit:', error);
+                alert('Error creating activiteit');
+            }
+        }
+
+        async function deleteActiviteit(id) {
+            if (confirm('Weet je zeker dat je deze activiteit wilt verwijderen?')) {
+                try {
+                    const response = await fetch(`${API_URL}?id=${id}`, {
+                        method: 'DELETE'
+                    });
+
+                    if (response.ok) {
+                        alert('Activiteit verwijderd!');
+                        loadActiviteiten();
+                    } else {
+                        alert('Error deleting activiteit');
+                    }
+                } catch (error) {
+                    console.error('Error deleting activiteit:', error);
+                    alert('Error deleting activiteit');
+                }
+            }
+        }
+
+        function editActiviteit(id) {
+            const editForm = document.getElementById(`edit-form-${id}`);
+            if (editForm.style.display === 'none') {
+                editForm.style.display = 'block';
+            } else {
+                editForm.style.display = 'none';
+            }
+        }
+
+        function cancelEdit(id) {
+            document.getElementById(`edit-form-${id}`).style.display = 'none';
+        }
+
+        async function saveActiviteit(id) {
+            const data = {
+                id: id,
+                naam: document.getElementById(`edit-naam-${id}`).value,
+                locatie: document.getElementById(`edit-locatie-${id}`).value,
+                eten: document.getElementById(`edit-eten-${id}`).value,
+                omschrijving: document.getElementById(`edit-omschrijving-${id}`).value,
+                begin: document.getElementById(`edit-begin-${id}`).value,
+                eind: document.getElementById(`edit-eind-${id}`).value,
+                kost: parseFloat(document.getElementById(`edit-kost-${id}`).value),
+                max: parseInt(document.getElementById(`edit-max-${id}`).value),
+                min: parseInt(document.getElementById(`edit-min-${id}`).value),
+                afbeelding: document.getElementById(`edit-afbeelding-${id}`).value
+            };
+
+            // Validate required fields
+            for (const [key, value] of Object.entries(data)) {
+                if (key !== 'id' && (!value && value !== 0)) {
+                    alert(`Vul het veld "${key}" in!`);
+                    return;
+                }
+            }
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    alert('Activiteit bijgewerkt!');
+                    cancelEdit(id);
+                    loadActiviteiten();
+                } else {
+                    const error = await response.text();
+                    alert('Error: ' + error);
+                }
+            } catch (error) {
+                console.error('Error updating activiteit:', error);
+                alert('Error updating activiteit');
+            }
+        }
+    </script>
+</body>
+</html>

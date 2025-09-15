@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="/css/style.css">
+    <title>Activadis - Instellingen</title>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="left">
+                <p><b>Activadis</b>: Instellingen</p>
+            </div>
+        </div>
+    </header>
+    <section id="mainContainer">
+        <aside id="sidebar">
+            <h1>Navigatie</h1>
+            <ul>
+                <li><a href="/beheerder/index.html">Dashboard</a></li>
+                <li><a href="/beheerder/gebruikers.html">Gebruikers</a></li>
+                <li><a href="/beheerder/activiteiten.html">Activiteiten</a></li>
+                <li><a href="/beheerder/instellingen.html">Instellingen</a></li>
+            </ul>
+        </aside>
+        <main id="mainContent">
+            <h2>Systeem Instellingen</h2>
+            
+            <div class="settings-section">
+                <h3>Database Informatie</h3>
+                <div id="db-info">
+                    <p>Status: <span id="db-status">Checking...</span></p>
+                    <button onclick="testConnection()">Test Database Verbinding</button>
+                </div>
+            </div>
+
+            <div class="settings-section" style="margin-top: 30px;">
+                <h3>API Endpoints</h3>
+                <div id="api-info">
+                    <p>Activiteiten API: <span id="activiteiten-status">Checking...</span></p>
+                    <p>Gebruikers API: <span id="gebruikers-status">Checking...</span></p>
+                    <p>Inschrijvingen API: <span id="inschrijvingen-status">Checking...</span></p>
+                    <p>Benodigdheden API: <span id="benodigdheden-status">Checking...</span></p>
+                    <button onclick="testAllAPIs()">Test Alle APIs</button>
+                </div>
+            </div>
+
+            <div class="settings-section" style="margin-top: 30px;">
+                <h3>Beheer Opties</h3>
+                <div>
+                    <button onclick="clearAllData()" style="background-color: #dc3545; color: white; padding: 10px 20px; border: none; border-radius: 5px; margin: 5px;">
+                        ⚠️ Alle Data Wissen (GEVAARLIJK)
+                    </button>
+                    <button onclick="exportData()" style="background-color: #28a745; color: white; padding: 10px 20px; border: none; border-radius: 5px; margin: 5px;">
+                        📥 Data Exporteren
+                    </button>
+                </div>
+            </div>
+
+            <div class="settings-section" style="margin-top: 30px;">
+                <h3>Systeem Logs</h3>
+                <div>
+                    <textarea id="logs" style="width: 100%; height: 200px; font-family: monospace;" readonly></textarea>
+                    <button onclick="refreshLogs()">Logs Verversen</button>
+                </div>
+            </div>
+        </main>
+        <div id="sideContent">
+            <h3>Quick Stats</h3>
+            <div id="quick-stats">
+                <p>Server Status: <span id="server-status">Online</span></p>
+                <p>Laatste Update: <span id="last-update">-</span></p>
+                <p>Totaal Requests: <span id="total-requests">-</span></p>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        const APIs = {
+            activiteit: '/api/activiteit',
+            gebruiker: '/api/gebruiker',
+            inschrijving: '/api/inschrijving',
+            benodigdheid: '/api/benodigdheid'
+        };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeSettings();
+        });
+
+        function initializeSettings() {
+            document.getElementById('last-update').textContent = new Date().toLocaleString();
+            testAllAPIs();
+            addLog('Instellingen pagina geladen');
+        }
+
+        async function testConnection() {
+            document.getElementById('db-status').textContent = 'Testing...';
+            
+            try {
+                // Test by trying to fetch users (this will test database connection)
+                const response = await fetch('/api/gebruiker');
+                if (response.ok) {
+                    document.getElementById('db-status').textContent = '✅ Verbonden';
+                    addLog('Database verbinding succesvol getest');
+                } else {
+                    document.getElementById('db-status').textContent = '❌ Fout';
+                    addLog('Database verbinding test gefaald');
+                }
+            } catch (error) {
+                document.getElementById('db-status').textContent = '❌ Fout';
+                addLog('Database verbinding error: ' + error.message);
+            }
+        }
+
+        async function testAllAPIs() {
+            const statusElements = {
+                activiteiten: 'activiteiten-status',
+                gebruikers: 'gebruikers-status',
+                inschrijvingen: 'inschrijvingen-status',
+                benodigdheden: 'benodigdheden-status'
+            };
+
+            for (const [name, elementId] of Object.entries(statusElements)) {
+                document.getElementById(elementId).textContent = 'Testing...';
+            }
+
+            for (const [apiName, url] of Object.entries(APIs)) {
+                try {
+                    const response = await fetch(url);
+                    const elementId = apiName === 'activiteit' ? 'activiteiten-status' : 
+                                     apiName === 'gebruiker' ? 'gebruikers-status' :
+                                     apiName + 'en-status';
+                    
+                    if (response.ok) {
+                        document.getElementById(elementId).textContent = '✅ Werkend';
+                        addLog(`${apiName} API test succesvol`);
+                    } else {
+                        document.getElementById(elementId).textContent = '❌ Fout';
+                        addLog(`${apiName} API test gefaald`);
+                    }
+                } catch (error) {
+                    const elementId = apiName === 'activiteit' ? 'activiteiten-status' : 
+                                     apiName === 'gebruiker' ? 'gebruikers-status' :
+                                     apiName + 'en-status';
+                    document.getElementById(elementId).textContent = '❌ Fout';
+                    addLog(`${apiName} API error: ${error.message}`);
+                }
+            }
+        }
+
+        async function clearAllData() {
+            const confirmation = prompt('Type "DELETE ALL" om alle data te wissen (dit kan niet ongedaan gemaakt worden):');
+            
+            if (confirmation === 'DELETE ALL') {
+                const doubleConfirm = confirm('Weet je het ZEKER? Dit wist ALLE gebruikers, activiteiten, inschrijvingen en benodigdheden!');
+                
+                if (doubleConfirm) {
+                    try {
+                        // This would need additional API endpoints for bulk deletion
+                        alert('Let op: Bulk delete functionaliteit moet nog geïmplementeerd worden in de API');
+                        addLog('Bulk delete poging - niet geïmplementeerd');
+                    } catch (error) {
+                        alert('Error tijdens data wissen: ' + error.message);
+                        addLog('Bulk delete error: ' + error.message);
+                    }
+                }
+            } else {
+                addLog('Data wis operatie geannuleerd');
+            }
+        }
+
+        async function exportData() {
+            try {
+                addLog('Data export gestart...');
+                
+                const [activiteiten, gebruikers, inschrijvingen, benodigdheden] = await Promise.all([
+                    fetch('/api/activiteit').then(res => res.json()),
+                    fetch('/api/gebruiker').then(res => res.json()),
+                    fetch('/api/inschrijving').then(res => res.json()),
+                    fetch('/api/benodigdheid').then(res => res.json())
+                ]);
+
+                const exportData = {
+                    timestamp: new Date().toISOString(),
+                    activiteiten,
+                    gebruikers: gebruikers.map(u => ({ id: u.id, email: u.email, admin: u.admin })), // Don't export passwords
+                    inschrijvingen,
+                    benodigdheden
+                };
+
+                const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `activadis-export-${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+
+                addLog('Data export voltooid');
+                alert('Data export voltooid!');
+            } catch (error) {
+                addLog('Data export error: ' + error.message);
+                alert('Error tijdens export: ' + error.message);
+            }
+        }
+
+        function addLog(message) {
+            const logs = document.getElementById('logs');
+            const timestamp = new Date().toLocaleTimeString();
+            logs.value += `[${timestamp}] ${message}\n`;
+            logs.scrollTop = logs.scrollHeight;
+        }
+
+        function refreshLogs() {
+            // In a real application, this would fetch server logs
+            addLog('Logs ververst (mock functie)');
+        }
+
+        // Update request counter (mock)
+        let requestCount = 0;
+        setInterval(() => {
+            requestCount += Math.floor(Math.random() * 3);
+            document.getElementById('total-requests').textContent = requestCount;
+        }, 5000);
+    </script>
+</body>
+</html>

@@ -27,12 +27,383 @@
         </aside>
         <main id="mainContent">
             <h2>Dashboard</h2>
-            <p>Welcome to the Activadis beheerder dashboard.</p>
+            <div id="dashboard-stats">
+                <h3>Overzicht</h3>
+                <div id="stats-container">
+                    <div>Activiteiten: <span id="activiteiten-count">-</span></div>
+                    <div>Gebruikers: <span id="gebruikers-count">-</span></div>
+                    <div>Inschrijvingen: <span id="inschrijvingen-count">-</span></div>
+                    <div>Benodigdheden: <span id="benodigdheden-count">-</span></div>
+                </div>
+            </div>
+
+            <div id="recent-activities">
+                <h3>Recente Activiteiten</h3>
+                <ul id="activiteiten-list"></ul>
+            </div>
+
+            <div id="manage-section">
+                <h3>Beheer</h3>
+                
+                <!-- Activiteiten beheer -->
+                <div class="manage-block">
+                    <h4>Activiteiten</h4>
+                    <button onclick="showActiviteitenForm()">Nieuwe Activiteit</button>
+                    <div id="activiteiten-form" style="display: none; margin-top: 10px;">
+                        <input type="text" id="act-naam" placeholder="Naam">
+                        <input type="text" id="act-locatie" placeholder="Locatie">
+                        <input type="text" id="act-eten" placeholder="Eten">
+                        <textarea id="act-omschrijving" placeholder="Omschrijving"></textarea>
+                        <input type="datetime-local" id="act-begin" placeholder="Begin">
+                        <input type="datetime-local" id="act-eind" placeholder="Eind">
+                        <input type="number" id="act-kost" placeholder="Kosten">
+                        <input type="number" id="act-max" placeholder="Max deelnemers">
+                        <input type="number" id="act-min" placeholder="Min deelnemers">
+                        <input type="text" id="act-afbeelding" placeholder="Afbeelding URL">
+                        <button onclick="createActiviteit()">Toevoegen</button>
+                        <button onclick="hideActiviteitenForm()">Annuleren</button>
+                    </div>
+                    <ul id="all-activiteiten-list"></ul>
+                </div>
+
+                <!-- Gebruikers beheer -->
+                <div class="manage-block">
+                    <h4>Gebruikers</h4>
+                    <button onclick="showGebruikersForm()">Nieuwe Gebruiker</button>
+                    <div id="gebruikers-form" style="display: none; margin-top: 10px;">
+                        <input type="email" id="user-email" placeholder="Email">
+                        <input type="password" id="user-password" placeholder="Wachtwoord">
+                        <select id="user-admin">
+                            <option value="0">Gebruiker</option>
+                            <option value="1">Admin</option>
+                        </select>
+                        <button onclick="createGebruiker()">Toevoegen</button>
+                        <button onclick="hideGebruikersForm()">Annuleren</button>
+                    </div>
+                    <ul id="all-gebruikers-list"></ul>
+                </div>
+            </div>
         </main>
         <div id="sideContent">
             <h3>Side Content</h3>
             <p>This is some additional side content.</p>
         </div>
     </section>
+
+    <script>
+        // API Base URLs
+        const API = {
+            activiteit: '/api/activiteit',
+            gebruiker: '/api/gebruiker',
+            inschrijving: '/api/inschrijving',
+            benodigdheid: '/api/benodigdheid'
+        };
+
+        // Helper functions for text handling
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function formatTextWithNewlines(text) {
+            if (!text) return '';
+            return escapeHtml(text).replace(/\n/g, '<br>');
+        }
+
+        // Load dashboard data on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDashboard();
+        });
+
+        async function loadDashboard() {
+            try {
+                // Load all data
+                const [activiteiten, gebruikers, inschrijvingen, benodigdheden] = await Promise.all([
+                    fetch(API.activiteit).then(res => res.json()),
+                    fetch(API.gebruiker).then(res => res.json()),
+                    fetch(API.inschrijving).then(res => res.json()),
+                    fetch(API.benodigdheid).then(res => res.json())
+                ]);
+
+                // Update counters
+                document.getElementById('activiteiten-count').textContent = activiteiten.length;
+                document.getElementById('gebruikers-count').textContent = gebruikers.length;
+                document.getElementById('inschrijvingen-count').textContent = inschrijvingen.length;
+                document.getElementById('benodigdheden-count').textContent = benodigdheden.length;
+
+                // Display recent activities
+                displayRecentActiviteiten(activiteiten.slice(0, 5));
+                
+                // Display all activities for management
+                displayAllActiviteiten(activiteiten);
+                
+                // Display all users for management
+                displayAllGebruikers(gebruikers);
+
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+            }
+        }
+
+        function displayRecentActiviteiten(activiteiten) {
+            const list = document.getElementById('activiteiten-list');
+            list.innerHTML = '';
+            
+            activiteiten.forEach(act => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <strong>${escapeHtml(act.naam)}</strong> - ${escapeHtml(act.locatie)} 
+                    (${new Date(act.begin).toLocaleDateString()})
+                `;
+                list.appendChild(li);
+            });
+        }
+
+        function displayAllActiviteiten(activiteiten) {
+            const list = document.getElementById('all-activiteiten-list');
+            list.innerHTML = '';
+            
+            activiteiten.forEach(act => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <div>
+                        <strong>${escapeHtml(act.naam)}</strong> - ${escapeHtml(act.locatie)}<br>
+                        ${formatTextWithNewlines(act.omschrijving)}<br>
+                        Begin: ${new Date(act.begin).toLocaleString()}<br>
+                        Eind: ${new Date(act.eind).toLocaleString()}<br>
+                        Kosten: €${act.kost} | Max: ${act.max} | Min: ${act.min}<br>
+                        <button onclick="editDashboardActiviteit(${act.id})">Bewerken</button>
+                        <button onclick="deleteActiviteit(${act.id})">Verwijderen</button>
+                        
+                        <!-- Quick edit form -->
+                        <div id="dashboard-edit-${act.id}" style="display: none; margin-top: 10px; padding: 10px; background-color: #f5f5f5; border-radius: 5px;">
+                            <input type="text" id="dash-naam-${act.id}" placeholder="Naam" value="${escapeHtml(act.naam)}" style="width: 100%; margin-bottom: 5px;">
+                            <input type="text" id="dash-locatie-${act.id}" placeholder="Locatie" value="${escapeHtml(act.locatie)}" style="width: 100%; margin-bottom: 5px;">
+                            <textarea id="dash-omschrijving-${act.id}" placeholder="Omschrijving" style="width: 100%; height: 50px; margin-bottom: 5px;">${escapeHtml(act.omschrijving)}</textarea>
+                            <input type="number" id="dash-kost-${act.id}" placeholder="Kosten" value="${act.kost}" step="0.01" style="width: 100%; margin-bottom: 5px;">
+                            <button onclick="saveDashboardActiviteit(${act.id})">Opslaan</button>
+                            <button onclick="cancelDashboardEdit(${act.id})">Annuleren</button>
+                        </div>
+                    </div>
+                `;
+                list.appendChild(li);
+            });
+        }
+
+        function displayAllGebruikers(gebruikers) {
+            const list = document.getElementById('all-gebruikers-list');
+            list.innerHTML = '';
+            
+            gebruikers.forEach(user => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <div>
+                        <strong>${user.email}</strong> - ${user.admin ? 'Admin' : 'Gebruiker'}<br>
+                        ID: ${user.id}<br>
+                        <button onclick="deleteGebruiker(${user.id})">Verwijderen</button>
+                    </div>
+                `;
+                list.appendChild(li);
+            });
+        }
+
+        // Activiteiten management
+        function showActiviteitenForm() {
+            document.getElementById('activiteiten-form').style.display = 'block';
+        }
+
+        function hideActiviteitenForm() {
+            document.getElementById('activiteiten-form').style.display = 'none';
+            clearActiviteitenForm();
+        }
+
+        function clearActiviteitenForm() {
+            ['act-naam', 'act-locatie', 'act-eten', 'act-omschrijving', 'act-begin', 'act-eind', 'act-kost', 'act-max', 'act-min', 'act-afbeelding'].forEach(id => {
+                document.getElementById(id).value = '';
+            });
+        }
+
+        async function createActiviteit() {
+            const data = {
+                naam: document.getElementById('act-naam').value,
+                locatie: document.getElementById('act-locatie').value,
+                eten: document.getElementById('act-eten').value,
+                omschrijving: document.getElementById('act-omschrijving').value,
+                begin: document.getElementById('act-begin').value,
+                eind: document.getElementById('act-eind').value,
+                kost: parseFloat(document.getElementById('act-kost').value),
+                max: parseInt(document.getElementById('act-max').value),
+                min: parseInt(document.getElementById('act-min').value),
+                afbeelding: document.getElementById('act-afbeelding').value
+            };
+
+            try {
+                const response = await fetch(API.activiteit, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    alert('Activiteit toegevoegd!');
+                    hideActiviteitenForm();
+                    loadDashboard(); // Refresh data
+                } else {
+                    const error = await response.text();
+                    alert('Error: ' + error);
+                }
+            } catch (error) {
+                console.error('Error creating activiteit:', error);
+                alert('Error creating activiteit');
+            }
+        }
+
+        async function deleteActiviteit(id) {
+            if (confirm('Weet je zeker dat je deze activiteit wilt verwijderen?')) {
+                try {
+                    const response = await fetch(`${API.activiteit}?id=${id}`, {
+                        method: 'DELETE'
+                    });
+
+                    if (response.ok) {
+                        alert('Activiteit verwijderd!');
+                        loadDashboard(); // Refresh data
+                    } else {
+                        alert('Error deleting activiteit');
+                    }
+                } catch (error) {
+                    console.error('Error deleting activiteit:', error);
+                    alert('Error deleting activiteit');
+                }
+            }
+        }
+
+        // Gebruikers management
+        function showGebruikersForm() {
+            document.getElementById('gebruikers-form').style.display = 'block';
+        }
+
+        function hideGebruikersForm() {
+            document.getElementById('gebruikers-form').style.display = 'none';
+            clearGebruikersForm();
+        }
+
+        function clearGebruikersForm() {
+            document.getElementById('user-email').value = '';
+            document.getElementById('user-password').value = '';
+            document.getElementById('user-admin').value = '0';
+        }
+
+        async function createGebruiker() {
+            const data = {
+                email: document.getElementById('user-email').value,
+                password: document.getElementById('user-password').value,
+                admin: parseInt(document.getElementById('user-admin').value)
+            };
+
+            try {
+                const response = await fetch(API.gebruiker, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    alert('Gebruiker toegevoegd!');
+                    hideGebruikersForm();
+                    loadDashboard(); // Refresh data
+                } else {
+                    const error = await response.text();
+                    alert('Error: ' + error);
+                }
+            } catch (error) {
+                console.error('Error creating gebruiker:', error);
+                alert('Error creating gebruiker');
+            }
+        }
+
+        async function deleteGebruiker(id) {
+            if (confirm('Weet je zeker dat je deze gebruiker wilt verwijderen?')) {
+                try {
+                    const response = await fetch(`${API.gebruiker}?id=${id}`, {
+                        method: 'DELETE'
+                    });
+
+                    if (response.ok) {
+                        alert('Gebruiker verwijderd!');
+                        loadDashboard(); // Refresh data
+                    } else {
+                        alert('Error deleting gebruiker');
+                    }
+                } catch (error) {
+                    console.error('Error deleting gebruiker:', error);
+                    alert('Error deleting gebruiker');
+                }
+            }
+        }
+
+        // Dashboard quick edit functions
+        function editDashboardActiviteit(id) {
+            const editForm = document.getElementById(`dashboard-edit-${id}`);
+            if (editForm.style.display === 'none') {
+                editForm.style.display = 'block';
+            } else {
+                editForm.style.display = 'none';
+            }
+        }
+
+        function cancelDashboardEdit(id) {
+            document.getElementById(`dashboard-edit-${id}`).style.display = 'none';
+        }
+
+        async function saveDashboardActiviteit(id) {
+            // Get current data first to fill in missing fields
+            try {
+                const currentResponse = await fetch(`${API.activiteit}?id=${id}`);
+                const currentData = await currentResponse.json();
+
+                const updatedData = {
+                    id: id,
+                    naam: document.getElementById(`dash-naam-${id}`).value,
+                    locatie: document.getElementById(`dash-locatie-${id}`).value,
+                    omschrijving: document.getElementById(`dash-omschrijving-${id}`).value,
+                    kost: parseFloat(document.getElementById(`dash-kost-${id}`).value),
+                    // Keep existing values for fields not in quick edit
+                    eten: currentData.eten,
+                    begin: currentData.begin,
+                    eind: currentData.eind,
+                    max: currentData.max,
+                    min: currentData.min,
+                    afbeelding: currentData.afbeelding
+                };
+
+                const response = await fetch(API.activiteit, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(updatedData)
+                });
+
+                if (response.ok) {
+                    alert('Activiteit bijgewerkt!');
+                    cancelDashboardEdit(id);
+                    loadDashboard();
+                } else {
+                    const error = await response.text();
+                    alert('Error: ' + error);
+                }
+            } catch (error) {
+                console.error('Error updating activiteit:', error);
+                alert('Error updating activiteit');
+            }
+        }
+    </script>
 </body>
 </html>
