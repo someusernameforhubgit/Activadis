@@ -12,19 +12,18 @@ document.querySelector("#loginForm #login").addEventListener("click", async (e) 
         const response = await fetch("../api/login?email=" + encodeURIComponent(email) + "&password=" + encodeURIComponent(password), {
             method: "GET",
         });
+        console.log(response);
         const data = await response.json();
 
-        if (!data[0]) {
+        if (Object.keys(data).length === 0) {
             errorMessage.textContent = "Wachtwoord of email onjuist";
             throw new Error("Wachtwoord of email onjuist");
         } else {
             errorMessage.textContent = "inlogt";
             errorMessage.style.color = "green";
-            sessionStorage.setItem("GebruikerId", data[0].id);
+            sessionStorage.setItem("JWT", data.token);
             window.location.href = "../../index.html";
         }
-
-
     } catch (error) {
         // if (errorMessage) {
         //     errorMessage.textContent = error.message;
