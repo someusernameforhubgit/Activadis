@@ -4,6 +4,19 @@ const database = await Database.init();
 const url = "/api/gebruiker";
 
 export default function GebruikerAPI(app) {
+    app.get("/api/login", async (req, res) => {
+        const { email, password } = req.query;
+        const gebruiker = await database.query("SELECT * FROM gebruiker WHERE email = ?", [email]);
+        if (gebruiker.length === 0) {
+            return res.send({});
+        }
+        const hash = hashPassword(password, gebruiker[0].salt);
+        if (hash !== gebruiker[0].hash) {
+            return res.send({});
+        }
+        res.send(gebruiker);
+    });
+
     app.get(url, async (req, res) => {
         if (req.query.id) {
             const gebruiker = (await database.query("SELECT * FROM gebruiker WHERE id = ?", [req.query.id]))[0];
