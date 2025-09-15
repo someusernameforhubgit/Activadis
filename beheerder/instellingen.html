@@ -11,7 +11,7 @@
     <header>
         <div class="container">
             <div class="left">
-                <p><b>Activadis</b>: Instellingen</p>
+                <p><b><span class="accent">Acti</span>vadis</b>: Instellingen</p>
             </div>
         </div>
     </header>
@@ -26,53 +26,62 @@
             </ul>
         </aside>
         <main id="mainContent">
-            <h2>Systeem Instellingen</h2>
+            <h2><i class="fas fa-cogs"></i> Systeem Instellingen</h2>
             
             <div class="settings-section">
-                <h3>Database Informatie</h3>
+                <h3><i class="fas fa-database"></i> Database Informatie</h3>
                 <div id="db-info">
-                    <p>Status: <span id="db-status">Checking...</span></p>
-                    <button onclick="testConnection()">Test Database Verbinding</button>
+                    <p><i class="fas fa-plug"></i> Status: <span id="db-status" class="status-checking">Checking...</span></p>
+                    <hr class="section-separator">
+                    <button onclick="testConnection()">
+                        <i class="fas fa-search"></i> Test Database Verbinding
+                    </button>
                 </div>
             </div>
 
-            <div class="settings-section" style="margin-top: 30px;">
-                <h3>API Endpoints</h3>
+            <div class="settings-section">
+                <h3><i class="fas fa-link"></i> API Endpoints</h3>
                 <div id="api-info">
-                    <p>Activiteiten API: <span id="activiteiten-status">Checking...</span></p>
-                    <p>Gebruikers API: <span id="gebruikers-status">Checking...</span></p>
-                    <p>Inschrijvingen API: <span id="inschrijvingen-status">Checking...</span></p>
-                    <p>Benodigdheden API: <span id="benodigdheden-status">Checking...</span></p>
-                    <button onclick="testAllAPIs()">Test Alle APIs</button>
-                </div>
-            </div>
-
-            <div class="settings-section" style="margin-top: 30px;">
-                <h3>Beheer Opties</h3>
-                <div>
-                    <button onclick="clearAllData()" style="background-color: #dc3545; color: white; padding: 10px 20px; border: none; border-radius: 5px; margin: 5px;">
-                        ⚠️ Alle Data Wissen (GEVAARLIJK)
-                    </button>
-                    <button onclick="exportData()" style="background-color: #28a745; color: white; padding: 10px 20px; border: none; border-radius: 5px; margin: 5px;">
-                        📥 Data Exporteren
+                    <p><i class="fas fa-calendar-alt"></i> Activiteiten API: <span id="activiteiten-status" class="status-checking">Checking...</span></p>
+                    <p><i class="fas fa-users"></i> Gebruikers API: <span id="gebruikers-status" class="status-checking">Checking...</span></p>
+                    <p><i class="fas fa-clipboard-list"></i> Inschrijvingen API: <span id="inschrijvingen-status" class="status-checking">Checking...</span></p>
+                    <p><i class="fas fa-box"></i> Benodigdheden API: <span id="benodigdheden-status" class="status-checking">Checking...</span></p>
+                    <hr class="section-separator">
+                    <button onclick="testAllAPIs()">
+                        <i class="fas fa-search"></i> Test Alle APIs
                     </button>
                 </div>
             </div>
 
-            <div class="settings-section" style="margin-top: 30px;">
-                <h3>Systeem Logs</h3>
+            <div class="settings-section">
+                <h3><i class="fas fa-tools"></i> Beheer Opties</h3>
+                <div class="button-group">
+                    <button onclick="clearAllData()" class="btn btn-danger">
+                        <i class="fas fa-exclamation-triangle"></i> Alle Data Wissen (GEVAARLIJK)
+                    </button>
+                    <button onclick="exportData()" class="btn btn-success">
+                        <i class="fas fa-download"></i> Data Exporteren
+                    </button>
+                </div>
+            </div>
+
+            <div class="settings-section">
+                <h3><i class="fas fa-file-alt"></i> Systeem Logs</h3>
                 <div>
-                    <textarea id="logs" style="width: 100%; height: 200px; font-family: monospace;" readonly></textarea>
-                    <button onclick="refreshLogs()">Logs Verversen</button>
+                    <textarea id="logs" readonly></textarea>
+                    <hr class="section-separator">
+                    <button onclick="refreshLogs()">
+                        <i class="fas fa-sync-alt"></i> Logs Verversen
+                    </button>
                 </div>
             </div>
         </main>
         <div id="sideContent">
-            <h3>Quick Stats</h3>
             <div id="quick-stats">
-                <p>Server Status: <span id="server-status">Online</span></p>
-                <p>Laatste Update: <span id="last-update">-</span></p>
-                <p>Totaal Requests: <span id="total-requests">-</span></p>
+                <h3><i class="fas fa-tachometer-alt"></i> Quick Stats</h3>
+                <p><i class="fas fa-server"></i> Server Status: <span id="server-status" class="status-online">Online</span></p>
+                <p><i class="fas fa-clock"></i> Laatste Update: <span id="last-update">-</span></p>
+                <p><i class="fas fa-chart-line"></i> Totaal Requests: <span id="total-requests">-</span></p>
             </div>
         </div>
     </section>
@@ -96,20 +105,25 @@
         }
 
         async function testConnection() {
-            document.getElementById('db-status').textContent = 'Testing...';
+            const statusEl = document.getElementById('db-status');
+            statusEl.textContent = 'Testing...';
+            statusEl.className = 'status-checking';
             
             try {
                 // Test by trying to fetch users (this will test database connection)
                 const response = await fetch('/api/gebruiker');
                 if (response.ok) {
-                    document.getElementById('db-status').textContent = '✅ Verbonden';
+                    statusEl.textContent = '✅ Verbonden';
+                    statusEl.className = 'status-online';
                     addLog('Database verbinding succesvol getest');
                 } else {
-                    document.getElementById('db-status').textContent = '❌ Fout';
+                    statusEl.textContent = '❌ Fout';
+                    statusEl.className = 'status-offline';
                     addLog('Database verbinding test gefaald');
                 }
             } catch (error) {
-                document.getElementById('db-status').textContent = '❌ Fout';
+                statusEl.textContent = '❌ Fout';
+                statusEl.className = 'status-offline';
                 addLog('Database verbinding error: ' + error.message);
             }
         }
@@ -123,7 +137,9 @@
             };
 
             for (const [name, elementId] of Object.entries(statusElements)) {
-                document.getElementById(elementId).textContent = 'Testing...';
+                const el = document.getElementById(elementId);
+                el.textContent = 'Testing...';
+                el.className = 'status-checking';
             }
 
             for (const [apiName, url] of Object.entries(APIs)) {
@@ -133,18 +149,23 @@
                                      apiName === 'gebruiker' ? 'gebruikers-status' :
                                      apiName + 'en-status';
                     
+                    const el = document.getElementById(elementId);
                     if (response.ok) {
-                        document.getElementById(elementId).textContent = '✅ Werkend';
+                        el.textContent = '✅ Werkend';
+                        el.className = 'status-online';
                         addLog(`${apiName} API test succesvol`);
                     } else {
-                        document.getElementById(elementId).textContent = '❌ Fout';
+                        el.textContent = '❌ Fout';
+                        el.className = 'status-offline';
                         addLog(`${apiName} API test gefaald`);
                     }
                 } catch (error) {
                     const elementId = apiName === 'activiteit' ? 'activiteiten-status' : 
                                      apiName === 'gebruiker' ? 'gebruikers-status' :
                                      apiName + 'en-status';
-                    document.getElementById(elementId).textContent = '❌ Fout';
+                    const el = document.getElementById(elementId);
+                    el.textContent = '❌ Fout';
+                    el.className = 'status-offline';
                     addLog(`${apiName} API error: ${error.message}`);
                 }
             }

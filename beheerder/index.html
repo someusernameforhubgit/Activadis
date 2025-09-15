@@ -5,13 +5,14 @@
     <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link rel="stylesheet" href="/css/style.css">
+    <script src="/beheerder/modal-utils.js"></script>
     <title>Activadis - Beheerder</title>
 </head>
 <body>
     <header>
         <div class="container">
             <div class="left">
-                <p><b>Activadis</b>: Beheerder</p>
+                <p><b><span class="accent">Acti</span>vadis</b>: Beheerder</p>
             </div>
         </div>
     </header>
@@ -28,58 +29,60 @@
         <main id="mainContent">
             <h2>Dashboard</h2>
             <div id="dashboard-stats">
-                <h3>Overzicht</h3>
+                <h3><i class="fas fa-chart-bar"></i> Systeem Overzicht</h3>
                 <div id="stats-container">
-                    <div>Activiteiten: <span id="activiteiten-count">-</span></div>
-                    <div>Gebruikers: <span id="gebruikers-count">-</span></div>
-                    <div>Inschrijvingen: <span id="inschrijvingen-count">-</span></div>
-                    <div>Benodigdheden: <span id="benodigdheden-count">-</span></div>
+                    <div>
+                        <div><i class="fas fa-calendar-alt"></i> Activiteiten</div>
+                        <span id="activiteiten-count">-</span>
+                    </div>
+                    <div>
+                        <div><i class="fas fa-users"></i> Gebruikers</div>
+                        <span id="gebruikers-count">-</span>
+                    </div>
+                    <div>
+                        <div><i class="fas fa-clipboard-list"></i> Inschrijvingen</div>
+                        <span id="inschrijvingen-count">-</span>
+                    </div>
+                    <div>
+                        <div><i class="fas fa-box"></i> Benodigdheden</div>
+                        <span id="benodigdheden-count">-</span>
+                    </div>
                 </div>
             </div>
 
-            <div id="recent-activities">
-                <h3>Recente Activiteiten</h3>
+            <div id="recent-activities" class="content-section">
+                <h3><i class="fas fa-clock"></i> Recente Activiteiten</h3>
                 <ul id="activiteiten-list"></ul>
             </div>
 
+            <hr class="section-separator thick">
+
             <div id="manage-section">
-                <h3>Beheer</h3>
-                
                 <!-- Activiteiten beheer -->
                 <div class="manage-block">
-                    <h4>Activiteiten</h4>
-                    <button onclick="showActiviteitenForm()">Nieuwe Activiteit</button>
-                    <div id="activiteiten-form" style="display: none; margin-top: 10px;">
-                        <input type="text" id="act-naam" placeholder="Naam">
-                        <input type="text" id="act-locatie" placeholder="Locatie">
-                        <input type="text" id="act-eten" placeholder="Eten">
-                        <textarea id="act-omschrijving" placeholder="Omschrijving"></textarea>
-                        <input type="datetime-local" id="act-begin" placeholder="Begin">
-                        <input type="datetime-local" id="act-eind" placeholder="Eind">
-                        <input type="number" id="act-kost" placeholder="Kosten">
-                        <input type="number" id="act-max" placeholder="Max deelnemers">
-                        <input type="number" id="act-min" placeholder="Min deelnemers">
-                        <input type="text" id="act-afbeelding" placeholder="Afbeelding URL">
-                        <button onclick="createActiviteit()">Toevoegen</button>
-                        <button onclick="hideActiviteitenForm()">Annuleren</button>
+                    <h4><i class="fas fa-calendar-alt"></i> Activiteiten Beheer</h4>
+                    
+                    <div class="button-group">
+                        <button class="btn btn-primary btn-small" onclick="ModalManager.instance.showEditActivityModal()">
+                            <i class="fas fa-plus"></i> Nieuwe Activiteit
+                        </button>
                     </div>
+                    
                     <ul id="all-activiteiten-list"></ul>
                 </div>
 
+                <hr class="section-separator">
+
                 <!-- Gebruikers beheer -->
                 <div class="manage-block">
-                    <h4>Gebruikers</h4>
-                    <button onclick="showGebruikersForm()">Nieuwe Gebruiker</button>
-                    <div id="gebruikers-form" style="display: none; margin-top: 10px;">
-                        <input type="email" id="user-email" placeholder="Email">
-                        <input type="password" id="user-password" placeholder="Wachtwoord">
-                        <select id="user-admin">
-                            <option value="0">Gebruiker</option>
-                            <option value="1">Admin</option>
-                        </select>
-                        <button onclick="createGebruiker()">Toevoegen</button>
-                        <button onclick="hideGebruikersForm()">Annuleren</button>
+                    <h4><i class="fas fa-users"></i> Gebruikers Beheer</h4>
+                    
+                    <div class="button-group">
+                        <button class="btn btn-primary btn-small" onclick="ModalManager.instance.showEditUserModal()">
+                            <i class="fas fa-plus"></i> Nieuwe Gebruiker
+                        </button>
                     </div>
+                    
                     <ul id="all-gebruikers-list"></ul>
                 </div>
             </div>
@@ -167,24 +170,26 @@
             
             activiteiten.forEach(act => {
                 const li = document.createElement('li');
+                li.style.marginBottom = '10px';
+                li.style.padding = '10px';
+                li.style.backgroundColor = '#f9f9f9';
+                li.style.borderRadius = '5px';
+                li.style.border = '1px solid #ddd';
+                
                 li.innerHTML = `
                     <div>
                         <strong>${escapeHtml(act.naam)}</strong> - ${escapeHtml(act.locatie)}<br>
-                        ${formatTextWithNewlines(act.omschrijving)}<br>
-                        Begin: ${new Date(act.begin).toLocaleString()}<br>
-                        Eind: ${new Date(act.eind).toLocaleString()}<br>
-                        Kosten: €${act.kost} | Max: ${act.max} | Min: ${act.min}<br>
-                        <button onclick="editDashboardActiviteit(${act.id})">Bewerken</button>
-                        <button onclick="deleteActiviteit(${act.id})">Verwijderen</button>
-                        
-                        <!-- Quick edit form -->
-                        <div id="dashboard-edit-${act.id}" style="display: none; margin-top: 10px; padding: 10px; background-color: #f5f5f5; border-radius: 5px;">
-                            <input type="text" id="dash-naam-${act.id}" placeholder="Naam" value="${escapeHtml(act.naam)}" style="width: 100%; margin-bottom: 5px;">
-                            <input type="text" id="dash-locatie-${act.id}" placeholder="Locatie" value="${escapeHtml(act.locatie)}" style="width: 100%; margin-bottom: 5px;">
-                            <textarea id="dash-omschrijving-${act.id}" placeholder="Omschrijving" style="width: 100%; height: 50px; margin-bottom: 5px;">${escapeHtml(act.omschrijving)}</textarea>
-                            <input type="number" id="dash-kost-${act.id}" placeholder="Kosten" value="${act.kost}" step="0.01" style="width: 100%; margin-bottom: 5px;">
-                            <button onclick="saveDashboardActiviteit(${act.id})">Opslaan</button>
-                            <button onclick="cancelDashboardEdit(${act.id})">Annuleren</button>
+                        <small>📅 Begin: ${new Date(act.begin).toLocaleDateString()} | 💰 Kosten: €${act.kost} | 👥 ${act.min}-${act.max} personen</small><br>
+                        <div class="actions">
+                            <button class="btn btn-info btn-small" onclick="ModalManager.instance.showViewActivityModal(${JSON.stringify(act).replace(/"/g, '&quot;')})">
+                                <i class="fas fa-eye"></i> Bekijken
+                            </button>
+                            <button class="btn btn-primary btn-small" onclick="ModalManager.instance.showEditActivityModal(${JSON.stringify(act).replace(/"/g, '&quot;')})">
+                                <i class="fas fa-edit"></i> Bewerken
+                            </button>
+                            <button class="btn btn-danger btn-small" onclick="deleteActiviteit(${act.id})">
+                                <i class="fas fa-trash"></i> Verwijderen
+                            </button>
                         </div>
                     </div>
                 `;
@@ -198,69 +203,34 @@
             
             gebruikers.forEach(user => {
                 const li = document.createElement('li');
+                li.style.marginBottom = '10px';
+                li.style.padding = '10px';
+                li.style.backgroundColor = '#f9f9f9';
+                li.style.borderRadius = '5px';
+                li.style.border = '1px solid #ddd';
+                
                 li.innerHTML = `
                     <div>
-                        <strong>${user.email}</strong> - ${user.admin ? 'Admin' : 'Gebruiker'}<br>
-                        ID: ${user.id}<br>
-                        <button onclick="deleteGebruiker(${user.id})">Verwijderen</button>
+                        <strong>${user.email}</strong> - ${user.admin ? '👑 Admin' : '👤 Gebruiker'}<br>
+                        <small>🆔 ID: ${user.id}</small><br>
+                        <div class="actions">
+                            <button class="btn btn-info btn-small" onclick="ModalManager.instance.showViewUserModal(${JSON.stringify(user).replace(/"/g, '&quot;')})">
+                                <i class="fas fa-eye"></i> Bekijken
+                            </button>
+                            <button class="btn btn-primary btn-small" onclick="ModalManager.instance.showEditUserModal(${JSON.stringify(user).replace(/"/g, '&quot;')})">
+                                <i class="fas fa-edit"></i> Bewerken
+                            </button>
+                            <button class="btn btn-danger btn-small" onclick="deleteGebruiker(${user.id})">
+                                <i class="fas fa-trash"></i> Verwijderen
+                            </button>
+                        </div>
                     </div>
                 `;
                 list.appendChild(li);
             });
         }
 
-        // Activiteiten management
-        function showActiviteitenForm() {
-            document.getElementById('activiteiten-form').style.display = 'block';
-        }
-
-        function hideActiviteitenForm() {
-            document.getElementById('activiteiten-form').style.display = 'none';
-            clearActiviteitenForm();
-        }
-
-        function clearActiviteitenForm() {
-            ['act-naam', 'act-locatie', 'act-eten', 'act-omschrijving', 'act-begin', 'act-eind', 'act-kost', 'act-max', 'act-min', 'act-afbeelding'].forEach(id => {
-                document.getElementById(id).value = '';
-            });
-        }
-
-        async function createActiviteit() {
-            const data = {
-                naam: document.getElementById('act-naam').value,
-                locatie: document.getElementById('act-locatie').value,
-                eten: document.getElementById('act-eten').value,
-                omschrijving: document.getElementById('act-omschrijving').value,
-                begin: document.getElementById('act-begin').value,
-                eind: document.getElementById('act-eind').value,
-                kost: parseFloat(document.getElementById('act-kost').value),
-                max: parseInt(document.getElementById('act-max').value),
-                min: parseInt(document.getElementById('act-min').value),
-                afbeelding: document.getElementById('act-afbeelding').value
-            };
-
-            try {
-                const response = await fetch(API.activiteit, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(data)
-                });
-
-                if (response.ok) {
-                    alert('Activiteit toegevoegd!');
-                    hideActiviteitenForm();
-                    loadDashboard(); // Refresh data
-                } else {
-                    const error = await response.text();
-                    alert('Error: ' + error);
-                }
-            } catch (error) {
-                console.error('Error creating activiteit:', error);
-                alert('Error creating activiteit');
-            }
-        }
+        // Activity management now handled by ModalManager
 
         async function deleteActiviteit(id) {
             if (confirm('Weet je zeker dat je deze activiteit wilt verwijderen?')) {
@@ -282,51 +252,7 @@
             }
         }
 
-        // Gebruikers management
-        function showGebruikersForm() {
-            document.getElementById('gebruikers-form').style.display = 'block';
-        }
-
-        function hideGebruikersForm() {
-            document.getElementById('gebruikers-form').style.display = 'none';
-            clearGebruikersForm();
-        }
-
-        function clearGebruikersForm() {
-            document.getElementById('user-email').value = '';
-            document.getElementById('user-password').value = '';
-            document.getElementById('user-admin').value = '0';
-        }
-
-        async function createGebruiker() {
-            const data = {
-                email: document.getElementById('user-email').value,
-                password: document.getElementById('user-password').value,
-                admin: parseInt(document.getElementById('user-admin').value)
-            };
-
-            try {
-                const response = await fetch(API.gebruiker, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(data)
-                });
-
-                if (response.ok) {
-                    alert('Gebruiker toegevoegd!');
-                    hideGebruikersForm();
-                    loadDashboard(); // Refresh data
-                } else {
-                    const error = await response.text();
-                    alert('Error: ' + error);
-                }
-            } catch (error) {
-                console.error('Error creating gebruiker:', error);
-                alert('Error creating gebruiker');
-            }
-        }
+        // User management now handled by ModalManager
 
         async function deleteGebruiker(id) {
             if (confirm('Weet je zeker dat je deze gebruiker wilt verwijderen?')) {
@@ -348,62 +274,7 @@
             }
         }
 
-        // Dashboard quick edit functions
-        function editDashboardActiviteit(id) {
-            const editForm = document.getElementById(`dashboard-edit-${id}`);
-            if (editForm.style.display === 'none') {
-                editForm.style.display = 'block';
-            } else {
-                editForm.style.display = 'none';
-            }
-        }
-
-        function cancelDashboardEdit(id) {
-            document.getElementById(`dashboard-edit-${id}`).style.display = 'none';
-        }
-
-        async function saveDashboardActiviteit(id) {
-            // Get current data first to fill in missing fields
-            try {
-                const currentResponse = await fetch(`${API.activiteit}?id=${id}`);
-                const currentData = await currentResponse.json();
-
-                const updatedData = {
-                    id: id,
-                    naam: document.getElementById(`dash-naam-${id}`).value,
-                    locatie: document.getElementById(`dash-locatie-${id}`).value,
-                    omschrijving: document.getElementById(`dash-omschrijving-${id}`).value,
-                    kost: parseFloat(document.getElementById(`dash-kost-${id}`).value),
-                    // Keep existing values for fields not in quick edit
-                    eten: currentData.eten,
-                    begin: currentData.begin,
-                    eind: currentData.eind,
-                    max: currentData.max,
-                    min: currentData.min,
-                    afbeelding: currentData.afbeelding
-                };
-
-                const response = await fetch(API.activiteit, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(updatedData)
-                });
-
-                if (response.ok) {
-                    alert('Activiteit bijgewerkt!');
-                    cancelDashboardEdit(id);
-                    loadDashboard();
-                } else {
-                    const error = await response.text();
-                    alert('Error: ' + error);
-                }
-            } catch (error) {
-                console.error('Error updating activiteit:', error);
-                alert('Error updating activiteit');
-            }
-        }
+        // Dashboard editing now handled by ModalManager
     </script>
 </body>
 </html>
