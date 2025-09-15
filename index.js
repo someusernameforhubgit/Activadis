@@ -16,6 +16,7 @@ api.ActiviteitAPI(app);
 api.GebruikerAPI(app);
 api.BenodigdheidAPI(app);
 api.InschrijvingAPI(app);
+api.LoginAPI(app);
 
 app.listen(3000, () => {
     console.log('Server listening on http://localhost:3000');
