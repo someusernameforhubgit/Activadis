@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="/css/style.css">
+    <title>Activadis - Gebruikers Beheer</title>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="left">
+                <p><b>Activadis</b>: Gebruikers Beheer</p>
+            </div>
+        </div>
+    </header>
+    <section id="mainContainer">
+        <aside id="sidebar">
+            <h1>Navigatie</h1>
+            <ul>
+                <li><a href="/beheerder/index.html">Dashboard</a></li>
+                <li><a href="/beheerder/gebruikers.html">Gebruikers</a></li>
+                <li><a href="/beheerder/activiteiten.html">Activiteiten</a></li>
+                <li><a href="/beheerder/instellingen.html">Instellingen</a></li>
+            </ul>
+        </aside>
+        <main id="mainContent">
+            <h2>Gebruikers Beheer</h2>
+            
+            <div class="actions">
+                <button onclick="showAddForm()">Nieuwe Gebruiker Toevoegen</button>
+            </div>
+
+            <div id="add-form" style="display: none; margin: 20px 0; padding: 20px; border: 1px solid #ccc;">
+                <h3>Nieuwe Gebruiker</h3>
+                <div>
+                    <label>Email:</label>
+                    <input type="email" id="new-email" required>
+                </div>
+                <div>
+                    <label>Wachtwoord:</label>
+                    <input type="password" id="new-password" required>
+                </div>
+                <div>
+                    <label>Rol:</label>
+                    <select id="new-admin">
+                        <option value="0">Gebruiker</option>
+                        <option value="1">Admin</option>
+                    </select>
+                </div>
+                <div>
+                    <button onclick="createUser()">Toevoegen</button>
+                    <button onclick="hideAddForm()">Annuleren</button>
+                </div>
+            </div>
+
+            <div id="users-list">
+                <h3>Alle Gebruikers</h3>
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="background-color: #f5f5f5;">
+                            <th style="padding: 10px; border: 1px solid #ddd;">ID</th>
+                            <th style="padding: 10px; border: 1px solid #ddd;">Email</th>
+                            <th style="padding: 10px; border: 1px solid #ddd;">Rol</th>
+                            <th style="padding: 10px; border: 1px solid #ddd;">Acties</th>
+                        </tr>
+                    </thead>
+                    <tbody id="users-table-body">
+                    </tbody>
+                </table>
+            </div>
+        </main>
+        <div id="sideContent">
+            <h3>Gebruiker Stats</h3>
+            <div id="user-stats">
+                <p>Totaal gebruikers: <span id="total-users">-</span></p>
+                <p>Admins: <span id="admin-count">-</span></p>
+                <p>Reguliere gebruikers: <span id="regular-count">-</span></p>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        const API_URL = '/api/gebruiker';
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadUsers();
+        });
+
+        async function loadUsers() {
+            try {
+                const response = await fetch(API_URL);
+                const users = await response.json();
+                
+                displayUsers(users);
+                updateStats(users);
+            } catch (error) {
+                console.error('Error loading users:', error);
+            }
+        }
+
+        function displayUsers(users) {
+            const tbody = document.getElementById('users-table-body');
+            tbody.innerHTML = '';
+
+            users.forEach(user => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td style="padding: 10px; border: 1px solid #ddd;">${user.id}</td>
+                    <td style="padding: 10px; border: 1px solid #ddd;" id="email-display-${user.id}">${user.email}</td>
+                    <td style="padding: 10px; border: 1px solid #ddd;" id="role-display-${user.id}">${user.admin ? 'Admin' : 'Gebruiker'}</td>
+                    <td style="padding: 10px; border: 1px solid #ddd;">
+                        <button onclick="toggleEditUser(${user.id})">Bewerken</button>
+                        <button onclick="deleteUser(${user.id})">Verwijderen</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+
+                // Add hidden edit form for each user
+                const editRow = document.createElement('tr');
+                editRow.id = `edit-row-${user.id}`;
+                editRow.style.display = 'none';
+                editRow.innerHTML = `
+                    <td style="padding: 10px; border: 1px solid #ddd;">${user.id}</td>
+                    <td style="padding: 10px; border: 1px solid #ddd;">
+                        <input type="email" id="edit-email-${user.id}" value="${user.email}" style="width: 100%;">
+                    </td>
+                    <td style="padding: 10px; border: 1px solid #ddd;">
+                        <select id="edit-admin-${user.id}" style="width: 100%;">
+                            <option value="0" ${!user.admin ? 'selected' : ''}>Gebruiker</option>
+                            <option value="1" ${user.admin ? 'selected' : ''}>Admin</option>
+                        </select>
+                    </td>
+                    <td style="padding: 10px; border: 1px solid #ddd;">
+                        <button onclick="saveUser(${user.id})">Opslaan</button>
+                        <button onclick="cancelEditUser(${user.id})">Annuleren</button>
+                        <br><br>
+                        <input type="password" id="edit-password-${user.id}" placeholder="Nieuw wachtwoord (optioneel)" style="width: 100%; margin-top: 5px;">
+                        <small>Laat leeg om wachtwoord niet te wijzigen</small>
+                    </td>
+                `;
+                tbody.appendChild(editRow);
+            });
+        }
+
+        function updateStats(users) {
+            const totalUsers = users.length;
+            const adminCount = users.filter(user => user.admin).length;
+            const regularCount = totalUsers - adminCount;
+
+            document.getElementById('total-users').textContent = totalUsers;
+            document.getElementById('admin-count').textContent = adminCount;
+            document.getElementById('regular-count').textContent = regularCount;
+        }
+
+        function showAddForm() {
+            document.getElementById('add-form').style.display = 'block';
+        }
+
+        function hideAddForm() {
+            document.getElementById('add-form').style.display = 'none';
+            clearForm();
+        }
+
+        function clearForm() {
+            document.getElementById('new-email').value = '';
+            document.getElementById('new-password').value = '';
+            document.getElementById('new-admin').value = '0';
+        }
+
+        async function createUser() {
+            const email = document.getElementById('new-email').value;
+            const password = document.getElementById('new-password').value;
+            const admin = parseInt(document.getElementById('new-admin').value);
+
+            if (!email || !password) {
+                alert('Vul alle velden in!');
+                return;
+            }
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password, admin })
+                });
+
+                if (response.ok) {
+                    alert('Gebruiker toegevoegd!');
+                    hideAddForm();
+                    loadUsers();
+                } else {
+                    const error = await response.text();
+                    alert('Error: ' + error);
+                }
+            } catch (error) {
+                console.error('Error creating user:', error);
+                alert('Error creating user');
+            }
+        }
+
+        async function deleteUser(id) {
+            if (confirm('Weet je zeker dat je deze gebruiker wilt verwijderen?')) {
+                try {
+                    const response = await fetch(`${API_URL}?id=${id}`, {
+                        method: 'DELETE'
+                    });
+
+                    if (response.ok) {
+                        alert('Gebruiker verwijderd!');
+                        loadUsers();
+                    } else {
+                        alert('Error deleting user');
+                    }
+                } catch (error) {
+                    console.error('Error deleting user:', error);
+                    alert('Error deleting user');
+                }
+            }
+        }
+
+        function toggleEditUser(id) {
+            const normalRow = document.getElementById(`email-display-${id}`).parentElement;
+            const editRow = document.getElementById(`edit-row-${id}`);
+            
+            if (editRow.style.display === 'none') {
+                normalRow.style.display = 'none';
+                editRow.style.display = '';
+            } else {
+                normalRow.style.display = '';
+                editRow.style.display = 'none';
+            }
+        }
+
+        function cancelEditUser(id) {
+            const normalRow = document.getElementById(`email-display-${id}`).parentElement;
+            const editRow = document.getElementById(`edit-row-${id}`);
+            
+            normalRow.style.display = '';
+            editRow.style.display = 'none';
+            
+            // Reset form values
+            loadUsers(); // This will reload and reset the form values
+        }
+
+        async function saveUser(id) {
+            const email = document.getElementById(`edit-email-${id}`).value;
+            const admin = parseInt(document.getElementById(`edit-admin-${id}`).value);
+            const password = document.getElementById(`edit-password-${id}`).value;
+
+            if (!email) {
+                alert('Email is verplicht!');
+                return;
+            }
+
+            const updateData = { id, email, admin };
+            
+            // Only include password if it's provided
+            if (password && password.trim() !== '') {
+                updateData.password = password;
+            } else {
+                // For API compatibility, we need to provide a password
+                // In a real app, you'd modify the API to handle optional password updates
+                alert('Wachtwoord is verplicht voor updates. Vul een nieuw wachtwoord in of annuleer.');
+                return;
+            }
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(updateData)
+                });
+
+                if (response.ok) {
+                    alert('Gebruiker bijgewerkt!');
+                    loadUsers();
+                } else {
+                    const error = await response.text();
+                    alert('Error: ' + error);
+                }
+            } catch (error) {
+                console.error('Error updating user:', error);
+                alert('Error updating user');
+            }
+        }
+    </script>
+</body>
+</html>

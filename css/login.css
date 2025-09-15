@@ -82,3 +82,8 @@ h2 {
         background-color: rgb(240, 179, 24);
     }
 }
+
+#errorMessage {
+    margin-top: 10px;
+    text-align: center;
+}
