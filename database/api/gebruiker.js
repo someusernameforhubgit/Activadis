@@ -27,7 +27,7 @@ export default function GebruikerAPI(app) {
                 "<h1>Account aangemaakt</h1><br>" +
                 "<p>Er is een account voor u aangemaakt op Activadis.</p>" +
                 "<p>U moet voor u kan inloggen op Activadis een wachtwoord instellen.</p>" +
-                "<p>Dit kunt u <a href='http://localhost:3000/login?reset_token=" + reset_token + "'>hier</a> doen.</p>" +
+                "<p>Dit kunt u <a href=" + process.env.PROTOCOL + "'://" + process.env.HOSTNAME + ":" + process.env.PORT + "/login?reset_token=" + reset_token + "'>hier</a> doen.</p>" +
                 "<p>Deze link verloopt over 15 minuten.</p>"
             );
         } else {
