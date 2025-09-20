@@ -20,6 +20,7 @@ document.querySelector("#loginForm #login").addEventListener("click", async (e) 
             errorMessage.style.color = "red";
             throw new Error("Wachtwoord of email onjuist");
         } else {
+            sessionStorage.setItem("JWT", data.token);
             window.location.href = "/";
         }
     } catch (error) {

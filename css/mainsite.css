@@ -192,3 +192,11 @@ main {
         font-size: 1.2em;
     }
 }
+
+.logout {
+    display: none;
+}
+
+a {
+    cursor: pointer;
+}
