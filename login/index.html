@@ -13,12 +13,12 @@
     <div id="bgCover"></div>
     <form id="loginForm" action="">
         <h2>Activadis</h2>
-        <label>Email adress</label>
-        <input type="email" id="emailadress">
-        <label>Wachtwoord</label>
-        <input type="password" id="password">
-        <button type="submit" id="login">Login</button>
-        <p id="errorMessage"></p>
+        <label for="emailadress">Email adres</label>
+        <input type="email" id="emailadress" placeholder="Voer je email adres in" required>
+        <label for="password">Wachtwoord</label>
+        <input type="password" id="password" placeholder="Voer je wachtwoord in" required>
+        <button type="submit" id="login">Inloggen</button>
+        <p id="errorMessage" class="display-none"></p>
     </form>
 </body>
 </html>

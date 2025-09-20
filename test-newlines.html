@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Newline Test - Activadis</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-container { margin: 20px 0; padding: 20px; border: 1px solid #ccc; }
+        textarea { width: 100%; height: 100px; margin: 10px 0; }
+        .result { background-color: #f5f5f5; padding: 10px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>Newline Test Pagina</h1>
+    
+    <div class="test-container">
+        <h2>Test 1: Activiteit met newlines maken</h2>
+        <form id="test-form">
+            <label>Naam:</label><br>
+            <input type="text" id="test-naam" value="Test Activiteit" required><br><br>
+            
+            <label>Locatie:</label><br>
+            <input type="text" id="test-locatie" value="Test Locatie" required><br><br>
+            
+            <label>Eten:</label><br>
+            <input type="text" id="test-eten" value="Test Eten" required><br><br>
+            
+            <label>Omschrijving (probeer enters):</label><br>
+            <textarea id="test-omschrijving" required>Dit is regel 1
+Dit is regel 2
+
+Dit is regel 4 (na een lege regel)
+- Bullet point 1
+- Bullet point 2</textarea><br>
+            
+            <label>Begin:</label><br>
+            <input type="datetime-local" id="test-begin" value="2025-12-01T10:00" required><br><br>
+            
+            <label>Eind:</label><br>
+            <input type="datetime-local" id="test-eind" value="2025-12-01T12:00" required><br><br>
+            
+            <label>Kosten:</label><br>
+            <input type="number" id="test-kost" step="0.01" value="25.50" required><br><br>
+            
+            <label>Max deelnemers:</label><br>
+            <input type="number" id="test-max" value="20" required><br><br>
+            
+            <label>Min deelnemers:</label><br>
+            <input type="number" id="test-min" value="5" required><br><br>
+            
+            <label>Afbeelding URL:</label><br>
+            <input type="url" id="test-afbeelding" value="https://example.com/image.jpg" required><br><br>
+            
+            <button type="button" onclick="createTestActivity()">Test Activiteit Maken</button>
+        </form>
+        
+        <div id="create-result" class="result" style="display: none;"></div>
+    </div>
+    
+    <div class="test-container">
+        <h2>Test 2: Activiteiten ophalen en tonen</h2>
+        <button onclick="loadAndDisplayActivities()">Activiteiten Laden</button>
+        <div id="activities-result" class="result"></div>
+    </div>
+    
+    <div class="test-container">
+        <h2>Test 3: Direct database test</h2>
+        <button onclick="testDirectApi()">Direct API Test</button>
+        <div id="api-result" class="result"></div>
+    </div>
+
+    <script>
+        // Helper functions
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function formatTextWithNewlines(text) {
+            if (!text) return '';
+            return escapeHtml(text).replace(/\n/g, '<br>');
+        }
+
+        async function createTestActivity() {
+            const data = {
+                naam: document.getElementById('test-naam').value,
+                locatie: document.getElementById('test-locatie').value,
+                eten: document.getElementById('test-eten').value,
+                omschrijving: document.getElementById('test-omschrijving').value,
+                begin: document.getElementById('test-begin').value,
+                eind: document.getElementById('test-eind').value,
+                kost: parseFloat(document.getElementById('test-kost').value),
+                max: parseInt(document.getElementById('test-max').value),
+                min: parseInt(document.getElementById('test-min').value),
+                afbeelding: document.getElementById('test-afbeelding').value
+            };
+
+            const resultDiv = document.getElementById('create-result');
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = 'Creating...';
+
+            try {
+                const response = await fetch('/api/activiteit', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    resultDiv.innerHTML = `
+                        <h3>✅ Activiteit succesvol aangemaakt!</h3>
+                        <p><strong>ID:</strong> ${result}</p>
+                        <p><strong>Verzonden omschrijving:</strong></p>
+                        <pre>${escapeHtml(data.omschrijving)}</pre>
+                    `;
+                } else {
+                    const error = await response.text();
+                    resultDiv.innerHTML = `<h3>❌ Fout:</h3><p>${error}</p>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<h3>❌ Fout:</h3><p>${error.message}</p>`;
+            }
+        }
+
+        async function loadAndDisplayActivities() {
+            const resultDiv = document.getElementById('activities-result');
+            resultDiv.innerHTML = 'Loading...';
+
+            try {
+                const response = await fetch('/api/activiteit');
+                const activities = await response.json();
+
+                if (activities.length === 0) {
+                    resultDiv.innerHTML = '<p>Geen activiteiten gevonden.</p>';
+                    return;
+                }
+
+                let html = '<h3>Gevonden activiteiten:</h3>';
+                activities.forEach(act => {
+                    html += `
+                        <div style="border: 1px solid #ddd; margin: 10px 0; padding: 10px;">
+                            <h4>${escapeHtml(act.naam)}</h4>
+                            <p><strong>Locatie:</strong> ${escapeHtml(act.locatie)}</p>
+                            <p><strong>Omschrijving (ruw):</strong></p>
+                            <pre style="background: #f0f0f0; padding: 5px;">${escapeHtml(act.omschrijving)}</pre>
+                            <p><strong>Omschrijving (geformateerd):</strong></p>
+                            <div style="background: #f9f9f9; padding: 5px;">${formatTextWithNewlines(act.omschrijving)}</div>
+                        </div>
+                    `;
+                });
+                resultDiv.innerHTML = html;
+            } catch (error) {
+                resultDiv.innerHTML = `<h3>❌ Fout:</h3><p>${error.message}</p>`;
+            }
+        }
+
+        async function testDirectApi() {
+            const resultDiv = document.getElementById('api-result');
+            resultDiv.innerHTML = 'Testing...';
+
+            try {
+                // Test POST
+                const testData = {
+                    naam: "API Test",
+                    locatie: "Test Locatie",
+                    eten: "Test Eten",
+                    omschrijving: "Regel 1\nRegel 2\n\nRegel 4",
+                    begin: "2025-12-01T10:00:00",
+                    eind: "2025-12-01T12:00:00",
+                    kost: 10.00,
+                    max: 10,
+                    min: 1,
+                    afbeelding: "https://example.com/test.jpg"
+                };
+
+                const postResponse = await fetch('/api/activiteit', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(testData)
+                });
+
+                if (postResponse.ok) {
+                    const postResult = await postResponse.json();
+                    
+                    // Test GET
+                    const getResponse = await fetch(`/api/activiteit?id=${postResult}`);
+                    const getData = await getResponse.json();
+
+                    resultDiv.innerHTML = `
+                        <h3>✅ Direct API Test Succesvol!</h3>
+                        <p><strong>Gemaakt ID:</strong> ${postResult}</p>
+                        <p><strong>Opgehaalde data:</strong></p>
+                        <pre>${JSON.stringify(getData, null, 2)}</pre>
+                        <p><strong>Omschrijving check:</strong></p>
+                        <div>Origineel: <pre>${escapeHtml(testData.omschrijving)}</pre></div>
+                        <div>Uit database: <pre>${escapeHtml(getData.omschrijving)}</pre></div>
+                        <div>Match: ${testData.omschrijving === getData.omschrijving ? '✅' : '❌'}</div>
+                    `;
+                } else {
+                    const error = await postResponse.text();
+                    resultDiv.innerHTML = `<h3>❌ POST Fout:</h3><p>${error}</p>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<h3>❌ Fout:</h3><p>${error.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>

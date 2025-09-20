@@ -10,6 +10,10 @@ app.use("/login", express.static("login"));
 app.use("/css", express.static("css"));
 app.use("/img", express.static("img"));
 
+// Serve test page
+app.get('/test-newlines', (req, res) => {
+    res.sendFile('test-newlines.html', { root: '.' });
+});
 
 // Database
 api.ActiviteitAPI(app);

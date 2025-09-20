@@ -5,13 +5,14 @@
     <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link rel="stylesheet" href="/css/style.css">
+    <script src="/beheerder/modal-utils.js"></script>
     <title>Activadis - Beheerder</title>
 </head>
 <body>
     <header>
         <div class="container">
             <div class="left">
-                <p><b>Activadis</b>: Beheerder</p>
+                <p><b><span class="accent">Acti</span>vadis</b>: Beheerder</p>
             </div>
         </div>
     </header>
@@ -27,12 +28,253 @@
         </aside>
         <main id="mainContent">
             <h2>Dashboard</h2>
-            <p>Welcome to the Activadis beheerder dashboard.</p>
+            <div id="dashboard-stats">
+                <h3><i class="fas fa-chart-bar"></i> Systeem Overzicht</h3>
+                <div id="stats-container">
+                    <div>
+                        <div><i class="fas fa-calendar-alt"></i> Activiteiten</div>
+                        <span id="activiteiten-count">-</span>
+                    </div>
+                    <div>
+                        <div><i class="fas fa-users"></i> Gebruikers</div>
+                        <span id="gebruikers-count">-</span>
+                    </div>
+                    <div>
+                        <div><i class="fas fa-clipboard-list"></i> Inschrijvingen</div>
+                        <span id="inschrijvingen-count">-</span>
+                    </div>
+                    <div>
+                        <div><i class="fas fa-box"></i> Benodigdheden</div>
+                        <span id="benodigdheden-count">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="recent-activities" class="content-section">
+                <h3><i class="fas fa-clock"></i> Recente Activiteiten</h3>
+                <ul id="activiteiten-list"></ul>
+            </div>
+
+            <hr class="section-separator thick">
+
+            <div id="manage-section">
+                <!-- Activiteiten beheer -->
+                <div class="manage-block">
+                    <h4><i class="fas fa-calendar-alt"></i> Activiteiten Beheer</h4>
+                    
+                    <div class="button-group">
+                        <button class="btn btn-primary btn-small" onclick="ModalManager.instance.showEditActivityModal()">
+                            <i class="fas fa-plus"></i> Nieuwe Activiteit
+                        </button>
+                    </div>
+                    
+                    <ul id="all-activiteiten-list"></ul>
+                </div>
+
+                <hr class="section-separator">
+
+                <!-- Gebruikers beheer -->
+                <div class="manage-block">
+                    <h4><i class="fas fa-users"></i> Gebruikers Beheer</h4>
+                    
+                    <div class="button-group">
+                        <button class="btn btn-primary btn-small" onclick="ModalManager.instance.showEditUserModal()">
+                            <i class="fas fa-plus"></i> Nieuwe Gebruiker
+                        </button>
+                    </div>
+                    
+                    <ul id="all-gebruikers-list"></ul>
+                </div>
+            </div>
         </main>
         <div id="sideContent">
             <h3>Side Content</h3>
             <p>This is some additional side content.</p>
         </div>
     </section>
+
+    <script>
+        // API Base URLs
+        const API = {
+            activiteit: '/api/activiteit',
+            gebruiker: '/api/gebruiker',
+            inschrijving: '/api/inschrijving',
+            benodigdheid: '/api/benodigdheid'
+        };
+
+        // Helper functions for text handling
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function formatTextWithNewlines(text) {
+            if (!text) return '';
+            return escapeHtml(text).replace(/\n/g, '<br>');
+        }
+
+        // Load dashboard data on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDashboard();
+        });
+
+        async function loadDashboard() {
+            try {
+                // Load all data
+                const [activiteiten, gebruikers, inschrijvingen, benodigdheden] = await Promise.all([
+                    fetch(API.activiteit).then(res => res.json()),
+                    fetch(API.gebruiker).then(res => res.json()),
+                    fetch(API.inschrijving).then(res => res.json()),
+                    fetch(API.benodigdheid).then(res => res.json())
+                ]);
+
+                // Update counters
+                document.getElementById('activiteiten-count').textContent = activiteiten.length;
+                document.getElementById('gebruikers-count').textContent = gebruikers.length;
+                document.getElementById('inschrijvingen-count').textContent = inschrijvingen.length;
+                document.getElementById('benodigdheden-count').textContent = benodigdheden.length;
+
+                // Display recent activities
+                displayRecentActiviteiten(activiteiten.slice(0, 5));
+                
+                // Display all activities for management
+                displayAllActiviteiten(activiteiten);
+                
+                // Display all users for management
+                displayAllGebruikers(gebruikers);
+
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+            }
+        }
+
+        function displayRecentActiviteiten(activiteiten) {
+            const list = document.getElementById('activiteiten-list');
+            list.innerHTML = '';
+            
+            activiteiten.forEach(act => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <strong>${escapeHtml(act.naam)}</strong> - ${escapeHtml(act.locatie)} 
+                    (${new Date(act.begin).toLocaleDateString()})
+                `;
+                list.appendChild(li);
+            });
+        }
+
+        function displayAllActiviteiten(activiteiten) {
+            const list = document.getElementById('all-activiteiten-list');
+            list.innerHTML = '';
+            
+            activiteiten.forEach(act => {
+                const li = document.createElement('li');
+                li.style.marginBottom = '10px';
+                li.style.padding = '10px';
+                li.style.backgroundColor = '#f9f9f9';
+                li.style.borderRadius = '5px';
+                li.style.border = '1px solid #ddd';
+                
+                li.innerHTML = `
+                    <div>
+                        <strong>${escapeHtml(act.naam)}</strong> - ${escapeHtml(act.locatie)}<br>
+                        <small>📅 Begin: ${new Date(act.begin).toLocaleDateString()} | 💰 Kosten: €${act.kost} | 👥 ${act.min}-${act.max} personen</small><br>
+                        <div class="actions">
+                            <button class="btn btn-info btn-small" onclick="ModalManager.instance.showViewActivityModal(${JSON.stringify(act).replace(/"/g, '&quot;')})">
+                                <i class="fas fa-eye"></i> Bekijken
+                            </button>
+                            <button class="btn btn-primary btn-small" onclick="ModalManager.instance.showEditActivityModal(${JSON.stringify(act).replace(/"/g, '&quot;')})">
+                                <i class="fas fa-edit"></i> Bewerken
+                            </button>
+                            <button class="btn btn-danger btn-small" onclick="deleteActiviteit(${act.id})">
+                                <i class="fas fa-trash"></i> Verwijderen
+                            </button>
+                        </div>
+                    </div>
+                `;
+                list.appendChild(li);
+            });
+        }
+
+        function displayAllGebruikers(gebruikers) {
+            const list = document.getElementById('all-gebruikers-list');
+            list.innerHTML = '';
+            
+            gebruikers.forEach(user => {
+                const li = document.createElement('li');
+                li.style.marginBottom = '10px';
+                li.style.padding = '10px';
+                li.style.backgroundColor = '#f9f9f9';
+                li.style.borderRadius = '5px';
+                li.style.border = '1px solid #ddd';
+                
+                li.innerHTML = `
+                    <div>
+                        <strong>${user.email}</strong> - ${user.admin ? '👑 Admin' : '👤 Gebruiker'}<br>
+                        <small>🆔 ID: ${user.id}</small><br>
+                        <div class="actions">
+                            <button class="btn btn-info btn-small" onclick="ModalManager.instance.showViewUserModal(${JSON.stringify(user).replace(/"/g, '&quot;')})">
+                                <i class="fas fa-eye"></i> Bekijken
+                            </button>
+                            <button class="btn btn-primary btn-small" onclick="ModalManager.instance.showEditUserModal(${JSON.stringify(user).replace(/"/g, '&quot;')})">
+                                <i class="fas fa-edit"></i> Bewerken
+                            </button>
+                            <button class="btn btn-danger btn-small" onclick="deleteGebruiker(${user.id})">
+                                <i class="fas fa-trash"></i> Verwijderen
+                            </button>
+                        </div>
+                    </div>
+                `;
+                list.appendChild(li);
+            });
+        }
+
+        // Activity management now handled by ModalManager
+
+        async function deleteActiviteit(id) {
+            if (confirm('Weet je zeker dat je deze activiteit wilt verwijderen?')) {
+                try {
+                    const response = await fetch(`${API.activiteit}?id=${id}`, {
+                        method: 'DELETE'
+                    });
+
+                    if (response.ok) {
+                        alert('Activiteit verwijderd!');
+                        loadDashboard(); // Refresh data
+                    } else {
+                        alert('Error deleting activiteit');
+                    }
+                } catch (error) {
+                    console.error('Error deleting activiteit:', error);
+                    alert('Error deleting activiteit');
+                }
+            }
+        }
+
+        // User management now handled by ModalManager
+
+        async function deleteGebruiker(id) {
+            if (confirm('Weet je zeker dat je deze gebruiker wilt verwijderen?')) {
+                try {
+                    const response = await fetch(`${API.gebruiker}?id=${id}`, {
+                        method: 'DELETE'
+                    });
+
+                    if (response.ok) {
+                        alert('Gebruiker verwijderd!');
+                        loadDashboard(); // Refresh data
+                    } else {
+                        alert('Error deleting gebruiker');
+                    }
+                } catch (error) {
+                    console.error('Error deleting gebruiker:', error);
+                    alert('Error deleting gebruiker');
+                }
+            }
+        }
+
+        // Dashboard editing now handled by ModalManager
+    </script>
 </body>
 </html>

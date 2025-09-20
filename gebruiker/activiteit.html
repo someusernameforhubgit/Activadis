@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Activiteit Details - Activadis</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/mainsite.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Header with Navigation -->
+    <header>
+        <div class="container">
+            <div class="left">
+                <p><b><span class="accent">Acti</span>vadis</b>: Activiteit</p>
+                <nav>
+                    <div>
+                        <a href="/"><i class="fas fa-home"></i>Home</a>
+                        <a href="javascript:history.back()"><i class="fas fa-arrow-left"></i>Terug</a>
+                    </div>
+                    <div>
+                        <a href="/login"><i class="fas fa-sign-in-alt"></i>Login</a>
+                    </div>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Loading State -->
+    <div id="loadingState" class="loading-container">
+        <div class="loading-spinner"></div>
+        <p>Activiteit laden...</p>
+    </div>
+
+    <!-- Error State -->
+    <div id="errorState" class="error-container" style="display: none;">
+        <div class="error-content">
+            <i class="fas fa-exclamation-triangle"></i>
+            <h2>Oeps! Er is iets misgegaan</h2>
+            <p id="errorMessage">Activiteit kon niet geladen worden.</p>
+            <button onclick="location.reload()" class="btn btn-primary">
+                <i class="fas fa-redo"></i> Opnieuw proberen
+            </button>
+            <a href="index.html" class="btn btn-secondary">
+                <i class="fas fa-home"></i> Naar homepagina
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main id="mainContent" style="display: none;">
+        <div class="activity-hero">
+            <div class="container">
+                <div class="hero-content">
+                    <div class="activity-header">
+                        <h1 id="activityTitle" class="activity-title"></h1>
+                        <div class="activity-meta">
+                            <span id="activityLocation" class="location-badge">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span></span>
+                            </span>
+                            <span id="activityPrice" class="price-badge">
+                                <i class="fas fa-euro-sign"></i>
+                                <span></span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="activity-content">
+                <!-- Activity Details Card -->
+                <div class="activity-details-card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-info-circle"></i> Activiteit Details</h2>
+                    </div>
+                    <div class="card-content">
+                        <div class="detail-grid">
+                            <div class="detail-item">
+                                <div class="detail-icon">
+                                    <i class="fas fa-calendar-alt"></i>
+                                </div>
+                                <div class="detail-info">
+                                    <label>Startdatum & tijd</label>
+                                    <span id="startDateTime"></span>
+                                </div>
+                            </div>
+                            
+                            <div class="detail-item">
+                                <div class="detail-icon">
+                                    <i class="fas fa-calendar-check"></i>
+                                </div>
+                                <div class="detail-info">
+                                    <label>Einddatum & tijd</label>
+                                    <span id="endDateTime"></span>
+                                </div>
+                            </div>
+                            
+                            <div class="detail-item">
+                                <div class="detail-icon">
+                                    <i class="fas fa-users"></i>
+                                </div>
+                                <div class="detail-info">
+                                    <label>Deelnemers</label>
+                                    <span id="participants"></span>
+                                </div>
+                            </div>
+                            
+                            <div class="detail-item">
+                                <div class="detail-icon">
+                                    <i class="fas fa-utensils"></i>
+                                </div>
+                                <div class="detail-info">
+                                    <label>Eten inbegrepen</label>
+                                    <span id="foodIncluded"></span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="description-section">
+                            <h3><i class="fas fa-align-left"></i> Omschrijving</h3>
+                            <p id="activityDescription"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Registration Card -->
+                <div class="registration-card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-user-plus"></i> Inschrijving</h2>
+                    </div>
+                    <div class="card-content">
+                        <div class="registration-info">
+                            <div class="availability-status" id="availabilityStatus">
+                                <i class="fas fa-check-circle"></i>
+                                <span>Plaatsen beschikbaar</span>
+                            </div>
+                            <div class="registration-details">
+                                <p><strong>Kosten:</strong> <span id="registrationPrice"></span></p>
+                                <p><strong>Beschikbare plaatsen:</strong> <span id="availableSpots"></span></p>
+                            </div>
+                        </div>
+                        
+                        <div class="registration-actions">
+                            <button id="registerBtn" class="btn btn-primary btn-large">
+                                <i class="fas fa-user-plus"></i>
+                                Inschrijven voor activiteit
+                            </button>
+                            <button id="shareBtn" class="btn btn-secondary">
+                                <i class="fas fa-share-alt"></i>
+                                Delen
+                            </button>
+                        </div>
+                        
+                        <div class="registration-note">
+                            <p><i class="fas fa-info-circle"></i> Je moet ingelogd zijn om je in te schrijven voor een activiteit.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Get activity ID from URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const activityId = urlParams.get('id');
+
+        // DOM elements
+        const loadingState = document.getElementById('loadingState');
+        const errorState = document.getElementById('errorState');
+        const mainContent = document.getElementById('mainContent');
+        const errorMessage = document.getElementById('errorMessage');
+
+        // Function to show error state
+        function showError(message = 'Er is een onbekende fout opgetreden.') {
+            loadingState.style.display = 'none';
+            mainContent.style.display = 'none';
+            errorState.style.display = 'flex';
+            errorMessage.textContent = message;
+        }
+
+        // Function to show main content
+        function showContent() {
+            loadingState.style.display = 'none';
+            errorState.style.display = 'none';
+            mainContent.style.display = 'block';
+        }
+
+        // Function to format date and time
+        function formatDateTime(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('nl-NL', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        // Function to calculate available spots
+        function calculateAvailableSpots(min, max, current = 0) {
+            return Math.max(0, max - current);
+        }
+
+        // Function to populate activity data
+        function populateActivityData(data) {
+            // Header information
+            document.getElementById('activityTitle').textContent = data.naam || 'Onbekende Activiteit';
+            document.querySelector('#activityLocation span').textContent = data.locatie || 'Locatie niet opgegeven';
+            document.querySelector('#activityPrice span').textContent = data.kost ? `${data.kost} euro` : 'Gratis';
+
+            // Detail information
+            document.getElementById('startDateTime').textContent = formatDateTime(data.begin);
+            document.getElementById('endDateTime').textContent = formatDateTime(data.eind);
+            document.getElementById('participants').textContent = `${data.min || 0} - ${data.max || 0} personen`;
+            document.getElementById('foodIncluded').innerHTML = data.eten ? 
+                '<i class="fas fa-check text-success"></i> Ja' : 
+                '<i class="fas fa-times text-danger"></i> Nee';
+            
+            // Description
+            document.getElementById('activityDescription').textContent = data.omschrijving || 'Geen omschrijving beschikbaar.';
+
+            // Registration information
+            document.getElementById('registrationPrice').textContent = data.kost ? `€${data.kost}` : 'Gratis';
+            
+            const availableSpots = calculateAvailableSpots(data.min, data.max);
+            document.getElementById('availableSpots').textContent = availableSpots;
+
+            // Update availability status
+            const statusElement = document.getElementById('availabilityStatus');
+            if (availableSpots > 0) {
+                statusElement.innerHTML = '<i class="fas fa-check-circle"></i><span>Plaatsen beschikbaar</span>';
+                statusElement.className = 'availability-status available';
+            } else {
+                statusElement.innerHTML = '<i class="fas fa-times-circle"></i><span>Volzet</span>';
+                statusElement.className = 'availability-status full';
+                document.getElementById('registerBtn').disabled = true;
+                document.getElementById('registerBtn').innerHTML = '<i class="fas fa-ban"></i> Volzet';
+            }
+        }
+
+        // Function to handle registration
+        function handleRegistration() {
+            // Check if user is logged in (you can implement this based on your auth system)
+            const isLoggedIn = sessionStorage.getItem('JWT') !== null;
+            
+            if (!isLoggedIn) {
+                alert('Je moet eerst inloggen om je in te schrijven voor een activiteit.');
+                window.location.href = '../login';
+                return;
+            }
+
+            // Here you would implement the actual registration logic
+            alert('Inschrijving functionaliteit nog niet geïmplementeerd.');
+        }
+
+        // Function to handle sharing
+        function handleShare() {
+            if (navigator.share) {
+                navigator.share({
+                    title: document.getElementById('activityTitle').textContent,
+                    text: 'Bekijk deze activiteit op Activadis!',
+                    url: window.location.href
+                });
+            } else {
+                // Fallback: copy to clipboard
+                navigator.clipboard.writeText(window.location.href).then(() => {
+                    alert('Link gekopieerd naar klembord!');
+                });
+            }
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!activityId) {
+                showError('Geen activiteit ID opgegeven in de URL.');
+                return;
+            }
+
+            // Fetch activity data
+            fetch(`/api/activiteit?id=${activityId}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Activity data:', data);
+                    if (!data || Object.keys(data).length === 0) {
+                        throw new Error('Geen activiteit gevonden met dit ID.');
+                    }
+                    populateActivityData(data);
+                    showContent();
+                })
+                .catch(error => {
+                    console.error('Error fetching activity:', error);
+                    showError(error.message || 'Kon de activiteit niet laden. Probeer het later opnieuw.');
+                });
+
+            // Add event listeners for buttons
+            document.getElementById('registerBtn').addEventListener('click', handleRegistration);
+            document.getElementById('shareBtn').addEventListener('click', handleShare);
+        });
+    </script>
+</body>
+</html>
