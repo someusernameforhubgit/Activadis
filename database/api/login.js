@@ -15,7 +15,7 @@ export default function LoginAPI(app) {
         if (hash !== gebruiker[0].hash) {
             return res.send({});
         }
-        res.send({token: await jwt.sign({email: gebruiker[0].email}, process.env.JWT_SECRET, {expiresIn: "1h"})});
+        res.send({token: await jwt.sign({id: gebruiker[0].id}, process.env.JWT_SECRET, {expiresIn: "1h"})});
     });
 
     app.get("/api/verify", async (req, res) => {
