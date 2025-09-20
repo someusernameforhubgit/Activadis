@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <script>
+        const id = new URLSearchParams(window.location.search).get('id');
+        fetch(`/api/activiteit?id=${id}`)
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                document.body.innerHTML = `
+                    <div class="activiteit-card" style="max-width:500px;margin:2rem auto;padding:1.5rem;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,0.1);background:#fafafa;">
+                        <h1>${data.naam}</h1>
+                        <h2>${data.locatie}</h2>
+                        <p><strong>Begin:</strong> ${new Date(data.begin).toLocaleString()}</p>
+                        <p><strong>Einde:</strong> ${new Date(data.eind).toLocaleString()}</p>
+                        <p><strong>Omschrijving:</strong> ${data.omschrijving}</p>
+                        <p><strong>ID:</strong> ${data.id}</p>
+                        <p><strong>Kost:</strong> &euro;${data.kost}</p>
+                        <p><strong>Min deelnemers:</strong> ${data.min}</p>
+                        <p><strong>Max deelnemers:</strong> ${data.max}</p>
+                        <p><strong>Eten:</strong> ${data.eten ? 'Ja' : 'Nee'}</p>
+                    </div>
+                `;
+            });
+    </script>
+</body>
+</html>

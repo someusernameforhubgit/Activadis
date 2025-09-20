@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="/css/style.css">
+    <title>Activadis - Instellingen</title>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="left">
+                <p><b><span class="accent">Acti</span>vadis</b>: Instellingen</p>
+            </div>
+        </div>
+    </header>
+    <section id="mainContainer">
+        <aside id="sidebar">
+            <h1>Navigatie</h1>
+            <ul>
+                <li><a href="/beheerder/index.html">Dashboard</a></li>
+                <li><a href="/beheerder/gebruikers.html">Gebruikers</a></li>
+                <li><a href="/beheerder/activiteiten.html">Activiteiten</a></li>
+                <li><a href="/beheerder/instellingen.html">Instellingen</a></li>
+            </ul>
+        </aside>
+        <main id="mainContent">
+            <h2><i class="fas fa-cogs"></i> Systeem Instellingen</h2>
+            
+            <div class="settings-section">
+                <h3><i class="fas fa-database"></i> Database Informatie</h3>
+                <div id="db-info">
+                    <p><i class="fas fa-plug"></i> Status: <span id="db-status" class="status-checking">Checking...</span></p>
+                    <hr class="section-separator">
+                    <button onclick="testConnection()">
+                        <i class="fas fa-search"></i> Test Database Verbinding
+                    </button>
+                </div>
+            </div>
+
+            <div class="settings-section">
+                <h3><i class="fas fa-link"></i> API Endpoints</h3>
+                <div id="api-info">
+                    <p><i class="fas fa-calendar-alt"></i> Activiteiten API: <span id="activiteiten-status" class="status-checking">Checking...</span></p>
+                    <p><i class="fas fa-users"></i> Gebruikers API: <span id="gebruikers-status" class="status-checking">Checking...</span></p>
+                    <p><i class="fas fa-clipboard-list"></i> Inschrijvingen API: <span id="inschrijvingen-status" class="status-checking">Checking...</span></p>
+                    <p><i class="fas fa-box"></i> Benodigdheden API: <span id="benodigdheden-status" class="status-checking">Checking...</span></p>
+                    <hr class="section-separator">
+                    <button onclick="testAllAPIs()">
+                        <i class="fas fa-search"></i> Test Alle APIs
+                    </button>
+                </div>
+            </div>
+
+            <div class="settings-section">
+                <h3><i class="fas fa-tools"></i> Beheer Opties</h3>
+                <div class="button-group">
+                    <button onclick="clearAllData()" class="btn btn-danger">
+                        <i class="fas fa-exclamation-triangle"></i> Alle Data Wissen (GEVAARLIJK)
+                    </button>
+                    <button onclick="exportData()" class="btn btn-success">
+                        <i class="fas fa-download"></i> Data Exporteren
+                    </button>
+                </div>
+            </div>
+
+            <div class="settings-section">
+                <h3><i class="fas fa-file-alt"></i> Systeem Logs</h3>
+                <div>
+                    <textarea id="logs" readonly></textarea>
+                    <hr class="section-separator">
+                    <button onclick="refreshLogs()">
+                        <i class="fas fa-sync-alt"></i> Logs Verversen
+                    </button>
+                </div>
+            </div>
+        </main>
+        <div id="sideContent">
+            <div id="quick-stats">
+                <h3><i class="fas fa-tachometer-alt"></i> Quick Stats</h3>
+                <p><i class="fas fa-server"></i> Server Status: <span id="server-status" class="status-online">Online</span></p>
+                <p><i class="fas fa-clock"></i> Laatste Update: <span id="last-update">-</span></p>
+                <p><i class="fas fa-chart-line"></i> Totaal Requests: <span id="total-requests">-</span></p>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        const APIs = {
+            activiteit: '/api/activiteit',
+            gebruiker: '/api/gebruiker',
+            inschrijving: '/api/inschrijving',
+            benodigdheid: '/api/benodigdheid'
+        };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeSettings();
+        });
+
+        function initializeSettings() {
+            document.getElementById('last-update').textContent = new Date().toLocaleString();
+            testAllAPIs();
+            addLog('Instellingen pagina geladen');
+        }
+
+        async function testConnection() {
+            const statusEl = document.getElementById('db-status');
+            statusEl.textContent = 'Testing...';
+            statusEl.className = 'status-checking';
+            
+            try {
+                // Test by trying to fetch users (this will test database connection)
+                const response = await fetch('/api/gebruiker');
+                if (response.ok) {
+                    statusEl.textContent = '✅ Verbonden';
+                    statusEl.className = 'status-online';
+                    addLog('Database verbinding succesvol getest');
+                } else {
+                    statusEl.textContent = '❌ Fout';
+                    statusEl.className = 'status-offline';
+                    addLog('Database verbinding test gefaald');
+                }
+            } catch (error) {
+                statusEl.textContent = '❌ Fout';
+                statusEl.className = 'status-offline';
+                addLog('Database verbinding error: ' + error.message);
+            }
+        }
+
+        async function testAllAPIs() {
+            const statusElements = {
+                activiteiten: 'activiteiten-status',
+                gebruikers: 'gebruikers-status',
+                inschrijvingen: 'inschrijvingen-status',
+                benodigdheden: 'benodigdheden-status'
+            };
+
+            for (const [name, elementId] of Object.entries(statusElements)) {
+                const el = document.getElementById(elementId);
+                el.textContent = 'Testing...';
+                el.className = 'status-checking';
+            }
+
+            for (const [apiName, url] of Object.entries(APIs)) {
+                try {
+                    const response = await fetch(url);
+                    const elementId = apiName === 'activiteit' ? 'activiteiten-status' : 
+                                     apiName === 'gebruiker' ? 'gebruikers-status' :
+                                     apiName + 'en-status';
+                    
+                    const el = document.getElementById(elementId);
+                    if (response.ok) {
+                        el.textContent = '✅ Werkend';
+                        el.className = 'status-online';
+                        addLog(`${apiName} API test succesvol`);
+                    } else {
+                        el.textContent = '❌ Fout';
+                        el.className = 'status-offline';
+                        addLog(`${apiName} API test gefaald`);
+                    }
+                } catch (error) {
+                    const elementId = apiName === 'activiteit' ? 'activiteiten-status' : 
+                                     apiName === 'gebruiker' ? 'gebruikers-status' :
+                                     apiName + 'en-status';
+                    const el = document.getElementById(elementId);
+                    el.textContent = '❌ Fout';
+                    el.className = 'status-offline';
+                    addLog(`${apiName} API error: ${error.message}`);
+                }
+            }
+        }
+
+        async function clearAllData() {
+            const confirmation = prompt('Type "DELETE ALL" om alle data te wissen (dit kan niet ongedaan gemaakt worden):');
+            
+            if (confirmation === 'DELETE ALL') {
+                const doubleConfirm = confirm('Weet je het ZEKER? Dit wist ALLE gebruikers, activiteiten, inschrijvingen en benodigdheden!');
+                
+                if (doubleConfirm) {
+                    try {
+                        // This would need additional API endpoints for bulk deletion
+                        alert('Let op: Bulk delete functionaliteit moet nog geïmplementeerd worden in de API');
+                        addLog('Bulk delete poging - niet geïmplementeerd');
+                    } catch (error) {
+                        alert('Error tijdens data wissen: ' + error.message);
+                        addLog('Bulk delete error: ' + error.message);
+                    }
+                }
+            } else {
+                addLog('Data wis operatie geannuleerd');
+            }
+        }
+
+        async function exportData() {
+            try {
+                addLog('Data export gestart...');
+                
+                const [activiteiten, gebruikers, inschrijvingen, benodigdheden] = await Promise.all([
+                    fetch('/api/activiteit').then(res => res.json()),
+                    fetch('/api/gebruiker').then(res => res.json()),
+                    fetch('/api/inschrijving').then(res => res.json()),
+                    fetch('/api/benodigdheid').then(res => res.json())
+                ]);
+
+                const exportData = {
+                    timestamp: new Date().toISOString(),
+                    activiteiten,
+                    gebruikers: gebruikers.map(u => ({ id: u.id, email: u.email, admin: u.admin })), // Don't export passwords
+                    inschrijvingen,
+                    benodigdheden
+                };
+
+                const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `activadis-export-${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+
+                addLog('Data export voltooid');
+                alert('Data export voltooid!');
+            } catch (error) {
+                addLog('Data export error: ' + error.message);
+                alert('Error tijdens export: ' + error.message);
+            }
+        }
+
+        function addLog(message) {
+            const logs = document.getElementById('logs');
+            const timestamp = new Date().toLocaleTimeString();
+            logs.value += `[${timestamp}] ${message}\n`;
+            logs.scrollTop = logs.scrollHeight;
+        }
+
+        function refreshLogs() {
+            // In a real application, this would fetch server logs
+            addLog('Logs ververst (mock functie)');
+        }
+
+        // Update request counter (mock)
+        let requestCount = 0;
+        setInterval(() => {
+            requestCount += Math.floor(Math.random() * 3);
+            document.getElementById('total-requests').textContent = requestCount;
+        }, 5000);
+    </script>
+</body>
+</html>

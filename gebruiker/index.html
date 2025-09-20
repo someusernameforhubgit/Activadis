@@ -14,20 +14,22 @@
 </head>
 
 <body>
-    <nav>
-        <div>
-            <a href="../"><i class="fas fa-home"></i></a>
-            <a href="../activiteiten">Activiteiten</a>
-        </div>
-        <div>
-            <a class="login" href="../login">Login</a>
-            <p class="logout name">NAME HERE</p>
-            <a class="logout" onclick="logout()">Logout</a>
-        </div>
-    </nav>
+    <header>
+        <nav>
+            <div>
+                <a href="../"><i class="fas fa-home"></i></a>
+                <a href="../activiteiten">Activiteiten</a>
+            </div>
+            <div>
+                <a class="login" href="../login">Login</a>
+                <p class="logout name">NAME HERE</p>
+                <a class="logout" onclick="logout()">Logout</a>
+            </div>
+        </nav>
+    </header>
     <main>
         <div class="events">
-            <div class="event">
+            <!-- <div class="event">
                 <div class="event-info">
                     <h2 class="event-title">EVENT</h2>
                     <h3 class="location">LOCATIE</h3>
@@ -37,70 +39,38 @@
                 <div class="icons">
                     <button>Deelnemen</button>
                 </div>
-            </div>
+            </div> -->
         </div>
     </main>
     <script>
-        const events = [
-            {
-                title: "Wandeling in het park",
-                location: "Vondelpark, Amsterdam",
-                date: "2024-07-15",
-                description: "Geniet van een ontspannen wandeling door het prachtige Vondelpark.",
-            },
-            {
-                title: "Museumbezoek",
-                location: "Rijksmuseum, Amsterdam",
-                date: "2024-08-05",
-                description: "Ontdek de meesterwerken van de Nederlandse kunst in het Rijksmuseum.",
-            },
-            {
-                title: "Kookworkshop",
-                location: "Culinaire Studio, Rotterdam",
-                date: "2024-09-10",
-                description: "Leer nieuwe recepten en kooktechnieken in een gezellige kookworkshop.",
-            },
-            {
-                title: "Kookworkshop",
-                location: "Culinaire Studio, Rotterdam",
-                date: "2024-09-10",
-                description: "Leer nieuwe recepten en kooktechnieken in een gezellige kookworkshop.",
-            },
-            {
-                title: "Kookworkshop",
-                location: "Culinaire Studio, Rotterdam",
-                date: "2024-09-10",
-                description: "Leer nieuwe recepten en kooktechnieken in een gezellige kookworkshop.",
-            },
-            {
-                title: "Kookworkshop",
-                location: "Culinaire Studio, Rotterdam",
-                date: "2024-09-10",
-                description: "Leer nieuwe recepten en kooktechnieken in een gezellige kookworkshop.",
-            },
-        ];
-
         const eventsContainer = document.querySelector('.events');
-        eventsContainer.innerHTML = '';
 
-        events.forEach(event => {
-            const eventElement = document.createElement('div');
-            eventElement.classList.add('event');
+        fetch('/api/activiteit')
+            .then(response => response.json())
+            .then(data => {
+                console.log(data)
+                data.forEach(element => {
+                    const eventElement = document.createElement('div');
+                    eventElement.classList.add('event');
 
-            eventElement.innerHTML = `
-                <div class="event-info">
-                    <h2 class="event-title">${event.title}</h2>
-                    <h3 class="location">${event.location}</h3>
-                    <p class="date">${new Date(event.date).toLocaleDateString()}</p>
-                    <p class="description">${event.description}</p>
-                </div>
-                <div class="icons">
-                    <button>Deelnemen</button>
-                </div>
-            `;
+                    eventElement.innerHTML = `
+                        <div class="event-info">
+                            <h2 class="event-title">${element.naam}</h2>
+                            <h3 class="location">${element.locatie}</h3>
+                            <p class="date">Begin: ${new Date(element.begin).toLocaleString()}</p>
+                            <p class="date">Einde: ${new Date(element.eind).toLocaleString()}</p>
+                            <p class="description">${element.omschrijving}</p>
+                        </div>
+                        <div class="icons">
+                            <a href="activiteit.html?id=${element.id}">Info</a>
+                            <button>Deelnemen</button>
+                        </div>
+                    `;
 
-            eventsContainer.appendChild(eventElement);
-        });
+                    eventsContainer.appendChild(eventElement);
+                });
+            })
+            .catch(error => console.error('Error fetching activities:', error));
     </script>
 </body>
 
