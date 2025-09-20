@@ -258,6 +258,7 @@ ul {
     border-radius: 5px;
     font-family: inherit;
     font-size: 14px;
+    width: 100%;
 }
 
 .modal-form-group input:focus,
