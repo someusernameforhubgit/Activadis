@@ -19,10 +19,12 @@ document.querySelector("#loginForm #login").addEventListener("click", async (e) 
             errorMessage.textContent = "Wachtwoord of email onjuist";
             throw new Error("Wachtwoord of email onjuist");
         } else {
-            errorMessage.textContent = "inlogt";
+            errorMessage.textContent = "Succesvol ingelogd! Doorverwijzen...";
             errorMessage.style.color = "green";
             sessionStorage.setItem("JWT", data.token);
-            window.location.href = "../../index.html";
+            setTimeout(() => {
+                window.location.href = "../";
+            }, 1000);
         }
     } catch (error) {
         // if (errorMessage) {
