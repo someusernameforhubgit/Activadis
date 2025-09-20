@@ -7,12 +7,14 @@
     <link rel="stylesheet" href="../css/style.css">
     <link rel="stylesheet" href="../css/login.css">
     <!-- <script src="../database/api/gebruiker.js" defer></script> -->
-    <script src="login.js" type="module" defer></script>
+    <script src="login.js" type="module"></script>
 </head>
 <body>
     <div id="bgCover"></div>
     <form id="loginForm" action="">
         <h2>Activadis</h2>
+        <input type="hidden" id="reset" name="reset" value="false">
+        <input type="hidden" id="reset_token" name="reset_token" value="">
         <label for="emailadress">Email adres</label>
         <input type="email" id="emailadress" placeholder="Voer je email adres in" required>
         <label for="password">Wachtwoord</label>

@@ -202,18 +202,30 @@ class ModalManager {
         
         modalBody.innerHTML = `
             <form class="modal-form" id="user-form">
+                <div class="name-fields" style="display: flex; gap: 15px; width: 100%;">
+                    <div class="modal-form-group" style="flex: 1;">
+                        <label for="user-firstname">Voornaam *</label>
+                        <input type="text" id="user-firstname" required value="${isEdit && user.firstname ? this.escapeHtml(user.firstname) : ''}">
+                    </div>
+                    <div class="modal-form-group" style="flex: 1;">
+                        <label for="user-lastname">Achternaam *</label>
+                        <input type="text" id="user-lastname" required value="${isEdit && user.lastname ? this.escapeHtml(user.lastname) : ''}">
+                    </div>
+                </div>
                 <div class="modal-form-group">
                     <label for="user-email">Email *</label>
                     <input type="email" id="user-email" required value="${isEdit ? this.escapeHtml(user.email) : ''}">
                 </div>
+                ${isEdit ? `
                 <div class="modal-form-group">
-                    <label for="user-password">${isEdit ? 'Nieuw Wachtwoord (laat leeg om niet te wijzigen)' : 'Wachtwoord *'}</label>
-                    <input type="password" id="user-password" ${!isEdit ? 'required' : ''} placeholder="${isEdit ? 'Laat leeg om ongewijzigd te laten' : 'Wachtwoord'}">
+                    <label for="user-password">Nieuw Wachtwoord (laat leeg om niet te wijzigen)</label>
+                    <input type="password" id="user-password" placeholder="Laat leeg om ongewijzigd te laten">
                 </div>
+                ` : ''}
                 <div class="modal-form-group">
                     <label for="user-admin">Rol *</label>
                     <select id="user-admin" required>
-                        <option value="0" ${isEdit && !user.admin ? 'selected' : ''}>Gebruiker</option>
+                        <option value="2" ${isEdit && !user.admin ? 'selected' : ''}>Gebruiker</option>
                         <option value="1" ${isEdit && user.admin ? 'selected' : ''}>Admin</option>
                     </select>
                 </div>
@@ -328,9 +340,16 @@ class ModalManager {
 
     // Handle user form submission
     async handleUserSubmit(existingUser) {
+        const firstname = document.getElementById('user-firstname').value;
+        const lastname = document.getElementById('user-lastname').value;
         const email = document.getElementById('user-email').value;
-        const password = document.getElementById('user-password').value;
-        const admin = parseInt(document.getElementById('user-admin').value);
+        const password = document.getElementById('user-password') ? document.getElementById('user-password').value : null;
+        const role = parseInt(document.getElementById('user-admin').value);
+
+        if (!firstname || !lastname) {
+            alert('Voornaam en achternaam zijn verplicht!');
+            return;
+        }
 
         if (!email) {
             alert('Email is verplicht!');
@@ -338,13 +357,8 @@ class ModalManager {
         }
 
         const isEdit = existingUser !== null;
-        
-        if (!isEdit && !password) {
-            alert('Wachtwoord is verplicht voor nieuwe gebruikers!');
-            return;
-        }
 
-        const formData = { email, admin };
+        const formData = { email, role, firstname, lastname };
         if (isEdit) {
             formData.id = existingUser.id;
             if (password.trim() !== '') {
@@ -355,8 +369,6 @@ class ModalManager {
                 alert('Vul een nieuw wachtwoord in om de gebruiker bij te werken.');
                 return;
             }
-        } else {
-            formData.password = password;
         }
 
         try {

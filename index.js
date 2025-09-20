@@ -1,6 +1,7 @@
 import 'dotenv/config'
 import express from 'express';
 import api from './database/api/api.js';
+const port = process.env.PORT || 3000;
 const app = express();
 app.use(express.json());
 
@@ -22,6 +23,6 @@ api.BenodigdheidAPI(app);
 api.InschrijvingAPI(app);
 api.LoginAPI(app);
 
-app.listen(3000, () => {
-    console.log('Server listening on http://localhost:3000');
+app.listen(port, () => {
+    console.log('Server listening on http://localhost:' + port);
 });
