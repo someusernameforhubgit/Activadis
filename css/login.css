@@ -75,6 +75,7 @@ h2 {
     background-color: var(--primary-color);
     border: solid 1px rgb(240, 179, 24);
     font-weight: bold;
+    cursor: pointer;
 
     transition: background-color 0.2s linear;
 

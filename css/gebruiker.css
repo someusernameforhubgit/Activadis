@@ -17,6 +17,7 @@ nav {
         background-color: var(--secondary-color);
         padding: 8px 12px;
         border-radius: 4px;
+        cursor: pointer;
 
         &:hover {
             transition: 0.3s ease-in-out;
@@ -84,4 +85,8 @@ main {
             }
         }
     }
+}
+
+.logout {
+    display: none;
 }

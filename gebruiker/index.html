@@ -10,16 +10,19 @@
     <link rel="stylesheet" href="../css/style.css">
     <link rel="stylesheet" href="../css/gebruiker.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
+    <script src="./script.js"></script>
 </head>
 
 <body>
     <nav>
         <div>
-            <a href="../index.html"><i class="fas fa-home"></i></a>
-            <a href="../activiteiten/index.html">Activiteiten</a>
+            <a href="../"><i class="fas fa-home"></i></a>
+            <a href="../activiteiten">Activiteiten</a>
         </div>
         <div>
-            <a href="../login">Login</a>
+            <a class="login" href="../login">Login</a>
+            <p class="logout name">NAME HERE</p>
+            <a class="logout" onclick="logout()">Logout</a>
         </div>
     </nav>
     <main>

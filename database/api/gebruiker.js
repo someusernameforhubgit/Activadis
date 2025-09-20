@@ -15,10 +15,10 @@ export default function GebruikerAPI(app) {
     });
 
     app.post(url, async (req, res) => {
-        if (req.body.email && req.body.password && req.body.admin !== undefined) {
+        if (req.body.email && req.body.password && req.body.firstname && req.body.lastname && req.body.role !== undefined) {
             const salt = crypto.randomBytes(16).toString("hex");
             const hash = hashPassword(req.body.password, salt);
-            const gebruiker = await database.query("INSERT INTO gebruiker (email, hash, salt, admin) VALUES (?, ?, ?, ?)", [req.body.email, hash, salt, req.body.admin]);
+            const gebruiker = await database.query("INSERT INTO gebruiker (email, hash, salt, firstname, lastname, role) VALUES (?, ?, ?, ?, ?, ?)", [req.body.email, hash, salt, req.body.firstname, req.body.lastname, req.body.role]);
             res.send(gebruiker);
         } else {
             res.status(400).send("One or more required fields are missing");
@@ -26,10 +26,10 @@ export default function GebruikerAPI(app) {
     });
 
     app.put(url, async (req, res) => {
-        if (req.body.id && req.body.email && req.body.password && req.body.admin !== undefined) {
+        if (req.body.id && req.body.email && req.body.password && req.body.firstname && req.body.lastname && req.body.role !== undefined) {
             const salt = crypto.randomBytes(16).toString("hex");
             const hash = hashPassword(req.body.password, salt);
-            const gebruiker = await database.query("UPDATE gebruiker SET email = ?, hash = ?, salt = ?, admin = ? WHERE id = ?", [req.body.email, hash, salt, req.body.admin, req.body.id]);
+            const gebruiker = await database.query("UPDATE gebruiker SET email = ?, hash = ?, salt = ?, firstname = ?, lastname = ?, role = ? WHERE id = ?", [req.body.email, hash, salt, req.body.firstname, req.body.lastname, req.body.role, req.body.id]);
             res.send(gebruiker);
         } else {
             res.status(400).send("One or more required fields are missing");

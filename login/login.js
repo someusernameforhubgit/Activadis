@@ -22,7 +22,7 @@ document.querySelector("#loginForm #login").addEventListener("click", async (e) 
             errorMessage.textContent = "inlogt";
             errorMessage.style.color = "green";
             sessionStorage.setItem("JWT", data.token);
-            window.location.href = "../../index.html";
+            window.location.href = "../../";
         }
     } catch (error) {
         // if (errorMessage) {
