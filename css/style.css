@@ -44,6 +44,9 @@ body {
     padding: 0 var(--main-padding);
 }
 
+.display-none {
+    display: none;
+}
 
 header {
     top: 0;

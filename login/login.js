@@ -6,8 +6,7 @@ document.querySelector("#loginForm #login").addEventListener("click", async (e) 
     const errorMessage = document.querySelector("#errorMessage");
 
     try {
-        errorMessage.textContent = "";
-         errorMessage.style.color = "red";
+        errorMessage.classList.add("display-none");
 
         const response = await fetch("../api/login?email=" + encodeURIComponent(email) + "&password=" + encodeURIComponent(password), {
             method: "GET",
@@ -16,20 +15,17 @@ document.querySelector("#loginForm #login").addEventListener("click", async (e) 
         const data = await response.json();
 
         if (Object.keys(data).length === 0) {
+            errorMessage.classList.remove("display-none");
             errorMessage.textContent = "Wachtwoord of email onjuist";
+            errorMessage.style.color = "red";
             throw new Error("Wachtwoord of email onjuist");
         } else {
-            errorMessage.textContent = "Succesvol ingelogd! Doorverwijzen...";
-            errorMessage.style.color = "green";
-            sessionStorage.setItem("JWT", data.token);
-            setTimeout(() => {
-                window.location.href = "../";
-            }, 1000);
+            window.location.href = "/";
         }
     } catch (error) {
-        // if (errorMessage) {
-        //     errorMessage.textContent = error.message;
-        // }
+        errorMessage.classList.remove("display-none");
+        errorMessage.textContent = error.message;
         console.error("Login error:", error);
     }
 });
+
