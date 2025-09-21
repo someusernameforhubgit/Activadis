@@ -19,71 +19,95 @@ export default function GebruikerAPI(app, database) {
     });
 
     app.post(url, async (req, res) => {
-        if (!(await verifyAdmin(req.query.token))) return res.status(401).send("Unauthorized");
+        if (!(await verifyAdmin(req.query.token))) {
+            return res.status(401).send("Unauthorized");
+        }
+
         const requiredFields = ['email', 'firstname', 'lastname', 'role'];
-        const hasAllRequiredFields = requiredFields.every(field => req.body[field] !== undefined && req.body[field] !== null && req.body[field] !== '');
-        
-        if (hasAllRequiredFields) {
-            try {
-                const gebruiker = await database.query(
-                    "INSERT INTO gebruiker (email, firstname, lastname, role) VALUES (?, ?, ?, ?)", 
-                    [req.body.email, req.body.firstname, req.body.lastname, req.body.role]
-                );
-                res.send(gebruiker);
-                
-                const reset_token = jwt.sign(
-                    {id: gebruiker.insertId, email: req.body.email, reset: true}, 
-                    process.env.JWT_SECRET, 
-                    {expiresIn: "15m"}
-                );
-                const reset_link = `${process.env.PROTOCOL}://${process.env.HOSTNAME}/login?reset_token=${reset_token}`;
-                
-                await mail(
-                    req.body.email,
-                    "Account aangemaakt",
-                    `
-                    <h1>Account aangemaakt</h1><br>
-                    <p>Er is een account voor u aangemaakt op Activadis.</p>
-                    <p>U moet voor u kan inloggen op Activadis een wachtwoord instellen.</p>
-                    <p>Dit kunt u <a href="${reset_link}">hier</a> doen.</p>
-                    <p>Deze link verloopt over 15 minuten.</p>
-                    `
-                );
-            } catch (error) {
-                console.error('Error creating user:', error);
-                res.status(500).send("Error creating user");
+
+        // ✅ Collect missing or empty fields (also trims strings)
+        const missingFields = requiredFields.filter(field => {
+            const value = req.body[field];
+            return value === undefined || value === null || (typeof value === "string" && value.trim() === "");
+        });
+
+        if (missingFields.length > 0) {
+            console.warn("Missing fields:", missingFields, "Body:", req.body);
+            return res.status(400).send("One or more required fields are missing: " + missingFields.join(", "));
+        }
+
+        try {
+            // ✅ Check if email already exists
+            const existingUser = await database.query(
+                "SELECT id FROM gebruiker WHERE email = ?",
+                [req.body.email]
+            );
+
+            if (existingUser.length > 0) {
+                return res.status(400).send("Email is already in use");
             }
-        } else {
-            res.status(400).send("One or more required fields are missing");
+
+            // ✅ Insert new user
+            const gebruiker = await database.query(
+                "INSERT INTO gebruiker (email, firstname, lastname, role) VALUES (?, ?, ?, ?)",
+                [req.body.email, req.body.firstname, req.body.lastname, req.body.role]
+            );
+
+            res.send(gebruiker);
+
+            // ✅ Generate reset token
+            const reset_token = jwt.sign(
+                { id: gebruiker.insertId, email: req.body.email, reset: true },
+                process.env.JWT_SECRET,
+                { expiresIn: "15m" }
+            );
+            const reset_link = `${process.env.PROTOCOL}://${process.env.HOSTNAME}/login?reset_token=${reset_token}`;
+
+            await mail(
+                req.body.email,
+                "Account aangemaakt",
+                `
+            <h1>Account aangemaakt</h1><br>
+            <p>Er is een account voor u aangemaakt op Activadis.</p>
+            <p>U moet voor u kan inloggen op Activadis een wachtwoord instellen.</p>
+            <p>Dit kunt u <a href="${reset_link}">hier</a> doen.</p>
+            <p>Deze link verloopt over 15 minuten.</p>
+            `
+            );
+        } catch (error) {
+            console.error('Error creating user:', error);
+            res.status(500).send("Error creating user");
         }
     });
+
+
 
     app.put(url, async (req, res) => {
         const jwtData = await verifyToken(req.query.token);
         if (!(await verifyAdmin(req.query.token)) && !jwtData.jwt.reset) {
             return res.status(401).send("Unauthorized");
         }
-        
+
         // Different required fields based on whether it's a password reset or admin update
         const isPasswordReset = jwtData.jwt && jwtData.jwt.reset;
-        const requiredFields = isPasswordReset 
+        const requiredFields = isPasswordReset
             ? ['id', 'password']
             : ['id', 'email', 'firstname', 'lastname', 'role', 'reset'];
-            
-        const hasAllRequiredFields = requiredFields.every(field => 
+
+        const hasAllRequiredFields = requiredFields.every(field =>
             req.body[field] !== undefined && req.body[field] !== null && req.body[field] !== ''
         );
-        
+
         if (!hasAllRequiredFields) {
             return res.status(400).send("One or more required fields are missing");
         }
-        
+
         try {
             if (isPasswordReset) {
                 const salt = crypto.randomBytes(16).toString("hex");
                 const hash = hashPassword(req.body.password, salt);
                 await database.query(
-                    "UPDATE gebruiker SET hash = ?, salt = ? WHERE id = ?", 
+                    "UPDATE gebruiker SET hash = ?, salt = ? WHERE id = ?",
                     [hash, salt, req.body.id]
                 );
                 res.send({ success: true, message: "Password updated successfully" });
@@ -96,9 +120,9 @@ export default function GebruikerAPI(app, database) {
                     res.send(gebruiker);
 
                     const reset_token = jwt.sign(
-                        {id: req.body.id, email: req.body.email, reset: true},
+                        { id: req.body.id, email: req.body.email, reset: true },
                         process.env.JWT_SECRET,
-                        {expiresIn: "15m"}
+                        { expiresIn: "15m" }
                     );
                     const reset_link = `${process.env.PROTOCOL}://${process.env.HOSTNAME}/login?reset_token=${reset_token}`;
 
