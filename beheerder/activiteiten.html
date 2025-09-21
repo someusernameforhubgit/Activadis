@@ -5,17 +5,31 @@
     <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/header.css">
+    <script src="/beheerder/verifyAdmin.js"></script>
     <script src="/beheerder/modal-utils.js"></script>
     <title>Activadis - Activiteiten Beheer</title>
 </head>
 <body>
-    <header>
-        <div class="container">
-            <div class="left">
-                <p><b><span class="accent">Acti</span>vadis</b>: Activiteiten Beheer</p>
-            </div>
+<header>
+    <div class="container">
+        <div class="left">
+            <p><b><span class="accent">Acti</span>vadis</b>: Activiteiten Beheer</p>
+            <nav>
+                <div class="nav-left">
+                    <a href="/"><i class="fas fa-home"></i>Home</a>
+                    <a href="../activiteit.html">Activiteiten</a>
+                    <a href="/beheerder">Beheerder</a>
+                </div>
+                <div>
+                    <a class="login" href="/login"><i class="fas fa-sign-in-alt"></i>Login</a>
+                    <p class="logout name">NAME HERE</p>
+                    <a class="logout" onclick="logout()">Logout</a>
+                </div>
+            </nav>
         </div>
-    </header>
+    </div>
+</header>
     <section id="mainContainer">
         <aside id="sidebar">
             <h1>Navigatie</h1>
@@ -52,6 +66,7 @@
     </section>
 
     <script>
+        const token = sessionStorage.getItem("JWT");
         const API_URL = '/api/activiteit';
 
         // Helper functions for text handling
@@ -79,7 +94,7 @@
 
         async function loadActiviteiten() {
             try {
-                const response = await fetch(API_URL);
+                const response = await fetch(API_URL + '?token=' + token);
                 const activiteiten = await response.json();
                 
                 displayActiviteiten(activiteiten);
@@ -140,7 +155,7 @@
         async function deleteActiviteit(id) {
             if (confirm('Weet je zeker dat je deze activiteit wilt verwijderen?')) {
                 try {
-                    const response = await fetch(`${API_URL}?id=${id}`, {
+                    const response = await fetch(`${API_URL}?id=${id}&token=${token}`, {
                         method: 'DELETE'
                     });
 

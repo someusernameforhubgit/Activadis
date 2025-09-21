@@ -3,6 +3,7 @@
 class ModalManager {
     constructor() {
         this.currentModal = null;
+        this.token = sessionStorage.getItem("JWT");
     }
 
     // Create a modal element
@@ -310,7 +311,7 @@ class ModalManager {
         }
 
         try {
-            const response = await fetch('/api/activiteit', {
+            const response = await fetch('/api/activiteit?token=' + this.token, {
                 method: isEdit ? 'PUT' : 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -372,7 +373,7 @@ class ModalManager {
         }
 
         try {
-            const response = await fetch('/api/gebruiker', {
+            const response = await fetch('/api/gebruiker?token=' + this.token, {
                 method: isEdit ? 'PUT' : 'POST',
                 headers: {
                     'Content-Type': 'application/json'

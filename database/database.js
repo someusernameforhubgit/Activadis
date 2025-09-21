@@ -3,6 +3,7 @@ import mysql from "mysql2/promise";
 export default class Database {
     constructor(connection) {
         this.connection = connection;
+        this.requests = 0;
     }
 
     static async init() {
@@ -16,11 +17,25 @@ export default class Database {
     }
 
     async query(query, params) {
+        this.requests++;
         let res = await this.connection.query(query, params);
         if (query.startsWith("SELECT")) {
             return res[0];
         } else if (query.startsWith("INSERT")) {
             return res[0].insertId;
         }
+    }
+
+    async testConnection() {
+        try {
+            await this.connection.query("SELECT 1");
+            return true;
+        } catch (error) {
+            return false;
+        }
+    }
+
+    getRequestCount() {
+        return this.requests;
     }
 }

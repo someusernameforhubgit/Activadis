@@ -5,16 +5,30 @@
     <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/header.css">
+    <script src="/beheerder/verifyAdmin.js"></script>
     <title>Activadis - Instellingen</title>
 </head>
 <body>
-    <header>
-        <div class="container">
-            <div class="left">
-                <p><b><span class="accent">Acti</span>vadis</b>: Instellingen</p>
-            </div>
+<header>
+    <div class="container">
+        <div class="left">
+            <p><b><span class="accent">Acti</span>vadis</b>: Instellingen</p>
+            <nav>
+                <div class="nav-left">
+                    <a href="/"><i class="fas fa-home"></i>Home</a>
+                    <a href="../activiteit.html">Activiteiten</a>
+                    <a href="/beheerder">Beheerder</a>
+                </div>
+                <div>
+                    <a class="login" href="/login"><i class="fas fa-sign-in-alt"></i>Login</a>
+                    <p class="logout name">NAME HERE</p>
+                    <a class="logout" onclick="logout()">Logout</a>
+                </div>
+            </nav>
         </div>
-    </header>
+    </div>
+</header>
     <section id="mainContainer">
         <aside id="sidebar">
             <h1>Navigatie</h1>
@@ -87,6 +101,8 @@
     </section>
 
     <script>
+        const token = sessionStorage.getItem("JWT");
+
         const APIs = {
             activiteit: '/api/activiteit',
             gebruiker: '/api/gebruiker',
@@ -100,6 +116,7 @@
 
         function initializeSettings() {
             document.getElementById('last-update').textContent = new Date().toLocaleString();
+            testConnection();
             testAllAPIs();
             addLog('Instellingen pagina geladen');
         }
@@ -108,10 +125,10 @@
             const statusEl = document.getElementById('db-status');
             statusEl.textContent = 'Testing...';
             statusEl.className = 'status-checking';
-            
+
             try {
                 // Test by trying to fetch users (this will test database connection)
-                const response = await fetch('/api/gebruiker');
+                const response = await fetch('/api');
                 if (response.ok) {
                     statusEl.textContent = '✅ Verbonden';
                     statusEl.className = 'status-online';
@@ -144,9 +161,11 @@
 
             for (const [apiName, url] of Object.entries(APIs)) {
                 try {
-                    const response = await fetch(url);
+                    const response = await fetch(url + '?token=' + token);
                     const elementId = apiName === 'activiteit' ? 'activiteiten-status' : 
                                      apiName === 'gebruiker' ? 'gebruikers-status' :
+                                     apiName === 'inschrijving' ? 'inschrijvingen-status' :
+                                     apiName === 'benodigdheid' ? 'benodigdheden-status' :
                                      apiName + 'en-status';
                     
                     const el = document.getElementById(elementId);
@@ -162,6 +181,8 @@
                 } catch (error) {
                     const elementId = apiName === 'activiteit' ? 'activiteiten-status' : 
                                      apiName === 'gebruiker' ? 'gebruikers-status' :
+                                     apiName === 'inschrijving' ? 'inschrijvingen-status' :
+                                     apiName === 'benodigdheid' ? 'benodigdheden-status' :
                                      apiName + 'en-status';
                     const el = document.getElementById(elementId);
                     el.textContent = '❌ Fout';
@@ -197,10 +218,10 @@
                 addLog('Data export gestart...');
                 
                 const [activiteiten, gebruikers, inschrijvingen, benodigdheden] = await Promise.all([
-                    fetch('/api/activiteit').then(res => res.json()),
-                    fetch('/api/gebruiker').then(res => res.json()),
-                    fetch('/api/inschrijving').then(res => res.json()),
-                    fetch('/api/benodigdheid').then(res => res.json())
+                    fetch('/api/activiteit?token=' + token).then(res => res.json()),
+                    fetch('/api/gebruiker?token=' + token).then(res => res.json()),
+                    fetch('/api/inschrijving?token=' + token).then(res => res.json()),
+                    fetch('/api/benodigdheid?token=' + token).then(res => res.json())
                 ]);
 
                 const exportData = {
@@ -242,11 +263,13 @@
         }
 
         // Update request counter (mock)
-        let requestCount = 0;
-        setInterval(() => {
-            requestCount += Math.floor(Math.random() * 3);
-            document.getElementById('total-requests').textContent = requestCount;
-        }, 5000);
+        setInterval(async () => {
+            const res = await fetch("../api");
+            if (res.ok) {
+                const data = await res.json();
+                document.getElementById('total-requests').textContent = data.requests;
+            }
+        }, 100);
     </script>
 </body>
 </html>

@@ -29,10 +29,10 @@ async function submitForm(e) {
         const response = await fetch("../api/verify?token=" + reset_token);
         const data = await response.json();
         if (data.reset) {
-            const gebruiker = await fetch("../api/gebruiker?id=" + data.id);
+            const gebruiker = await fetch("../api/gebruiker?id=" + data.id + "&token=" + reset_token);
             const gebruikerData = await gebruiker.json();
 
-            await fetch("../api/gebruiker", {
+            await fetch("../api/gebruiker?token=" + reset_token, {
                 method: "PUT",
                 headers: {
                     'Content-Type': 'application/json'
