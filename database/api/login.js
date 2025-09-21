@@ -1,10 +1,8 @@
-import Database from "../database.js";
 import crypto from "crypto";
 import jwt from "jsonwebtoken";
-const database = await Database.init();
 const url = "/api/login";
 
-export default function LoginAPI(app) {
+export default function LoginAPI(app, database) {
     app.get(url, async (req, res) => {
         const {email, password} = req.query;
         const gebruiker = await database.query("SELECT * FROM gebruiker WHERE email = ?", [email]);

@@ -17,11 +17,7 @@ app.get('/test-newlines', (req, res) => {
 });
 
 // Database
-api.ActiviteitAPI(app);
-api.GebruikerAPI(app);
-api.BenodigdheidAPI(app);
-api.InschrijvingAPI(app);
-api.LoginAPI(app);
+api(app);
 
 app.listen(port, () => {
     console.log('Server listening on ' + process.env.PROTOCOL + '://' + process.env.HOSTNAME);

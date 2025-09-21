@@ -1,22 +1,25 @@
-import Database from "../database.js";
 import crypto from "crypto";
 import mail from "../../util/mail.js";
 import jwt from "jsonwebtoken";
-const database = await Database.init();
+import { verifyToken, verifyAdmin } from "../../util/jwt-auth.js";
 const url = "/api/gebruiker";
 
-export default function GebruikerAPI(app) {
+export default function GebruikerAPI(app, database) {
     app.get(url, async (req, res) => {
         if (req.query.id) {
+            const verifiedId = (await verifyToken(req.query.token)).id;
+            if (verifiedId !== parseInt(req.query.id) && !(await verifyAdmin(req.query.token))) return res.status(401).send("Unauthorized");
             const gebruiker = (await database.query("SELECT * FROM gebruiker WHERE id = ?", [req.query.id]))[0];
             res.send(gebruiker);
         } else {
+            if (!(await verifyAdmin(req.query.token))) return res.status(401).send("Unauthorized");
             const gebruikers = await database.query("SELECT * FROM gebruiker");
             res.send(gebruikers);
         }
     });
 
     app.post(url, async (req, res) => {
+        if (!(await verifyAdmin(req.query.token))) return res.status(401).send("Unauthorized");
         if (req.body.email && req.body.firstname && req.body.lastname && req.body.role !== undefined) {
             const gebruiker = await database.query("INSERT INTO gebruiker (email, firstname, lastname, role) VALUES (?, ?, ?, ?)", [req.body.email, req.body.firstname, req.body.lastname, req.body.role]);
             res.send(gebruiker);
@@ -37,6 +40,8 @@ export default function GebruikerAPI(app) {
     });
 
     app.put(url, async (req, res) => {
+        const jwtData = await verifyToken(req.query.token);
+        if (!(await verifyAdmin(req.query.token)) && !jwtData.jwt.reset) return res.status(401).send("Unauthorized");
         if (req.body.id && req.body.email && req.body.password && req.body.firstname && req.body.lastname && req.body.role !== undefined) {
             const salt = crypto.randomBytes(16).toString("hex");
             const hash = hashPassword(req.body.password, salt);
@@ -48,6 +53,7 @@ export default function GebruikerAPI(app) {
     });
 
     app.delete(url, async (req, res) => {
+        if (!(await verifyAdmin(req.query.token))) return res.status(401).send("Unauthorized");
         if (req.query.id) {
             const gebruiker = await database.query("DELETE FROM gebruiker WHERE id = ?", [req.query.id]);
             res.send(gebruiker);

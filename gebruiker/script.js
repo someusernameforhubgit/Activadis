@@ -10,9 +10,13 @@ document.addEventListener("DOMContentLoaded", async () => {
             document.querySelectorAll(".logout").forEach((element) => {
                 element.style.display = "block";
             });
-            const gebruiker = await fetch("../api/gebruiker?id=" + data.id);
+            const gebruiker = await fetch("../api/gebruiker?id=" + data.id + "&token=" + token);
             const gebruikerData = await gebruiker.json();
             document.querySelector(".name").textContent = gebruikerData.firstname + " " + gebruikerData.lastname;
+
+            if (gebruikerData.role === 1) {
+                document.querySelector(".nav-left").innerHTML += `<a href="beheerder">Beheerder</a>`;
+            }
         }
     }
 });

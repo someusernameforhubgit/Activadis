@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/header.css">
+    <script src="/beheerder/verifyAdmin.js"></script>
     <script src="/beheerder/modal-utils.js"></script>
     <title>Activadis - Beheerder</title>
 </head>
@@ -13,12 +15,24 @@
         <div class="container">
             <div class="left">
                 <p><b><span class="accent">Acti</span>vadis</b>: Beheerder</p>
+                <nav>
+                    <div class="nav-left">
+                        <a href="/"><i class="fas fa-home"></i>Home</a>
+                        <a href="../activiteit.html">Activiteiten</a>
+                        <a href="/beheerder">Beheerder</a>
+                    </div>
+                    <div>
+                        <a class="login" href="/login"><i class="fas fa-sign-in-alt"></i>Login</a>
+                        <p class="logout name">NAME HERE</p>
+                        <a class="logout" onclick="logout()">Logout</a>
+                    </div>
+                </nav>
             </div>
         </div>
     </header>
     <section id="mainContainer">
         <aside id="sidebar">
-            <h1>Current Page</h1>
+            <h1>Navigatie</h1>
             <ul>
                 <li><a href="/beheerder/index.html">Dashboard</a></li>
                 <li><a href="/beheerder/gebruikers.html">Gebruikers</a></li>
@@ -94,6 +108,8 @@
     </section>
 
     <script>
+        const token = sessionStorage.getItem("JWT");
+
         // API Base URLs
         const API = {
             activiteit: '/api/activiteit',
@@ -124,10 +140,10 @@
             try {
                 // Load all data
                 const [activiteiten, gebruikers, inschrijvingen, benodigdheden] = await Promise.all([
-                    fetch(API.activiteit).then(res => res.json()),
-                    fetch(API.gebruiker).then(res => res.json()),
-                    fetch(API.inschrijving).then(res => res.json()),
-                    fetch(API.benodigdheid).then(res => res.json())
+                    fetch(API.activiteit + "?token=" + token).then(res => res.json()),
+                    fetch(API.gebruiker + "?token=" + token).then(res => res.json()),
+                    fetch(API.inschrijving + "?token=" + token).then(res => res.json()),
+                    fetch(API.benodigdheid + "?token=" + token).then(res => res.json())
                 ]);
 
                 // Update counters
@@ -138,10 +154,10 @@
 
                 // Display recent activities
                 displayRecentActiviteiten(activiteiten.slice(0, 5));
-                
+
                 // Display all activities for management
                 displayAllActiviteiten(activiteiten);
-                
+
                 // Display all users for management
                 displayAllGebruikers(gebruikers);
 
@@ -153,11 +169,11 @@
         function displayRecentActiviteiten(activiteiten) {
             const list = document.getElementById('activiteiten-list');
             list.innerHTML = '';
-            
+
             activiteiten.forEach(act => {
                 const li = document.createElement('li');
                 li.innerHTML = `
-                    <strong>${escapeHtml(act.naam)}</strong> - ${escapeHtml(act.locatie)} 
+                    <strong>${escapeHtml(act.naam)}</strong> - ${escapeHtml(act.locatie)}
                     (${new Date(act.begin).toLocaleDateString()})
                 `;
                 list.appendChild(li);
@@ -167,7 +183,7 @@
         function displayAllActiviteiten(activiteiten) {
             const list = document.getElementById('all-activiteiten-list');
             list.innerHTML = '';
-            
+
             activiteiten.forEach(act => {
                 const li = document.createElement('li');
                 li.style.marginBottom = '10px';
@@ -175,7 +191,7 @@
                 li.style.backgroundColor = '#f9f9f9';
                 li.style.borderRadius = '5px';
                 li.style.border = '1px solid #ddd';
-                
+
                 li.innerHTML = `
                     <div>
                         <strong>${escapeHtml(act.naam)}</strong> - ${escapeHtml(act.locatie)}<br>
@@ -200,7 +216,7 @@
         function displayAllGebruikers(gebruikers) {
             const list = document.getElementById('all-gebruikers-list');
             list.innerHTML = '';
-            
+
             gebruikers.forEach(user => {
                 const li = document.createElement('li');
                 li.style.marginBottom = '10px';
@@ -208,10 +224,10 @@
                 li.style.backgroundColor = '#f9f9f9';
                 li.style.borderRadius = '5px';
                 li.style.border = '1px solid #ddd';
-                
+
                 li.innerHTML = `
                     <div>
-                        <strong>${user.email}</strong> - ${user.admin ? '👑 Admin' : '👤 Gebruiker'}<br>
+                        <strong>${user.email}</strong> - ${user.role === 1 ? '👑 Admin' : '👤 Gebruiker'}<br>
                         <small>🆔 ID: ${user.id}</small><br>
                         <div class="actions">
                             <button class="btn btn-info btn-small" onclick="ModalManager.instance.showViewUserModal(${JSON.stringify(user).replace(/"/g, '&quot;')})">
@@ -235,7 +251,7 @@
         async function deleteActiviteit(id) {
             if (confirm('Weet je zeker dat je deze activiteit wilt verwijderen?')) {
                 try {
-                    const response = await fetch(`${API.activiteit}?id=${id}`, {
+                    const response = await fetch(`${API.activiteit}?id=${id}&token=${token}`, {
                         method: 'DELETE'
                     });
 
@@ -257,7 +273,7 @@
         async function deleteGebruiker(id) {
             if (confirm('Weet je zeker dat je deze gebruiker wilt verwijderen?')) {
                 try {
-                    const response = await fetch(`${API.gebruiker}?id=${id}`, {
+                    const response = await fetch(`${API.gebruiker}?id=${id}&token=${token}`, {
                         method: 'DELETE'
                     });
 
