@@ -14,7 +14,9 @@ export default function ActiviteitAPI(app, database) {
 
     app.post(url, async (req, res) => {
         if (!(await verifyAdmin(req.query.token))) return res.status(401).send("Unauthorized");
-        if (req.body.naam && req.body.locatie && req.body.eten && req.body.omschrijving && req.body.begin && req.body.eind && req.body.kost && req.body.max && req.body.min && req.body.afbeelding && req.body.hidden !== undefined) {
+        const requiredFields = ['naam', 'locatie', 'eten', 'omschrijving', 'begin', 'eind', 'kost', 'max', 'min', 'afbeelding'];
+        const hasAllRequiredFields = requiredFields.every(field => req.body[field] !== undefined && req.body[field] !== null && req.body[field] !== '');
+        if (hasAllRequiredFields) {
             const activiteit = await database.query("INSERT INTO activiteit (naam, locatie, eten, omschrijving, begin, eind, kost, max, min, afbeelding, hidden) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", [req.body.naam, req.body.locatie, req.body.eten, req.body.omschrijving, req.body.begin, req.body.eind, req.body.kost, req.body.max, req.body.min, req.body.afbeelding, req.body.hidden ? 1 : 0]);
             res.send(activiteit);
         } else {
@@ -24,8 +26,14 @@ export default function ActiviteitAPI(app, database) {
 
     app.put(url, async (req, res) => {
         if (!(await verifyAdmin(req.query.token))) return res.status(401).send("Unauthorized");
-        if (req.body.id && req.body.naam && req.body.locatie && req.body.eten && req.body.omschrijving && req.body.begin && req.body.eind && req.body.kost && req.body.max && req.body.min && req.body.afbeelding && req.body.hidden !== undefined) {
-            const activiteit = await database.query("UPDATE activiteit SET naam = ?, locatie = ?, eten = ?, omschrijving = ?, begin = ?, eind = ?, kost = ?, max = ?, min = ?, afbeelding = ?, hidden = ? WHERE id = ?", [req.body.naam, req.body.locatie, req.body.eten, req.body.omschrijving, req.body.begin, req.body.eind, req.body.kost, req.body.max, req.body.min, req.body.afbeelding, req.body.hidden ? 1 : 0, req.body.id]);
+        const requiredFields = ['id', 'naam', 'locatie', 'eten', 'omschrijving', 'begin', 'eind', 'kost', 'max', 'min', 'afbeelding', 'hidden'];
+        const hasAllRequiredFields = requiredFields.every(field => req.body[field] !== undefined && req.body[field] !== null && req.body[field] !== '');
+        
+        if (hasAllRequiredFields) {
+            const activiteit = await database.query(
+                "UPDATE activiteit SET naam = ?, locatie = ?, eten = ?, omschrijving = ?, begin = ?, eind = ?, kost = ?, max = ?, min = ?, afbeelding = ?, hidden = ? WHERE id = ?", 
+                [req.body.naam, req.body.locatie, req.body.eten, req.body.omschrijving, req.body.begin, req.body.eind, req.body.kost, req.body.max, req.body.min, req.body.afbeelding, req.body.hidden ? 1 : 0, req.body.id]
+            );
             res.send(activiteit);
         } else {
             res.status(400).send("One or more required fields are missing");

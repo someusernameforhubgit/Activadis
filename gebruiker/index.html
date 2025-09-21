@@ -22,7 +22,6 @@
                 <nav>
                     <div class="nav-left">
                         <a href="/"><i class="fas fa-home"></i>Home</a>
-                        <a href="activiteit.html">Activiteiten</a>
                     </div>
                     <div>
                         <a class="login" href="/login"><i class="fas fa-sign-in-alt"></i>Login</a>
@@ -56,10 +55,11 @@
             .then(data => {
                 console.log(data)
                 data.forEach(element => {
-                    const eventElement = document.createElement('div');
-                    eventElement.classList.add('event');
+                    if (new Date(element.begin) > new Date()) {
+                        const eventElement = document.createElement('div');
+                        eventElement.classList.add('event');
 
-                    eventElement.innerHTML = `
+                        eventElement.innerHTML = `
                         <div class="event-info">
                             <h2 class="event-title">${element.naam}</h2>
                             <h3 class="location">${element.locatie}</h3>
@@ -73,7 +73,8 @@
                         </div>
                     `;
 
-                    eventsContainer.appendChild(eventElement);
+                        eventsContainer.appendChild(eventElement);
+                    }
                 });
             })
             .catch(error => console.error('Error fetching activities:', error));

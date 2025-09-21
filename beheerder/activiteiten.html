@@ -18,7 +18,6 @@
             <nav>
                 <div class="nav-left">
                     <a href="/"><i class="fas fa-home"></i>Home</a>
-                    <a href="../activiteit.html">Activiteiten</a>
                     <a href="/beheerder">Beheerder</a>
                 </div>
                 <div>
@@ -60,6 +59,7 @@
                 <h3><i class="fas fa-chart-pie"></i> Activiteit Statistieken</h3>
                 <p><i class="fas fa-calendar-alt"></i> Totaal activiteiten: <span id="total-activities">-</span></p>
                 <p><i class="fas fa-arrow-up"></i> Komende activiteiten: <span id="upcoming-count">-</span></p>
+                <p><i class="fas fa-clock"></i> Lopende activiteiten: <span id="ongoing-count">-</span></p>
                 <p><i class="fas fa-check"></i> Afgelopen activiteiten: <span id="past-count">-</span></p>
             </div>
         </div>
@@ -114,12 +114,17 @@
                 
                 const beginDate = new Date(act.begin);
                 const eindDate = new Date(act.eind);
-                const isUpcoming = beginDate > new Date();
+                const isUpcoming = beginDate > new Date() && eindDate > new Date();
+                const isOngoing = beginDate < new Date() && eindDate > new Date();
                 
                 div.innerHTML = `
-                    <h4><i class="fas fa-calendar-check"></i> ${escapeHtml(act.naam)} ${isUpcoming ? '<span style="color: #28a745; font-size: 0.8em;"><i class="fas fa-arrow-up"></i> Aankomend</span>' : '<span style="color: #6c757d; font-size: 0.8em;"><i class="fas fa-check"></i> Afgelopen</span>'}</h4>
+                    <h4><i class="fas fa-calendar-check"></i> ${escapeHtml(act.naam)} ${isUpcoming ? 
+                        '<span style="color: #28a745; font-size: 0.8em;"><i class="fas fa-arrow-up"></i> Aankomend</span>' : 
+                        isOngoing ? 
+                        '<span style="color: #17a2b8; font-size: 0.8em;"><i class="fas fa-spinner"></i> Bezig</span>' : 
+                        '<span style="color: #6c757d; font-size: 0.8em;"><i class="fas fa-check"></i> Afgelopen</span>'}</h4>
                     <p><strong><i class="fas fa-map-marker-alt"></i> Locatie:</strong> ${escapeHtml(act.locatie)}</p>
-                    <p><strong><i class="fas fa-calendar"></i> Datum:</strong> ${beginDate.toLocaleDateString()} - ${eindDate.toLocaleDateString()}</p>
+                    <p><strong><i class="fas fa-calendar"></i> Datum:</strong> ${beginDate.toLocaleDateString("en-UK")} - ${eindDate.toLocaleDateString("en-UK")}</p>
                     <p><strong><i class="fas fa-clock"></i> Tijd:</strong> ${beginDate.toLocaleTimeString('nl-NL', {hour: '2-digit', minute: '2-digit'})} - ${eindDate.toLocaleTimeString('nl-NL', {hour: '2-digit', minute: '2-digit'})}</p>
                     <p><strong><i class="fas fa-euro-sign"></i> Kosten:</strong> €${act.kost} | <strong><i class="fas fa-users"></i> Deelnemers:</strong> ${act.min} - ${act.max} personen</p>
                     ${act.omschrijving ? `<p><strong><i class="fas fa-file-text"></i> Omschrijving:</strong> ${escapeHtml(act.omschrijving).substring(0, 100)}${act.omschrijving.length > 100 ? '...' : ''}</p>` : ''}
@@ -142,11 +147,17 @@
         function updateStats(activiteiten) {
             const now = new Date();
             const totalActivities = activiteiten.length;
-            const upcomingCount = activiteiten.filter(act => new Date(act.begin) > now).length;
-            const pastCount = totalActivities - upcomingCount;
+            const upcomingCount = activiteiten.filter(act => {
+                return new Date(act.begin) > now && new Date(act.eind) > now
+            }).length;
+            const ongoingCount = activiteiten.filter(act => {
+                return new Date(act.begin) < now && new Date(act.eind) > now
+            }).length;
+            const pastCount = totalActivities - upcomingCount - ongoingCount;
 
             document.getElementById('total-activities').textContent = totalActivities;
             document.getElementById('upcoming-count').textContent = upcomingCount;
+            document.getElementById('ongoing-count').textContent = ongoingCount;
             document.getElementById('past-count').textContent = pastCount;
         }
 

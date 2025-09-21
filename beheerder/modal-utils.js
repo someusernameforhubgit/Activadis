@@ -79,9 +79,9 @@ class ModalManager {
                     <label for="activity-locatie">Locatie *</label>
                     <input type="text" id="activity-locatie" required value="${isEdit ? this.escapeHtml(activity.locatie) : ''}">
                 </div>
-                <div class="modal-form-group">
-                    <label for="activity-eten">Eten *</label>
-                    <input type="text" id="activity-eten" required value="${isEdit ? this.escapeHtml(activity.eten) : ''}">
+                <div class="modal-form-group checkbox">
+                    <label for="activity-eten">Inclusief Eten *</label>
+                    <input type="checkbox" id="activity-eten" ${isEdit ? this.escapeHtml(activity.eten) ? 'checked' : '' : ''}>
                 </div>
                 <div class="modal-form-group">
                     <label for="activity-omschrijving">Omschrijving *</label>
@@ -164,8 +164,8 @@ class ModalManager {
                     <div class="value">${eindDate.toLocaleString()}</div>
                 </div>
                 <div class="view-item">
-                    <label>Eten:</label>
-                    <div class="value">${this.escapeHtml(activity.eten)}</div>
+                    <label>Inclusief Eten:</label>
+                    <div class="value">${this.escapeHtml(activity.eten) ? 'Ja' : 'Nee'}</div>
                 </div>
                 <div class="view-item">
                     <label>Kosten:</label>
@@ -218,9 +218,9 @@ class ModalManager {
                     <input type="email" id="user-email" required value="${isEdit ? this.escapeHtml(user.email) : ''}">
                 </div>
                 ${isEdit ? `
-                <div class="modal-form-group">
-                    <label for="user-password">Nieuw Wachtwoord (laat leeg om niet te wijzigen)</label>
-                    <input type="password" id="user-password" placeholder="Laat leeg om ongewijzigd te laten">
+                <div class="modal-form-group checkbox">
+                    <label for="user-password">Wachtwoord resetten *</label>
+                    <input type="checkbox" id="user-password">
                 </div>
                 ` : ''}
                 <div class="modal-form-group">
@@ -287,7 +287,7 @@ class ModalManager {
         const formData = {
             naam: document.getElementById('activity-naam').value,
             locatie: document.getElementById('activity-locatie').value,
-            eten: document.getElementById('activity-eten').value,
+            eten: document.getElementById('activity-eten').checked ? 1 : 0,
             omschrijving: document.getElementById('activity-omschrijving').value,
             begin: document.getElementById('activity-begin').value,
             eind: document.getElementById('activity-eind').value,
@@ -344,7 +344,7 @@ class ModalManager {
         const firstname = document.getElementById('user-firstname').value;
         const lastname = document.getElementById('user-lastname').value;
         const email = document.getElementById('user-email').value;
-        const password = document.getElementById('user-password') ? document.getElementById('user-password').value : null;
+        const password = document.getElementById('user-password') ? document.getElementById('user-password').checked : false;
         const role = parseInt(document.getElementById('user-admin').value);
 
         if (!firstname || !lastname) {
@@ -362,14 +362,7 @@ class ModalManager {
         const formData = { email, role, firstname, lastname };
         if (isEdit) {
             formData.id = existingUser.id;
-            if (password.trim() !== '') {
-                formData.password = password;
-            } else {
-                // For edits without password change, we need to handle this in API
-                // For now, require password for all updates
-                alert('Vul een nieuw wachtwoord in om de gebruiker bij te werken.');
-                return;
-            }
+            formData.reset = password;
         }
 
         try {

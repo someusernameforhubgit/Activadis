@@ -18,7 +18,6 @@
             <nav>
                 <div class="nav-left">
                     <a href="/"><i class="fas fa-home"></i>Home</a>
-                    <a href="../activiteit.html">Activiteiten</a>
                     <a href="/beheerder">Beheerder</a>
                 </div>
                 <div>
@@ -126,7 +125,7 @@
 
         function updateStats(users) {
             const totalUsers = users.length;
-            const adminCount = users.filter(user => user.admin).length;
+            const adminCount = users.filter(user => user.role === 1).length;
             const regularCount = totalUsers - adminCount;
 
             document.getElementById('total-users').textContent = totalUsers;

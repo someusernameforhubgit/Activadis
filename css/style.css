@@ -207,6 +207,10 @@ ul {
     display: flex;
     flex-direction: column;
     gap: 5px;
+
+    &.checkbox {
+        flex-direction: row;
+    }
 }
 
 .modal-form-group label {
@@ -223,6 +227,10 @@ ul {
     font-family: inherit;
     font-size: 14px;
     width: 100%;
+
+    &[type="checkbox"] {
+        width: auto;
+    }
 }
 
 .modal-form-group input:focus,

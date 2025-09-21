@@ -20,20 +20,39 @@ export default function GebruikerAPI(app, database) {
 
     app.post(url, async (req, res) => {
         if (!(await verifyAdmin(req.query.token))) return res.status(401).send("Unauthorized");
-        if (req.body.email && req.body.firstname && req.body.lastname && req.body.role !== undefined) {
-            const gebruiker = await database.query("INSERT INTO gebruiker (email, firstname, lastname, role) VALUES (?, ?, ?, ?)", [req.body.email, req.body.firstname, req.body.lastname, req.body.role]);
-            res.send(gebruiker);
-            const reset_token = jwt.sign({id: gebruiker, email: req.body.email, reset: true}, process.env.JWT_SECRET, {expiresIn: "15m"});
-            const reset_link = process.env.PROTOCOL + "://" + process.env.HOSTNAME + "/login?reset_token=" + reset_token;
-            await mail(
-                req.body.email,
-                "Account aangemaakt",
-                "<h1>Account aangemaakt</h1><br>" +
-                "<p>Er is een account voor u aangemaakt op Activadis.</p>" +
-                "<p>U moet voor u kan inloggen op Activadis een wachtwoord instellen.</p>" +
-                "<p>Dit kunt u <a href=" + reset_link + ">hier</a> doen.</p>" +
-                "<p>Deze link verloopt over 15 minuten.</p>"
-            );
+        const requiredFields = ['email', 'firstname', 'lastname', 'role'];
+        const hasAllRequiredFields = requiredFields.every(field => req.body[field] !== undefined && req.body[field] !== null && req.body[field] !== '');
+        
+        if (hasAllRequiredFields) {
+            try {
+                const gebruiker = await database.query(
+                    "INSERT INTO gebruiker (email, firstname, lastname, role) VALUES (?, ?, ?, ?)", 
+                    [req.body.email, req.body.firstname, req.body.lastname, req.body.role]
+                );
+                res.send(gebruiker);
+                
+                const reset_token = jwt.sign(
+                    {id: gebruiker.insertId, email: req.body.email, reset: true}, 
+                    process.env.JWT_SECRET, 
+                    {expiresIn: "15m"}
+                );
+                const reset_link = `${process.env.PROTOCOL}://${process.env.HOSTNAME}/login?reset_token=${reset_token}`;
+                
+                await mail(
+                    req.body.email,
+                    "Account aangemaakt",
+                    `
+                    <h1>Account aangemaakt</h1><br>
+                    <p>Er is een account voor u aangemaakt op Activadis.</p>
+                    <p>U moet voor u kan inloggen op Activadis een wachtwoord instellen.</p>
+                    <p>Dit kunt u <a href="${reset_link}">hier</a> doen.</p>
+                    <p>Deze link verloopt over 15 minuten.</p>
+                    `
+                );
+            } catch (error) {
+                console.error('Error creating user:', error);
+                res.status(500).send("Error creating user");
+            }
         } else {
             res.status(400).send("One or more required fields are missing");
         }
@@ -41,14 +60,70 @@ export default function GebruikerAPI(app, database) {
 
     app.put(url, async (req, res) => {
         const jwtData = await verifyToken(req.query.token);
-        if (!(await verifyAdmin(req.query.token)) && !jwtData.jwt.reset) return res.status(401).send("Unauthorized");
-        if (req.body.id && req.body.email && req.body.password && req.body.firstname && req.body.lastname && req.body.role !== undefined) {
-            const salt = crypto.randomBytes(16).toString("hex");
-            const hash = hashPassword(req.body.password, salt);
-            const gebruiker = await database.query("UPDATE gebruiker SET email = ?, hash = ?, salt = ?, firstname = ?, lastname = ?, role = ? WHERE id = ?", [req.body.email, hash, salt, req.body.firstname, req.body.lastname, req.body.role, req.body.id]);
-            res.send(gebruiker);
-        } else {
-            res.status(400).send("One or more required fields are missing");
+        if (!(await verifyAdmin(req.query.token)) && !jwtData.jwt.reset) {
+            return res.status(401).send("Unauthorized");
+        }
+        
+        // Different required fields based on whether it's a password reset or admin update
+        const isPasswordReset = jwtData.jwt && jwtData.jwt.reset;
+        const requiredFields = isPasswordReset 
+            ? ['id', 'password']
+            : ['id', 'email', 'firstname', 'lastname', 'role', 'reset'];
+            
+        const hasAllRequiredFields = requiredFields.every(field => 
+            req.body[field] !== undefined && req.body[field] !== null && req.body[field] !== ''
+        );
+        
+        if (!hasAllRequiredFields) {
+            return res.status(400).send("One or more required fields are missing");
+        }
+        
+        try {
+            if (isPasswordReset) {
+                const salt = crypto.randomBytes(16).toString("hex");
+                const hash = hashPassword(req.body.password, salt);
+                await database.query(
+                    "UPDATE gebruiker SET hash = ?, salt = ? WHERE id = ?", 
+                    [hash, salt, req.body.id]
+                );
+                res.send({ success: true, message: "Password updated successfully" });
+            } else {
+                if (req.body.reset) {
+                    const gebruiker = await database.query(
+                        "UPDATE gebruiker SET email = ?, firstname = ?, lastname = ?, role = ?, hash = ?, salt = ? WHERE id = ?",
+                        [req.body.email, req.body.firstname, req.body.lastname, req.body.role, "", "", req.body.id]
+                    );
+                    res.send(gebruiker);
+
+                    const reset_token = jwt.sign(
+                        {id: req.body.id, email: req.body.email, reset: true},
+                        process.env.JWT_SECRET,
+                        {expiresIn: "15m"}
+                    );
+                    const reset_link = `${process.env.PROTOCOL}://${process.env.HOSTNAME}/login?reset_token=${reset_token}`;
+
+                    await mail(
+                        req.body.email,
+                        "Wachtwoord resetten",
+                        `
+                    <h1>Wachtwoord resetten</h1><br>
+                    <p>Uw wachtwoord is gereset door een beheerder.</p>
+                    <p>U moet voor u weer kan inloggen op Activadis een wachtwoord instellen.</p>
+                    <p>Dit kunt u <a href="${reset_link}">hier</a> doen.</p>
+                    <p>Deze link verloopt over 15 minuten.</p>
+                    `
+                    );
+                } else {
+                    const gebruiker = await database.query(
+                        "UPDATE gebruiker SET email = ?, firstname = ?, lastname = ?, role = ? WHERE id = ?",
+                        [req.body.email, req.body.firstname, req.body.lastname, req.body.role, req.body.id]
+                    );
+                    res.send(gebruiker);
+                }
+            }
+        } catch (error) {
+            console.error('Error updating user:', error);
+            res.status(500).send("Error updating user");
         }
     });
 

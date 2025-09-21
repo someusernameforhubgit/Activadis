@@ -17,9 +17,22 @@ export default function InschrijvingAPI(app, database) {
 
     app.post(url, async (req, res) => {
         if (!(await verifyAdmin(req.query.token))) return res.status(401).send("Unauthorized");
-        if (req.body.gebruiker && req.body.activiteit) {
-            const inschrijving = await database.query("INSERT INTO inschrijving (gebruiker, activiteit, notitie) VALUES (?, ?, ?)", [req.body.gebruiker, req.body.activiteit, req.body.notitie || null]);
-            res.send(inschrijving);
+        const requiredFields = ['gebruiker', 'activiteit'];
+        const hasAllRequiredFields = requiredFields.every(field => 
+            req.body[field] !== undefined && req.body[field] !== null && req.body[field] !== ''
+        );
+        
+        if (hasAllRequiredFields) {
+            try {
+                const inschrijving = await database.query(
+                    "INSERT INTO inschrijving (gebruiker, activiteit, notitie) VALUES (?, ?, ?)", 
+                    [req.body.gebruiker, req.body.activiteit, req.body.notitie || null]
+                );
+                res.send(inschrijving);
+            } catch (error) {
+                console.error('Error creating inschrijving:', error);
+                res.status(500).send("Error creating inschrijving");
+            }
         } else {
             res.status(400).send("One or more required fields are missing");
         }
@@ -27,9 +40,22 @@ export default function InschrijvingAPI(app, database) {
 
     app.put(url, async (req, res) => {
         if (!(await verifyAdmin(req.query.token))) return res.status(401).send("Unauthorized");
-        if (req.body.id && req.body.gebruiker && req.body.activiteit) {
-            const inschrijving = await database.query("UPDATE inschrijving SET gebruiker = ?, activiteit = ?, notitie = ? WHERE id = ?", [req.body.gebruiker, req.body.activiteit, req.body.notitie || null, req.body.id]);
-            res.send(inschrijving);
+        const requiredFields = ['id', 'gebruiker', 'activiteit'];
+        const hasAllRequiredFields = requiredFields.every(field => 
+            req.body[field] !== undefined && req.body[field] !== null && req.body[field] !== ''
+        );
+        
+        if (hasAllRequiredFields) {
+            try {
+                const inschrijving = await database.query(
+                    "UPDATE inschrijving SET gebruiker = ?, activiteit = ?, notitie = ? WHERE id = ?", 
+                    [req.body.gebruiker, req.body.activiteit, req.body.notitie || null, req.body.id]
+                );
+                res.send(inschrijving);
+            } catch (error) {
+                console.error('Error updating inschrijving:', error);
+                res.status(500).send("Error updating inschrijving");
+            }
         } else {
             res.status(400).send("One or more required fields are missing");
         }
