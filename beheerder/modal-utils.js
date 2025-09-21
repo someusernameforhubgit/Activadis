@@ -189,18 +189,18 @@ class ModalManager {
         this.showModal(modalId);
     }
 
-    // Create and show an edit modal for users
+    // Create and show a view modal for users
     showEditUserModal(user = null) {
         const modalId = 'user-edit-modal';
         let modal = document.getElementById(modalId);
-        
+
         if (!modal) {
             modal = this.createModal(modalId, user ? 'Gebruiker Bewerken' : 'Nieuwe Gebruiker');
         }
 
         const modalBody = modal.querySelector('.modal-body');
         const isEdit = user !== null;
-        
+
         modalBody.innerHTML = `
             <form class="modal-form" id="user-form">
                 <div class="name-fields" style="display: flex; gap: 15px; width: 100%;">
@@ -216,6 +216,7 @@ class ModalManager {
                 <div class="modal-form-group">
                     <label for="user-email">Email *</label>
                     <input type="email" id="user-email" required value="${isEdit ? this.escapeHtml(user.email) : ''}">
+                    <p id="user-email-error" class="text-danger" style="display:none; font-size: 0.9em; margin-top: 5px;"></p>
                 </div>
                 ${isEdit ? `
                 <div class="modal-form-group checkbox">
@@ -246,65 +247,6 @@ class ModalManager {
 
         this.showModal(modalId);
     }
-
-    // Create and show a view modal for users
-    showEditUserModal(user = null) {
-    const modalId = 'user-edit-modal';
-    let modal = document.getElementById(modalId);
-    
-    if (!modal) {
-        modal = this.createModal(modalId, user ? 'Gebruiker Bewerken' : 'Nieuwe Gebruiker');
-    }
-
-    const modalBody = modal.querySelector('.modal-body');
-    const isEdit = user !== null;
-    
-    modalBody.innerHTML = `
-        <form class="modal-form" id="user-form">
-            <div class="name-fields" style="display: flex; gap: 15px; width: 100%;">
-                <div class="modal-form-group" style="flex: 1;">
-                    <label for="user-firstname">Voornaam *</label>
-                    <input type="text" id="user-firstname" required value="${isEdit && user.firstname ? this.escapeHtml(user.firstname) : ''}">
-                </div>
-                <div class="modal-form-group" style="flex: 1;">
-                    <label for="user-lastname">Achternaam *</label>
-                    <input type="text" id="user-lastname" required value="${isEdit && user.lastname ? this.escapeHtml(user.lastname) : ''}">
-                </div>
-            </div>
-            <div class="modal-form-group">
-                <label for="user-email">Email *</label>
-                <input type="email" id="user-email" required value="${isEdit ? this.escapeHtml(user.email) : ''}">
-                <p id="user-email-error" class="text-danger" style="display:none; font-size: 0.9em; margin-top: 5px;"></p>
-            </div>
-            ${isEdit ? `
-            <div class="modal-form-group checkbox">
-                <label for="user-password">Wachtwoord resetten *</label>
-                <input type="checkbox" id="user-password">
-            </div>
-            ` : ''}
-            <div class="modal-form-group">
-                <label for="user-admin">Rol *</label>
-                <select id="user-admin" required>
-                    <option value="2" ${isEdit && !user.admin ? 'selected' : ''}>Gebruiker</option>
-                    <option value="1" ${isEdit && user.admin ? 'selected' : ''}>Admin</option>
-                </select>
-            </div>
-            <div class="modal-actions">
-                <button type="button" class="btn btn-secondary" onclick="ModalManager.instance.closeModal('${modalId}')">Annuleren</button>
-                <button type="submit" class="btn btn-primary">${isEdit ? 'Bijwerken' : 'Toevoegen'}</button>
-            </div>
-        </form>
-    `;
-
-    // Handle form submission
-    const form = modal.querySelector('#user-form');
-    form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        await this.handleUserSubmit(user);
-    });
-
-    this.showModal(modalId);
-}
 
     // Handle activity form submission
     async handleActivitySubmit(existingActivity) {
@@ -399,21 +341,28 @@ class ModalManager {
     const isEdit = existingUser !== null;
 
     // ✅ Pre-check for duplicate emails on the frontend
-    if (!isEdit) {
-        try {
-            const users = await fetch('/api/gebruiker?token=' + this.token).then(res => res.json());
-            if (users.some(u => u.email.toLowerCase() === email.toLowerCase())) {
-                if (emailErrorEl) {
-                    emailErrorEl.textContent = "Dit e-mailadres is al in gebruik!";
-                    emailErrorEl.style.display = "block";
-                } else {
-                    alert('Dit e-mailadres is al in gebruik!');
+    try {
+        const users = await fetch('/api/gebruiker?token=' + this.token).then(res => res.json());
+        if (users.some(u => {
+            if (isEdit) {
+                if (u.id !== existingUser.id) {
+                    return u.email.toLowerCase() === email.toLowerCase();
                 }
-                return;
+            } else {
+                return u.email.toLowerCase() === email.toLowerCase();
             }
-        } catch (err) {
-            console.warn("Kon gebruikers niet vooraf controleren:", err);
+            return false;
+        })) {
+            if (emailErrorEl) {
+                emailErrorEl.textContent = "Dit e-mailadres is al in gebruik!";
+                emailErrorEl.style.display = "block";
+            } else {
+                alert('Dit e-mailadres is al in gebruik!');
+            }
+            return;
         }
+    } catch (err) {
+        console.warn("Kon gebruikers niet vooraf controleren:", err);
     }
 
     // ✅ Build request payload
