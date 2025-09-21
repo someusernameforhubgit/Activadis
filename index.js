@@ -24,5 +24,5 @@ api.InschrijvingAPI(app);
 api.LoginAPI(app);
 
 app.listen(port, () => {
-    console.log('Server listening on ' + process.env.PROTOCOL + '://' + process.env.HOSTNAME + ':' + port);
+    console.log('Server listening on ' + process.env.PROTOCOL + '://' + process.env.HOSTNAME);
 });

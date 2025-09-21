@@ -21,14 +21,14 @@ export default function GebruikerAPI(app) {
             const gebruiker = await database.query("INSERT INTO gebruiker (email, firstname, lastname, role) VALUES (?, ?, ?, ?)", [req.body.email, req.body.firstname, req.body.lastname, req.body.role]);
             res.send(gebruiker);
             const reset_token = jwt.sign({id: gebruiker, email: req.body.email, reset: true}, process.env.JWT_SECRET, {expiresIn: "15m"});
-            const reset_link = process.env.PROTOCOL + "://" + process.env.HOSTNAME + ":" + process.env.PORT + "/login?reset_token=" + reset_token;
+            const reset_link = process.env.PROTOCOL + "://" + process.env.HOSTNAME + "/login?reset_token=" + reset_token;
             await mail(
                 req.body.email,
                 "Account aangemaakt",
                 "<h1>Account aangemaakt</h1><br>" +
                 "<p>Er is een account voor u aangemaakt op Activadis.</p>" +
                 "<p>U moet voor u kan inloggen op Activadis een wachtwoord instellen.</p>" +
-                "<p>Dit kunt u <a href=" + reset_link + "'>hier</a> doen.</p>" +
+                "<p>Dit kunt u <a href=" + reset_link + ">hier</a> doen.</p>" +
                 "<p>Deze link verloopt over 15 minuten.</p>"
             );
         } else {
