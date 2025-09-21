@@ -189,18 +189,18 @@ class ModalManager {
         this.showModal(modalId);
     }
 
-    // Create and show an edit modal for users
+    // Create and show a view modal for users
     showEditUserModal(user = null) {
         const modalId = 'user-edit-modal';
         let modal = document.getElementById(modalId);
-        
+
         if (!modal) {
             modal = this.createModal(modalId, user ? 'Gebruiker Bewerken' : 'Nieuwe Gebruiker');
         }
 
         const modalBody = modal.querySelector('.modal-body');
         const isEdit = user !== null;
-        
+
         modalBody.innerHTML = `
             <form class="modal-form" id="user-form">
                 <div class="name-fields" style="display: flex; gap: 15px; width: 100%;">
@@ -216,6 +216,7 @@ class ModalManager {
                 <div class="modal-form-group">
                     <label for="user-email">Email *</label>
                     <input type="email" id="user-email" required value="${isEdit ? this.escapeHtml(user.email) : ''}">
+                    <p id="user-email-error" class="text-danger" style="display:none; font-size: 0.9em; margin-top: 5px;"></p>
                 </div>
                 ${isEdit ? `
                 <div class="modal-form-group checkbox">
@@ -243,41 +244,6 @@ class ModalManager {
             e.preventDefault();
             await this.handleUserSubmit(user);
         });
-
-        this.showModal(modalId);
-    }
-
-    // Create and show a view modal for users
-    showViewUserModal(user) {
-        const modalId = 'user-view-modal';
-        let modal = document.getElementById(modalId);
-        
-        if (!modal) {
-            modal = this.createModal(modalId, 'Gebruiker Details');
-        }
-
-        const modalBody = modal.querySelector('.modal-body');
-        
-        modalBody.innerHTML = `
-            <div class="modal-view-content">
-                <div class="view-item">
-                    <label>ID:</label>
-                    <div class="value">${user.id}</div>
-                </div>
-                <div class="view-item">
-                    <label>Email:</label>
-                    <div class="value">${this.escapeHtml(user.email)}</div>
-                </div>
-                <div class="view-item">
-                    <label>Rol:</label>
-                    <div class="value">${user.admin ? 'Admin' : 'Gebruiker'}</div>
-                </div>
-                <div class="modal-actions">
-                    <button type="button" class="btn btn-secondary" onclick="ModalManager.instance.closeModal('${modalId}')">Sluiten</button>
-                    <button type="button" class="btn btn-primary" onclick="ModalManager.instance.closeModal('${modalId}'); ModalManager.instance.showEditUserModal(${JSON.stringify(user).replace(/"/g, '&quot;')})">Bewerken</button>
-                </div>
-            </div>
-        `;
 
         this.showModal(modalId);
     }
@@ -341,58 +307,103 @@ class ModalManager {
 
     // Handle user form submission
     async handleUserSubmit(existingUser) {
-        const firstname = document.getElementById('user-firstname').value;
-        const lastname = document.getElementById('user-lastname').value;
-        const email = document.getElementById('user-email').value;
-        const password = document.getElementById('user-password') ? document.getElementById('user-password').checked : false;
-        const role = parseInt(document.getElementById('user-admin').value);
+    const firstname = document.getElementById('user-firstname').value.trim();
+    const lastname = document.getElementById('user-lastname').value.trim();
+    const email = document.getElementById('user-email').value.trim();
+    const password = document.getElementById('user-password')
+        ? document.getElementById('user-password').checked
+        : false;
+    const role = parseInt(document.getElementById('user-admin').value);
 
-        if (!firstname || !lastname) {
-            alert('Voornaam en achternaam zijn verplicht!');
-            return;
-        }
+    // Reset previous error messages
+    const emailErrorEl = document.getElementById('user-email-error');
+    if (emailErrorEl) {
+        emailErrorEl.style.display = "none";
+        emailErrorEl.textContent = "";
+    }
 
-        if (!email) {
+    // ✅ Validate fields
+    if (!firstname || !lastname) {
+        alert('Voornaam en achternaam zijn verplicht!');
+        return;
+    }
+
+    if (!email) {
+        if (emailErrorEl) {
+            emailErrorEl.textContent = "Email is verplicht!";
+            emailErrorEl.style.display = "block";
+        } else {
             alert('Email is verplicht!');
-            return;
         }
+        return;
+    }
 
-        const isEdit = existingUser !== null;
+    const isEdit = existingUser !== null;
 
-        const formData = { email, role, firstname, lastname };
-        if (isEdit) {
-            formData.id = existingUser.id;
-            formData.reset = password;
-        }
-
-        try {
-            const response = await fetch('/api/gebruiker?token=' + this.token, {
-                method: isEdit ? 'PUT' : 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(formData)
-            });
-
-            if (response.ok) {
-                alert(isEdit ? 'Gebruiker bijgewerkt!' : 'Gebruiker toegevoegd!');
-                this.closeModal('user-edit-modal');
-                
-                // Reload data if the function exists
-                if (typeof loadUsers === 'function') {
-                    loadUsers();
-                } else if (typeof loadDashboard === 'function') {
-                    loadDashboard();
+    // ✅ Pre-check for duplicate emails on the frontend
+    try {
+        const users = await fetch('/api/gebruiker?token=' + this.token).then(res => res.json());
+        if (users.some(u => {
+            if (isEdit) {
+                if (u.id !== existingUser.id) {
+                    return u.email.toLowerCase() === email.toLowerCase();
                 }
             } else {
-                const error = await response.text();
-                alert('Error: ' + error);
+                return u.email.toLowerCase() === email.toLowerCase();
             }
-        } catch (error) {
-            console.error('Error saving user:', error);
-            alert('Error saving user');
+            return false;
+        })) {
+            if (emailErrorEl) {
+                emailErrorEl.textContent = "Dit e-mailadres is al in gebruik!";
+                emailErrorEl.style.display = "block";
+            } else {
+                alert('Dit e-mailadres is al in gebruik!');
+            }
+            return;
         }
+    } catch (err) {
+        console.warn("Kon gebruikers niet vooraf controleren:", err);
     }
+
+    // ✅ Build request payload
+    const formData = { email, role, firstname, lastname };
+    if (isEdit) {
+        formData.id = existingUser.id;
+        formData.reset = password;
+    }
+
+    try {
+        const response = await fetch('/api/gebruiker?token=' + this.token, {
+            method: isEdit ? 'PUT' : 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formData)
+        });
+
+        if (response.ok) {
+            alert(isEdit ? 'Gebruiker bijgewerkt!' : 'Gebruiker toegevoegd!');
+            this.closeModal('user-edit-modal');
+
+            if (typeof loadUsers === 'function') {
+                loadUsers();
+            } else if (typeof loadDashboard === 'function') {
+                loadDashboard();
+            }
+        } else {
+            const error = await response.text();
+            if (error.includes("Email is already in use") && emailErrorEl) {
+                emailErrorEl.textContent = "Dit e-mailadres is al in gebruik!";
+                emailErrorEl.style.display = "block";
+            } else {
+                alert(error);
+            }
+        }
+    } catch (error) {
+        console.error('Error saving user:', error);
+        alert('Error saving user');
+    }
+}
 
     // Utility functions
     escapeHtml(text) {
