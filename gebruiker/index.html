@@ -155,12 +155,12 @@
             <div id="availableActivities" class="events"></div>
         </section>
         
-        <section class="activity-section">
+        <section class="activity-section logged-in">
             <h2>Mijn aanstaande activiteiten</h2>
             <div id="myUpcomingActivities" class="events"></div>
         </section>
         
-        <section class="activity-section">
+        <section class="activity-section logged-in">
             <h2>Lopende activiteiten</h2>
             <div id="ongoingActivities" class="events"></div>
         </section>
@@ -180,17 +180,17 @@
                 // Load user enrollments
                 const enrollmentsRes = await fetch(`/api/inschrijving?gebruiker=${userId}&token=${jwt}`);
                 userEnrollments = await enrollmentsRes.json() || [];
-                
-                // Load all activities
-                const activitiesRes = await fetch('/api/activiteit');
-                allActivities = await activitiesRes.json();
-                
-                // Update all sections
-                updateActivitySections();
+
+                document.querySelectorAll(".logged-in").forEach(section => section.style.display = "block");
             } else {
-                // Redirect to login if not authenticated
-                window.location.href = '/login';
+                document.querySelectorAll(".logged-in").forEach(section => section.style.display = "none");
             }
+
+            // Load all activities
+            const activitiesRes = await fetch('/api/activiteit');
+            allActivities = await activitiesRes.json();
+
+            updateActivitySections();
         }
 
         function updateActivitySections() {
@@ -277,7 +277,7 @@
                 const jwtData = await res.json();
                 
                 if (!jwtData.id) {
-                    window.location.href = '/login';
+                    alert("Je moet ingelogd zijn om je in te schrijven voor een activiteit.");
                     return;
                 }
 
