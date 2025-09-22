@@ -57,7 +57,7 @@ export default function GebruikerAPI(app, database) {
 
             // ✅ Generate reset token
             const reset_token = jwt.sign(
-                { id: gebruiker.insertId, email: req.body.email, reset: true },
+                { id: gebruiker, email: req.body.email, reset: true },
                 process.env.JWT_SECRET,
                 { expiresIn: "15m" }
             );
