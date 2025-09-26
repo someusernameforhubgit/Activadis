@@ -40,7 +40,9 @@
             </ul>
         </aside>
         <main id="mainContent">
-            <h2>Dashboard</h2>
+            <div class="heading split-row">
+                <h2>Dashboard</h2>
+            </div>
             <div id="dashboard-stats">
                 <h3><i class="fas fa-chart-bar"></i> Systeem Overzicht</h3>
                 <div id="stats-container">
@@ -81,7 +83,19 @@
                         </button>
                     </div>
                     
-                    <ul id="all-activiteiten-list"></ul>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th><i class="fas fa-calendar-check"></i> Naam</th>
+                                <th><i class="fas fa-map-marker-alt"></i> Locatie</th>
+                                <th><i class="fas fa-calendar"></i> Datum</th>
+                                <th><i class="fas fa-euro-sign"></i> Kosten</th>
+                                <th><i class="fas fa-cogs"></i> Acties</th>
+                            </tr>
+                        </thead>
+                        <tbody id="all-activiteiten-list">
+                        </tbody>
+                    </table>
                 </div>
 
                 <hr class="section-separator">
@@ -96,7 +110,18 @@
                         </button>
                     </div>
                     
-                    <ul id="all-gebruikers-list"></ul>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th><i class="fas fa-hashtag"></i> ID</th>
+                                <th><i class="fas fa-envelope"></i> Email</th>
+                                <th><i class="fas fa-user-tag"></i> Rol</th>
+                                <th><i class="fas fa-cogs"></i> Acties</th>
+                            </tr>
+                        </thead>
+                        <tbody id="all-gebruikers-list">
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </main>
@@ -176,68 +201,65 @@
         }
 
         function displayAllActiviteiten(activiteiten) {
-            const list = document.getElementById('all-activiteiten-list');
-            list.innerHTML = '';
+            const tbody = document.getElementById('all-activiteiten-list');
+            tbody.innerHTML = '';
 
             activiteiten.forEach(act => {
-                const li = document.createElement('li');
-                li.style.marginBottom = '10px';
-                li.style.padding = '10px';
-                li.style.backgroundColor = '#f9f9f9';
-                li.style.borderRadius = '5px';
-                li.style.border = '1px solid #ddd';
-
-                li.innerHTML = `
-                    <div>
-                        <strong>${escapeHtml(act.naam)}</strong> - ${escapeHtml(act.locatie)}<br>
-                        <small>📅 Begin: ${new Date(act.begin).toLocaleDateString()} | 💰 Kosten: €${act.kost} | 👥 ${act.min}-${act.max} personen</small><br>
-                        <div class="actions">
-                            <button class="btn btn-info btn-small" onclick="ModalManager.instance.showViewActivityModal(${JSON.stringify(act).replace(/"/g, '&quot;')})">
-                                <i class="fas fa-eye"></i> Bekijken
-                            </button>
+                const row = document.createElement('tr');
+                row.style.cursor = 'pointer';
+                row.onclick = function() {
+                    ModalManager.instance.showViewActivityModal(act);
+                };
+                
+                const beginDate = new Date(act.begin);
+                
+                row.innerHTML = `
+                    <td><strong>${escapeHtml(act.naam)}</strong></td>
+                    <td>${escapeHtml(act.locatie)}</td>
+                    <td>${beginDate.toLocaleDateString()}</td>
+                    <td>€${act.kost}</td>
+                    <td onclick="event.stopPropagation()">
+                        <div style="display: flex; gap: 5px; flex-wrap: wrap;">
                             <button class="btn btn-primary btn-small" onclick="ModalManager.instance.showEditActivityModal(${JSON.stringify(act).replace(/"/g, '&quot;')})">
-                                <i class="fas fa-edit"></i> Bewerken
+                                <i class="fas fa-edit"></i>
                             </button>
                             <button class="btn btn-danger btn-small" onclick="deleteActiviteit(${act.id})">
-                                <i class="fas fa-trash"></i> Verwijderen
+                                <i class="fas fa-trash"></i>
                             </button>
                         </div>
-                    </div>
+                    </td>
                 `;
-                list.appendChild(li);
+                tbody.appendChild(row);
             });
         }
 
         function displayAllGebruikers(gebruikers) {
-            const list = document.getElementById('all-gebruikers-list');
-            list.innerHTML = '';
+            const tbody = document.getElementById('all-gebruikers-list');
+            tbody.innerHTML = '';
 
             gebruikers.forEach(user => {
-                const li = document.createElement('li');
-                li.style.marginBottom = '10px';
-                li.style.padding = '10px';
-                li.style.backgroundColor = '#f9f9f9';
-                li.style.borderRadius = '5px';
-                li.style.border = '1px solid #ddd';
-
-                li.innerHTML = `
-                    <div>
-                        <strong>${user.email}</strong> - ${user.role === 1 ? '👑 Admin' : '👤 Gebruiker'}<br>
-                        <small>🆔 ID: ${user.id}</small><br>
-                        <div class="actions">
-                            <button class="btn btn-info btn-small" onclick="ModalManager.instance.showViewUserModal(${JSON.stringify(user).replace(/"/g, '&quot;')})">
-                                <i class="fas fa-eye"></i> Bekijken
-                            </button>
+                const row = document.createElement('tr');
+                row.style.cursor = 'pointer';
+                row.onclick = function() {
+                    ModalManager.instance.showViewUserModal(user);
+                };
+                
+                row.innerHTML = `
+                    <td>${user.id}</td>
+                    <td><i class="fas fa-envelope"></i> ${user.email}</td>
+                    <td>${user.role === 1 ? '<i class="fas fa-crown"></i> Admin' : '<i class="fas fa-user"></i> Gebruiker'}</td>
+                    <td onclick="event.stopPropagation()">
+                        <div style="display: flex; gap: 5px; flex-wrap: wrap;">
                             <button class="btn btn-primary btn-small" onclick="ModalManager.instance.showEditUserModal(${JSON.stringify(user).replace(/"/g, '&quot;')})">
-                                <i class="fas fa-edit"></i> Bewerken
+                                <i class="fas fa-edit"></i>
                             </button>
                             <button class="btn btn-danger btn-small" onclick="deleteGebruiker(${user.id})">
-                                <i class="fas fa-trash"></i> Verwijderen
+                                <i class="fas fa-trash"></i>
                             </button>
                         </div>
-                    </div>
+                    </td>
                 `;
-                list.appendChild(li);
+                tbody.appendChild(row);
             });
         }
 

@@ -40,21 +40,42 @@
             </ul>
         </aside>
         <main id="mainContent">
-            <h2><i class="fas fa-users"></i> Gebruikers Beheer</h2>
-            
-            <div class="page-actions">
-                <h3><i class="fas fa-user-plus"></i> Nieuwe Gebruiker</h3>
+            <div class="heading split-row">
+                <h2>Gebruikers Beheer</h2>
                 <button class="btn btn-primary" onclick="ModalManager.instance.showEditUserModal()">
                     <i class="fas fa-plus"></i> Nieuwe Gebruiker Toevoegen
                 </button>
             </div>
 
+            <div id="user-stats">
+                <h3>Statistieken</h3>
+                <div class="item split-row">
+                    <div class="item split-row">
+                        <div class="row">
+                            <div class="fa-container"><i class="fas fa-users"></i></div><p>Totaal</p>
+                        </div>
+                        <p><span id="total-users">-</span></p>
+                    </div>
+                </div>
+                <div class="item split-row">
+                    <div class="row">
+                        <div class="fa-container"><i class="fas fa-crown"></i></div><p>Admins</p>
+                    </div>
+                    <p><span id="admin-count">-</span></p>
+                </div>
+                <div class="item split-row">
+                    <div class="row">
+                        <div class="fa-container"><i class="fas fa-user"></i></div><p>Reguliere gebruikers</p>
+                    </div>
+                    <p><span id="regular-count">-</span></p>
+                </div>
+            </div>
+
             <div id="users-list" class="content-section">
-                <h3><i class="fas fa-list"></i> Alle Gebruikers</h3>
+                <h3>Alle Gebruikers</h3>
                 <table class="data-table">
                     <thead>
                         <tr>
-                            <th><i class="fas fa-hashtag"></i> ID</th>
                             <th><i class="fas fa-envelope"></i> Email</th>
                             <th><i class="fas fa-user-tag"></i> Rol</th>
                             <th><i class="fas fa-cogs"></i> Acties</th>
@@ -65,14 +86,9 @@
                 </table>
             </div>
         </main>
-        <div id="sideContent">
-            <div id="user-stats">
-                <h3><i class="fas fa-chart-pie"></i> Gebruiker Statistieken</h3>
-                <p><i class="fas fa-users"></i> Totaal gebruikers: <span id="total-users">-</span></p>
-                <p><i class="fas fa-crown"></i> Admins: <span id="admin-count">-</span></p>
-                <p><i class="fas fa-user"></i> Reguliere gebruikers: <span id="regular-count">-</span></p>
-            </div>
-        </div>
+        <!-- <div id="sideContent">
+
+        </div> -->
     </section>
 
     <script>
@@ -101,20 +117,21 @@
 
             users.forEach(user => {
                 const row = document.createElement('tr');
+                row.style.cursor = 'pointer';
+                row.onclick = function() {
+                    ModalManager.instance.showViewUserModal(user);
+                };
+                
                 row.innerHTML = `
-                    <td>${user.id}</td>
-                    <td><i class="fas fa-envelope"></i> ${user.email}</td>
-                    <td>${user.role === 1 ? '<i class="fas fa-crown"></i> Admin' : '<i class="fas fa-user"></i> Gebruiker'}</td>
-                    <td>
+                    <td>${user.email}</td>
+                    <td>${user.role === 1 ? 'Admin' : 'Gebruiker'}</td>
+                    <td onclick="event.stopPropagation()">
                         <div style="display: flex; gap: 5px; flex-wrap: wrap;">
-                            <button class="btn btn-info btn-small" onclick="ModalManager.instance.showViewUserModal(${JSON.stringify(user).replace(/"/g, '&quot;')})">
-                                <i class="fas fa-eye"></i> Bekijken
-                            </button>
                             <button class="btn btn-primary btn-small" onclick="ModalManager.instance.showEditUserModal(${JSON.stringify(user).replace(/"/g, '&quot;')})">
-                                <i class="fas fa-edit"></i> Bewerken
+                                <i class="fas fa-edit"></i>
                             </button>
                             <button class="btn btn-danger btn-small" onclick="deleteUser(${user.id})">
-                                <i class="fas fa-trash"></i> Verwijderen
+                                <i class="fas fa-trash"></i>
                             </button>
                         </div>
                     </td>
