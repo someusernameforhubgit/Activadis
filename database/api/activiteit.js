@@ -5,9 +5,19 @@ export default function ActiviteitAPI(app, database) {
     app.get(url, async (req, res) => {
         if (req.query.id) {
             const activiteit = (await database.query("SELECT * FROM activiteit WHERE id = ? AND hidden = 0", [req.query.id]))[0];
+            if (activiteit) {
+                // Fetch corresponding images for this activity
+                const afbeeldingen = await database.query("SELECT * FROM afbeeldingen WHERE activiteitId = ?", [activiteit.id]);
+                activiteit.afbeeldingen = afbeeldingen;
+            }
             res.send(activiteit);
         } else {
             const activiteiten = await database.query("SELECT * FROM activiteit WHERE hidden = 0");
+            // Fetch images for each activity
+            for (let activiteit of activiteiten) {
+                const afbeeldingen = await database.query("SELECT * FROM afbeeldingen WHERE activiteitId = ?", [activiteit.id]);
+                activiteit.afbeeldingen = afbeeldingen;
+            }
             res.send(activiteiten);
         }
     });
