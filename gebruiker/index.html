@@ -20,7 +20,7 @@
             max-width: 1200px;
             margin: 0 auto;
         }
-        
+
         .activity-section h1 {
             color: #2c3e50;
             font-size: 1.8rem;
@@ -28,13 +28,13 @@
             padding-bottom: 0.5rem;
             border-bottom: 2px solid #f0f0f0;
         }
-        
+
         .events {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
             gap: 1.5rem;
         }
-        
+
         .event {
             background: #f9f9f9;
             border-radius: 8px;
@@ -44,34 +44,35 @@
             justify-content: space-between;
             transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
-        
+
         .event:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
-        
+
         .event-info {
             margin-bottom: 1rem;
         }
-        
+
         .event-title {
             color: #2c3e50;
             margin-top: 0;
             margin-bottom: 0.5rem;
         }
-        
-        .location, .date {
+
+        .location,
+        .date {
             color: #666;
             font-size: 0.9rem;
             margin: 0.25rem 0;
         }
-        
+
         .description {
             color: #444;
             margin: 0.75rem 0;
             line-height: 1.5;
         }
-        
+
         .icons {
             display: flex;
             justify-content: space-between;
@@ -80,7 +81,7 @@
             padding-top: 1rem;
             border-top: 1px solid #eee;
         }
-        
+
         .btn {
             padding: 0.5rem 1rem;
             border: none;
@@ -90,25 +91,25 @@
             font-size: 0.9rem;
             transition: background-color 0.2s;
         }
-        
+
         .btn-primary {
             background-color: #3498db;
             color: white;
         }
-        
+
         .btn-primary:hover {
             background-color: #2980b9;
         }
-        
+
         .btn-danger {
             background-color: #e74c3c;
             color: white;
         }
-        
+
         .btn-danger:hover {
             background-color: #c0392b;
         }
-        
+
         .no-activities {
             color: #7f8c8d;
             font-style: italic;
@@ -116,12 +117,12 @@
             padding: 2rem;
             grid-column: 1 / -1;
         }
-        
+
         @media (max-width: 768px) {
             .events {
                 grid-template-columns: 1fr;
             }
-            
+
             .activity-section h1 {
                 font-size: 1.5rem;
                 margin: 1.5rem 0 0.75rem 0;
@@ -154,12 +155,12 @@
             <h2>Beschikbare activiteiten</h2>
             <div id="availableActivities" class="events"></div>
         </section>
-        
+
         <section class="activity-section logged-in">
             <h2>Mijn aanstaande activiteiten</h2>
             <div id="myUpcomingActivities" class="events"></div>
         </section>
-        
+
         <section class="activity-section logged-in">
             <h2>Lopende activiteiten</h2>
             <div id="ongoingActivities" class="events"></div>
@@ -174,7 +175,7 @@
         async function initializePage() {
             const res = await fetch("/api/verify?token=" + jwt);
             const jwtData = await res.json();
-            
+
             if (jwtData.id) {
                 userId = jwtData.id;
                 // Load user enrollments
@@ -196,24 +197,24 @@
         function updateActivitySections() {
             const now = new Date();
             const enrolledActivityIds = userEnrollments.map(e => e.activiteit);
-            
+
             // Filter activities
-            const availableActivities = allActivities.filter(activity => 
-                !enrolledActivityIds.includes(activity.id) && 
+            const availableActivities = allActivities.filter(activity =>
+                !enrolledActivityIds.includes(activity.id) &&
                 new Date(activity.begin) > now
             );
-            
-            const myUpcomingActivities = allActivities.filter(activity => 
-                enrolledActivityIds.includes(activity.id) && 
-                new Date(activity.begin) > now
-            );
-            
-            const ongoingActivities = allActivities.filter(activity => 
+
+            const myUpcomingActivities = allActivities.filter(activity =>
                 enrolledActivityIds.includes(activity.id) &&
-                new Date(activity.begin) <= now && 
+                new Date(activity.begin) > now
+            );
+
+            const ongoingActivities = allActivities.filter(activity =>
+                enrolledActivityIds.includes(activity.id) &&
+                new Date(activity.begin) <= now &&
                 new Date(activity.eind) >= now
             );
-            
+
             // Render each section
             renderActivities('availableActivities', availableActivities, false);
             renderActivities('myUpcomingActivities', myUpcomingActivities, true);
@@ -223,21 +224,28 @@
         function renderActivities(containerId, activities, isEnrolled) {
             const container = document.getElementById(containerId);
             container.innerHTML = '';
-            
+
             if (activities.length === 0) {
                 container.innerHTML = '<p class="no-activities">Geen activiteiten gevonden</p>';
                 return;
             }
-            
+
             activities.forEach(activity => {
                 const eventElement = document.createElement('div');
                 eventElement.classList.add('event');
-                
+
                 const beginDate = new Date(activity.begin);
                 const endDate = new Date(activity.eind);
-                
+
+                if (activity.afbeeldingen[0] != null) {
+                    afbeelding = '<img src="' + activity.afbeeldingen[0].afbeeldingUrl + '" alt="Afbeelding van activiteit">';
+                }else{
+                    afbeelding = '<img src="https://covadis.nl/wp-content/themes/id/resource/image/header/1.svg" alt="Afbeelding">';
+                }
+
                 eventElement.innerHTML = `
                     <div class="event-info">
+                    ${afbeelding}
                         <h2 class="event-title">${escapeHtml(activity.naam)}</h2>
                         <h3 class="location">${escapeHtml(activity.locatie)}</h3>
                         <p class="date">Begin: ${beginDate.toLocaleString('nl-NL')}</p>
@@ -251,11 +259,11 @@
                         </button>
                     </div>
                 `;
-                
+
                 container.appendChild(eventElement);
             });
         }
-        
+
         // Helper function to escape HTML
         function escapeHtml(unsafe) {
             return unsafe
@@ -275,7 +283,7 @@
             try {
                 const res = await fetch("/api/verify?token=" + jwt);
                 const jwtData = await res.json();
-                
+
                 if (!jwtData.id) {
                     alert("Je moet ingelogd zijn om je in te schrijven voor een activiteit.");
                     return;
@@ -283,7 +291,7 @@
 
                 const isEnrolled = userEnrollments.some(e => e.activiteit === id);
                 const method = isEnrolled ? 'DELETE' : 'POST';
-                
+
                 const response = await fetch(`/api/inschrijving?gebruiker=${jwtData.id}&activiteit=${id}&token=${jwt}`, {
                     method: method,
                     headers: { "Content-Type": "application/json" },
@@ -294,10 +302,10 @@
                     // Update the enrollments list
                     const enrollmentsRes = await fetch(`/api/inschrijving?gebruiker=${jwtData.id}&token=${jwt}`);
                     userEnrollments = await enrollmentsRes.json() || [];
-                    
+
                     // Refresh the activity sections
                     updateActivitySections();
-                    
+
                     // Show success message
                     alert(`Je bent ${isEnrolled ? 'uitgeschreven' : 'ingeschreven'} voor deze activiteit`);
                 } else {

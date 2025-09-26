@@ -4,6 +4,7 @@ import BenodigdheidAPI from "./benodigdheid.js";
 import InschrijvingAPI from "./inschrijving.js";
 import LoginAPI from "./login.js";
 import Database from "../database.js";
+import AfbeeldingAPI from "./afbeelding.js";
 const database = await Database.init();
 
 function API(app) {
@@ -26,6 +27,7 @@ function startAPI(app) {
     BenodigdheidAPI(app, database);
     InschrijvingAPI(app, database);
     LoginAPI(app, database);
+    AfbeeldingAPI(app, database);
 }
 
 export default startAPI;
