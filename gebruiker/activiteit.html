@@ -148,8 +148,7 @@
                             </div>
                             <div class="registration-details">
                                 <p><strong>Kosten:</strong> <span id="registrationPrice"></span></p>
-                                <p><strong>Beschikbare plaatsen:</strong> <span id="availableSpots"></span></p>
-                                <p><strong>Benodigde plaatsen:</strong> <span id="neededSpots"></span></p>
+                                <p><strong>Aantal inschrijvingen:</strong> <span id="registrationCount"></span></p>
                             </div>
                         </div>
 
@@ -157,6 +156,10 @@
                             <button id="registerBtn" class="btn btn-primary btn-large">
                                 <i class="fas fa-user-plus"></i>
                                 Inschrijven voor activiteit
+                            </button>
+                            <button id="unregisterBtn" class="btn btn-primary btn-large">
+                                <i class="fas fa-user-minus"></i>
+                                Uitschrijven voor activiteit
                             </button>
                             <button id="shareBtn" class="btn btn-secondary">
                                 <i class="fas fa-share-alt"></i>
@@ -283,8 +286,7 @@
             const inschrijvingen = await fetch("/api/inschrijving?activiteit=" + data.id);
             const inschrijvingenData = await inschrijvingen.json();
             const availableSpots = calculateAvailableSpots(data.min, data.max, inschrijvingenData.length);
-            document.getElementById('availableSpots').textContent = availableSpots;
-            document.getElementById('neededSpots').textContent = data.min - inschrijvingenData.length;
+            document.getElementById('registrationCount').textContent = inschrijvingenData.length;
 
             // Update availability status
             const statusElement = document.getElementById('availabilityStatus');
@@ -292,15 +294,41 @@
                 statusElement.innerHTML = '<i class="fas fa-check-circle"></i><span>Plaatsen beschikbaar</span>';
                 statusElement.className = 'availability-status available';
             } else {
-                statusElement.innerHTML = '<i class="fas fa-times-circle"></i><span>Volzet</span>';
+                statusElement.innerHTML = '<i class="fas fa-times-circle"></i><span>Vol</span>';
                 statusElement.className = 'availability-status full';
                 document.getElementById('registerBtn').disabled = true;
-                document.getElementById('registerBtn').innerHTML = '<i class="fas fa-ban"></i> Volzet';
+                document.getElementById('registerBtn').innerHTML = '<i class="fas fa-ban"></i> Vol';
             }
         }
 
         // Function to handle registration
         async function handleRegistration() {
+            const res = await fetch("/api/verify?token=" + jwt);
+            const jwtData = await res.json();
+            if (jwtData.id) {
+                const inschrijvingen = await fetch("/api/inschrijving?gebruiker=" + jwtData.id + "&token=" + jwt);
+                const inschrijvingenData = await inschrijvingen.json();
+                const inschrijving = inschrijvingenData.find(inschrijving => inschrijving.activiteit === parseInt(activityId));
+                if (!inschrijving) {
+                    await fetch("/api/inschrijving?gebruiker=" + jwtData.id + "&activiteit=" + activityId + "&token=" + jwt, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            gebruiker: jwtData.id,
+                            activiteit: activityId,
+                        })
+                    });
+                    alert("Je bent ingeschreven");
+                    loadPage();
+                }
+            } else {
+                alert("Je moet ingelogd zijn om je in te schrijven voor een activiteit.");
+            }
+        }
+
+        async function handleDeRegistration() {
             const res = await fetch("/api/verify?token=" + jwt);
             const jwtData = await res.json();
             if (jwtData.id) {
@@ -319,18 +347,6 @@
                         })
                     });
                     alert("Je bent uitgeschreven");
-                } else {
-                    await fetch("/api/inschrijving?gebruiker=" + jwtData.id + "&activiteit=" + activityId + "&token=" + jwt, {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json"
-                        },
-                        body: JSON.stringify({
-                            gebruiker: jwtData.id,
-                            activiteit: activityId,
-                        })
-                    });
-                    alert("Je bent ingeschreven");
                 }
                 loadPage();
             } else {
@@ -354,7 +370,7 @@
             }
         }
 
-        async function loadButton() {
+        async function loadButtons() {
             const res = await fetch("/api/verify?token=" + jwt);
             const jwtData = await res.json();
             if (jwtData.id) {
@@ -362,9 +378,11 @@
                 const inschrijvingenData = await inschrijvingen.json();
                 const inschrijving = inschrijvingenData.find(inschrijving => inschrijving.activiteit === parseInt(activityId));
                 if (inschrijving) {
-                    document.getElementById('registerBtn').innerHTML = '<i class="fas fa-user-minus"></i> Uitschrijven';
+                    document.getElementById('registerBtn').disabled = true;
+                    document.getElementById('unregisterBtn').disabled = false;
                 } else {
-                    document.getElementById('registerBtn').innerHTML = '<i class="fas fa-user-plus"></i> Inschrijven voor activiteit';
+                    document.getElementById('unregisterBtn').disabled = true;
+                    document.getElementById('registerBtn').disabled = false;
                 }
             }
         }
@@ -419,12 +437,14 @@
                 }
             });
         }
-
-        function loadPage() {
+      
+        async function loadPage() {
             if (!activityId) {
                 showError('Geen activiteit ID opgegeven in de URL.');
                 return;
             }
+
+            await loadButtons();
 
             // Fetch activity data
             fetch(`/api/activiteit?id=${activityId}`)
@@ -449,9 +469,8 @@
 
             // Add event listeners for buttons
             document.getElementById('registerBtn').addEventListener('click', handleRegistration);
+            document.getElementById('unregisterBtn').addEventListener('click', handleDeRegistration);
             document.getElementById('shareBtn').addEventListener('click', handleShare);
-
-            loadButton();
         }
 
         // Event listeners
