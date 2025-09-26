@@ -151,18 +151,13 @@
     </header>
     <main class="activity-sections">
         <section class="activity-section">
-            <h2>Beschikbare activiteiten</h2>
+            <h2>Beschrikbaar</h2>
             <div id="availableActivities" class="events"></div>
         </section>
         
         <section class="activity-section logged-in">
-            <h2>Mijn aanstaande activiteiten</h2>
+            <h2>Ingeschreven</h2>
             <div id="myUpcomingActivities" class="events"></div>
-        </section>
-        
-        <section class="activity-section logged-in">
-            <h2>Lopende activiteiten</h2>
-            <div id="ongoingActivities" class="events"></div>
         </section>
     </main>
     <script>
@@ -217,7 +212,7 @@
             // Render each section
             renderActivities('availableActivities', availableActivities, false);
             renderActivities('myUpcomingActivities', myUpcomingActivities, true);
-            renderActivities('ongoingActivities', ongoingActivities, true);
+            // renderActivities('ongoingActivities', ongoingActivities, true);
         }
 
         function renderActivities(containerId, activities, isEnrolled) {
@@ -246,9 +241,6 @@
                     </div>
                     <div class="icons">
                         <a href="activiteit.html?id=${activity.id}" class="btn">Info</a>
-                        <button onclick="joinActivity(${activity.id})" class="btn ${isEnrolled ? 'btn-danger' : 'btn-primary'}">
-                            ${isEnrolled ? 'Uitschrijven' : 'Deelnemen'}
-                        </button>
                     </div>
                 `;
                 
