@@ -21,7 +21,7 @@
                 </div>
                 <div>
                     <a class="login" href="/login"><i class="fas fa-sign-in-alt"></i>Login</a>
-                    <p class="logout name">NAME HERE</p>
+                    <p class="logout name"></p>
                     <a class="logout" onclick="logout()">Logout</a>
                 </div>
             </nav>
@@ -53,9 +53,9 @@
                             <th><i class="fas fa-calendar-check"></i> Naam</th>
                             <th><i class="fas fa-map-marker-alt"></i> Locatie</th>
                             <th><i class="fas fa-calendar"></i> Begin</th>
-                            <th><i class="fas fa-calendar"></i> Eind</th>
+                            <th>Eind</th>
                             <th><i class="fas fa-info-circle"></i> Status</th>
-                            <th><i class="fas fa-cogs"></i> Acties</th>
+                            <th class="justify-right">Acties</th>
                         </tr>
                     </thead>
                     <tbody id="activiteiten-table-body">
@@ -131,7 +131,7 @@
                         '<span style="color: #28a745;"><i class="fas fa-arrow-up"></i> Aankomend</span>' :
                         '<span style="color: #6c757d;"><i class="fas fa-check"></i> Afgelopen</span>'}</td>
                     <td onclick="event.stopPropagation()">
-                        <div style="display: flex; gap: 5px; flex-wrap: wrap;">
+                        <div class="justify-right" style="display: flex; gap: 5px; flex-wrap: wrap;">
                             <button class="btn btn-primary btn-small" onclick="window.location.href='/beheerder/activiteit-edit.html?id=${act.id}'">
                                 <i class="fas fa-edit"></i>
                             </button>

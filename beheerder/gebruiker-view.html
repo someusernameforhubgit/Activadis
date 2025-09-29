@@ -21,7 +21,7 @@
                 </div>
                 <div>
                     <a class="login" href="/login"><i class="fas fa-sign-in-alt"></i>Login</a>
-                    <p class="logout name">NAME HERE</p>
+                    <p class="logout name"></p>
                     <a class="logout" onclick="logout()">Logout</a>
                 </div>
             </nav>
@@ -51,41 +51,269 @@
             </div>
 
             <div id="user-details" class="content-section">
-                <div id="loading">
-                    <p>Laden...</p>
+                <div id="loading" class="loading-container">
+                    <div class="loading-spinner"></div>
+                    <p>Laden van gebruiker gegevens...</p>
                 </div>
                 <div id="user-content" style="display: none;">
-                    <div class="view-item">
-                        <label>Email:</label>
-                        <div class="value" id="user-email"></div>
+                    <div class="user-header">
+                        <div class="user-avatar">
+                            <i class="fas fa-user-circle"></i>
+                        </div>
+                        <div class="user-summary">
+                            <h3 id="user-name-title"></h3>
+                            <div class="user-meta">
+                                <span class="meta-item"><i class="fas fa-envelope"></i> <span id="user-email-meta"></span></span>
+                                <span class="meta-item" id="user-role-meta"></span>
+                            </div>
+                        </div>
                     </div>
-                    <div class="view-item">
-                        <label>Voornaam:</label>
-                        <div class="value" id="user-firstname"></div>
-                    </div>
-                    <div class="view-item">
-                        <label>Achternaam:</label>
-                        <div class="value" id="user-lastname"></div>
-                    </div>
-                    <div class="view-item">
-                        <label>Rol:</label>
-                        <div class="value" id="user-role"></div>
+                    
+                    <div class="user-details-grid">
+                        <div class="details-section">
+                            <h4>Persoonlijke gegevens</h4>
+                            <div class="view-item">
+                                <label>Volledige naam:</label>
+                                <div class="value" id="user-fullname"></div>
+                            </div>
+                            <div class="view-item">
+                                <label>Voornaam:</label>
+                                <div class="value" id="user-firstname"></div>
+                            </div>
+                            <div class="view-item">
+                                <label>Achternaam:</label>
+                                <div class="value" id="user-lastname"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="details-section">
+                            <h4>Account informatie</h4>
+                            <div class="view-item">
+                                <label>E-mailadres:</label>
+                                <div class="value email" id="user-email"></div>
+                            </div>
+                            <div class="view-item">
+                                <label>Rol:</label>
+                                <div class="value" id="user-role"></div>
+                            </div>
+                            <div class="view-item">
+                                <label>Status:</label>
+                                <div class="value" id="user-status">Actief</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div id="error-message" style="display: none;">
-                    <p class="text-danger">Fout bij het laden van de gebruiker.</p>
-                    <button class="btn btn-secondary" onclick="goBack()">Terug naar overzicht</button>
+                    <div class="error-container">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <h3>Fout bij laden</h3>
+                        <p id="error-text">Er is een fout opgetreden bij het laden van de gebruiker.</p>
+                        <div class="error-actions">
+                            <button class="btn btn-primary" onclick="retryLoad()">Opnieuw proberen</button>
+                            <button class="btn btn-secondary" onclick="goBack()">Terug naar overzicht</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </main>
-    </section>
+        </section>
+
+    <style>
+        .loading-container {
+            text-align: center;
+            padding: 60px 20px;
+        }
+        
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .error-container {
+            text-align: center;
+            padding: 40px 20px;
+            color: #721c24;
+        }
+        
+        .error-container i {
+            font-size: 3rem;
+            color: #dc3545;
+            margin-bottom: 20px;
+        }
+        
+        .error-container h3 {
+            margin-bottom: 10px;
+            color: #721c24;
+        }
+        
+        .error-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .user-header {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #eee;
+        }
+        
+        .user-avatar {
+            flex: 0 0 120px;
+            height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f8f9fa;
+            border-radius: 50%;
+            border: 3px solid #dee2e6;
+        }
+        
+        .user-avatar i {
+            font-size: 4rem;
+            color: #6c757d;
+        }
+        
+        .user-summary {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .user-summary h3 {
+            margin: 0 0 15px 0;
+            color: #333;
+            font-size: 1.8rem;
+        }
+        
+        .user-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1rem;
+            color: #555;
+        }
+        
+        .meta-item i {
+            width: 24px;
+            color: var(--primary-color);
+        }
+        
+        .user-details-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+        
+        .details-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+        }
+        
+        .details-section h4 {
+            margin: 0 0 20px 0;
+            color: #333;
+            font-size: 1.2rem;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .view-item {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 15px;
+        }
+        
+        .view-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .view-item label {
+            font-weight: bold;
+            color: #555;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+        
+        .view-item .value {
+            color: #333;
+            font-size: 1rem;
+        }
+        
+        .value.badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: bold;
+            width: fit-content;
+        }
+        
+        .badge {
+            background-color: rgba(128, 128, 128, 0.1);
+        }
+        
+        @media (max-width: 1024px) {
+            .user-details-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .user-header {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+                gap: 20px;
+            }
+            
+            .user-avatar {
+                flex: none;
+            }
+            
+            .user-meta {
+                align-items: center;
+            }
+            
+            .error-actions {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
 
     <script>
         const token = sessionStorage.getItem("JWT");
         const API_URL = '/api/gebruiker';
         let currentUser = null;
+        let retryCount = 0;
+        const MAX_RETRIES = 3;
 
-        // Helper functions for text handling
+        // Helper functions
         function escapeHtml(text) {
             if (!text) return '';
             const div = document.createElement('div');
@@ -93,13 +321,12 @@
             return div.innerHTML;
         }
 
-        // Get user ID from URL parameters
         function getUserIdFromUrl() {
             const urlParams = new URLSearchParams(window.location.search);
-            return urlParams.get('id');
+            const id = urlParams.get('id');
+            return id ? parseInt(id) : null;
         }
 
-        // Go back to previous page or users list
         function goBack() {
             if (document.referrer && document.referrer.includes('/beheerder/')) {
                 window.history.back();
@@ -108,11 +335,30 @@
             }
         }
 
-        // Navigate to edit page
         function editUser() {
             if (currentUser) {
                 window.location.href = `/beheerder/gebruiker-edit.html?id=${currentUser.id}`;
             }
+        }
+
+        // Error handling
+        function retryLoad() {
+            const userId = getUserIdFromUrl();
+            if (userId && retryCount < MAX_RETRIES) {
+                retryCount++;
+                document.getElementById('error-message').style.display = 'none';
+                document.getElementById('loading').style.display = 'block';
+                loadUser(userId);
+            } else {
+                showError('Maximaal aantal pogingen bereikt. Probeer later opnieuw.');
+            }
+        }
+
+        function showError(message = 'Er is een fout opgetreden bij het laden van de gebruiker.') {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('user-content').style.display = 'none';
+            document.getElementById('error-text').textContent = message;
+            document.getElementById('error-message').style.display = 'block';
         }
 
         document.addEventListener('DOMContentLoaded', function() {
@@ -120,58 +366,122 @@
             if (userId) {
                 loadUser(userId);
             } else {
-                showError();
+                showError('Geen gebruiker ID gevonden.');
             }
         });
 
         async function loadUser(id) {
+            if (!id) {
+                showError('Geen geldig gebruiker ID gevonden.');
+                return;
+            }
+
             try {
-                const response = await fetch(`${API_URL}?id=${id}&token=${token}`);
-                
-                if (response.ok) {
-                    const users = await response.json();
-                    // API returns array, find the specific user
-                    const user = Array.isArray(users) ? 
-                        users.find(usr => usr.id == id) : users;
-                    
-                    if (user) {
-                        currentUser = user;
-                        displayUser(user);
-                    } else {
-                        showError();
+                const response = await fetch(`${API_URL}?id=${id}&token=${token}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
                     }
-                } else {
-                    showError();
+                });
+                
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        showError('U bent niet geautoriseerd. Log opnieuw in.');
+                        setTimeout(() => window.location.href = '/login', 2000);
+                        return;
+                    } else if (response.status === 404) {
+                        showError('Gebruiker niet gevonden.');
+                        return;
+                    } else {
+                        throw new Error(`HTTP ${response.status}`);
+                    }
                 }
+
+                const user = await response.json();
+                
+                if (!user || (Array.isArray(user) && user.length === 0)) {
+                    showError('Gebruiker niet gevonden.');
+                    return;
+                }
+                
+                // Handle both single object and array responses
+                const userData = Array.isArray(user) ? 
+                    user.find(usr => usr.id == id) : user;
+                
+                if (userData) {
+                    currentUser = userData;
+                    displayUser(userData);
+                } else {
+                    showError('Gebruiker niet gevonden.');
+                }
+                
             } catch (error) {
                 console.error('Error loading user:', error);
-                showError();
+                const errorMessage = retryCount < MAX_RETRIES ? 
+                    'Fout bij laden van gebruiker. Probeer het opnieuw.' : 
+                    'Kan gebruiker niet laden na meerdere pogingen.';
+                showError(errorMessage);
             }
         }
 
         function displayUser(user) {
-            // Update page title
-            const fullName = `${user.firstname || ''} ${user.lastname || ''}`.trim();
-            const displayName = fullName || user.email;
-            document.getElementById('page-title').textContent = `Gebruiker: ${displayName}`;
-            document.title = `Activadis - ${displayName}`;
-            
-            // Fill in the details
-            document.getElementById('user-email').innerHTML = escapeHtml(user.email);
-            document.getElementById('user-firstname').innerHTML = escapeHtml(user.firstname || 'Niet ingesteld');
-            document.getElementById('user-lastname').innerHTML = escapeHtml(user.lastname || 'Niet ingesteld');
-            document.getElementById('user-role').innerHTML = user.role === 1 ? 
-                '<span style="color: #dc3545;"><i class="fas fa-crown"></i> Admin</span>' : 
-                '<span style="color: #28a745;"><i class="fas fa-user"></i> Gebruiker</span>';
-            
-            // Show content and hide loading
-            document.getElementById('loading').style.display = 'none';
-            document.getElementById('user-content').style.display = 'block';
-        }
-
-        function showError() {
-            document.getElementById('loading').style.display = 'none';
-            document.getElementById('error-message').style.display = 'block';
+            try {
+                // Validate user data
+                if (!user.email) {
+                    throw new Error('Invalid user data: missing email');
+                }
+                
+                // Create display names
+                const firstName = escapeHtml(user.firstname) || '';
+                const lastName = escapeHtml(user.lastname) || '';
+                const fullName = `${firstName} ${lastName}`.trim();
+                const displayName = fullName || user.email;
+                
+                // Update page title
+                document.getElementById('page-title').textContent = `Gebruiker: ${displayName}`;
+                document.title = `Activadis - ${displayName}`;
+                
+                // Header section
+                document.getElementById('user-name-title').textContent = displayName;
+                document.getElementById('user-email-meta').textContent = user.email;
+                
+                // Role meta with icon
+                const roleMetaElement = document.getElementById('user-role-meta');
+                if (user.role === 1) {
+                    roleMetaElement.innerHTML = '<i class="fas fa-crown"></i> Administrator';
+                } else {
+                    roleMetaElement.innerHTML = '<i class="fas fa-user"></i> Gebruiker';
+                }
+                
+                // Details sections
+                document.getElementById('user-fullname').textContent = fullName || 'Niet ingesteld';
+                document.getElementById('user-firstname').textContent = firstName || 'Niet ingesteld';
+                document.getElementById('user-lastname').textContent = lastName || 'Niet ingesteld';
+                document.getElementById('user-email').textContent = user.email;
+                
+                // Role badge
+                const roleElement = document.getElementById('user-role');
+                if (user.role === 1) {
+                    roleElement.textContent = 'Administrator';
+                    roleElement.className = 'value admin';
+                } else {
+                    roleElement.textContent = 'Gebruiker';
+                    roleElement.className = 'value user';
+                }
+                
+                // Status (always active for now)
+                const statusElement = document.getElementById('user-status');
+                statusElement.textContent = 'Actief';
+                statusElement.className = 'value active';
+                
+                // Show content and hide loading
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('user-content').style.display = 'block';
+                
+            } catch (error) {
+                console.error('Error displaying user:', error);
+                showError('Fout bij het weergeven van de gebruiker gegevens.');
+            }
         }
     </script>
 </body>

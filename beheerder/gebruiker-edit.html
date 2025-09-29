@@ -21,7 +21,7 @@
                 </div>
                 <div>
                     <a class="login" href="/login"><i class="fas fa-sign-in-alt"></i>Login</a>
-                    <p class="logout name">NAME HERE</p>
+                    <p class="logout name"></p>
                     <a class="logout" onclick="logout()">Logout</a>
                 </div>
             </nav>
@@ -46,41 +46,47 @@
             </div>
 
             <div id="user-form-section" class="content-section">
-                <div id="loading">
-                    <p>Laden...</p>
+                <div id="loading" class="loading-container">
+                    <div class="loading-spinner"></div>
+                    <p>Laden van gebruiker gegevens...</p>
                 </div>
                 <form id="user-form" style="display: none;">
                     <div class="form-grid">
                         <div class="form-group">
                             <label for="user-firstname">Voornaam *</label>
-                            <input type="text" id="user-firstname" required>
+                            <input type="text" id="user-firstname" required maxlength="100" autocomplete="given-name" pattern="[A-Za-z\s-']{2,}" title="Alleen letters, spaties, streepjes en apostrofs toegestaan (min. 2 karakters)">
+                            <div class="field-error" id="firstname-error"></div>
                         </div>
                         <div class="form-group">
                             <label for="user-lastname">Achternaam *</label>
-                            <input type="text" id="user-lastname" required>
+                            <input type="text" id="user-lastname" required maxlength="100" autocomplete="family-name" pattern="[A-Za-z\s-']{2,}" title="Alleen letters, spaties, streepjes en apostrofs toegestaan (min. 2 karakters)">
+                            <div class="field-error" id="lastname-error"></div>
                         </div>
                         <div class="form-group full-width">
                             <label for="user-email">Email *</label>
-                            <input type="email" id="user-email" required>
-                            <p id="user-email-error" class="text-danger" style="display:none; font-size: 0.9em; margin-top: 5px;"></p>
+                            <input type="email" id="user-email" required maxlength="255" autocomplete="email" placeholder="gebruiker@voorbeeld.nl">
+                            <div class="field-error" id="email-error"></div>
                         </div>
                         <div class="form-group" id="password-reset-group" style="display: none;">
                             <label>Wachtwoord beheer</label>
-                            <div style="display: flex; align-items: center; gap: 10px;">
+                            <div class="password-reset-container">
                                 <button type="button" class="btn btn-warning btn-small" id="reset-password-btn" onclick="togglePasswordReset()">
                                     <i class="fas fa-key"></i> Wachtwoord Resetten
                                 </button>
-                                <span id="reset-status" style="display: none; color: #dc3545; font-weight: bold;">
-                                    <i class="fas fa-exclamation-triangle"></i> Wachtwoord wordt gereset bij opslaan
-                                </span>
+                                <div id="reset-status" style="display: none;" class="reset-warning">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    <span>Wachtwoord wordt gereset en gebruiker ontvangt een nieuwe inloglink per email</span>
+                                </div>
                             </div>
                         </div>
                         <div class="form-group">
                             <label for="user-admin">Rol *</label>
                             <select id="user-admin" required>
+                                <option value="">Selecteer een rol...</option>
                                 <option value="2">Gebruiker</option>
-                                <option value="1">Admin</option>
+                                <option value="1">Administrator</option>
                             </select>
+                            <div class="field-error" id="admin-error"></div>
                         </div>
                     </div>
                     <div class="form-actions">
@@ -89,8 +95,15 @@
                     </div>
                 </form>
                 <div id="error-message" style="display: none;">
-                    <p class="text-danger">Fout bij het laden van de gebruiker.</p>
-                    <button class="btn btn-secondary" onclick="goBack()">Terug naar overzicht</button>
+                    <div class="error-container">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <h3>Fout bij laden</h3>
+                        <p id="error-text">Er is een fout opgetreden bij het laden van de gebruiker.</p>
+                        <div class="error-actions">
+                            <button class="btn btn-primary" onclick="retryLoad()">Opnieuw proberen</button>
+                            <button class="btn btn-secondary" onclick="goBack()">Terug naar overzicht</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </main>
@@ -126,14 +139,99 @@
             border: 1px solid #ddd;
             border-radius: 4px;
             font-size: 14px;
+            transition: border-color 0.2s, box-shadow 0.2s;
         }
         
         .form-group input:focus,
         .form-group textarea:focus,
         .form-group select:focus {
             outline: none;
-            border-color: #007bff;
+            border-color: var(--primary-color);
             box-shadow: 0 0 0 2px rgba(0,123,255,.25);
+        }
+        
+        .form-group input.error,
+        .form-group select.error {
+            border-color: #dc3545;
+            box-shadow: 0 0 0 2px rgba(220,53,69,.25);
+        }
+        
+        .field-error {
+            color: #dc3545;
+            font-size: 0.875rem;
+            margin-top: 5px;
+            display: none;
+        }
+        
+        .field-error.show {
+            display: block;
+        }
+        
+        .loading-container {
+            text-align: center;
+            padding: 60px 20px;
+        }
+        
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .error-container {
+            text-align: center;
+            padding: 40px 20px;
+            color: #721c24;
+        }
+        
+        .error-container i {
+            font-size: 3rem;
+            color: #dc3545;
+            margin-bottom: 20px;
+        }
+        
+        .error-container h3 {
+            margin-bottom: 10px;
+            color: #721c24;
+        }
+        
+        .error-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .password-reset-container {
+            display: flex;
+            /* flex-direction: column; */
+            gap: 10px;
+        }
+        
+        .reset-warning {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 4px;
+            padding: 10px;
+            color: #856404;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .reset-warning i {
+            color: #f39c12;
         }
         
         .form-actions {
@@ -153,14 +251,9 @@
             font-size: 12px;
         }
         
-        #reset-status {
-            animation: pulse 2s infinite;
-        }
-        
-        @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.5; }
-            100% { opacity: 1; }
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
         }
         
         @media (max-width: 768px) {
@@ -171,6 +264,15 @@
             .form-group.full-width {
                 grid-column: span 1;
             }
+            
+            .form-actions {
+                justify-content: center;
+            }
+            
+            .error-actions {
+                flex-direction: column;
+                align-items: center;
+            }
         }
     </style>
 
@@ -180,8 +282,18 @@
         let currentUser = null;
         let isEditMode = false;
         let passwordResetRequested = false;
+        let retryCount = 0;
+        const MAX_RETRIES = 3;
 
-        // Helper functions for text handling
+        // Validation rules
+        const validationRules = {
+            firstname: { required: true, minLength: 2, maxLength: 100, pattern: /^[A-Za-z\s\-']+$/ },
+            lastname: { required: true, minLength: 2, maxLength: 100, pattern: /^[A-Za-z\s\-']+$/ },
+            email: { required: true, maxLength: 255, pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/ },
+            admin: { required: true }
+        };
+
+        // Helper functions
         function escapeHtml(text) {
             if (!text) return '';
             const div = document.createElement('div');
@@ -189,13 +301,12 @@
             return div.innerHTML;
         }
 
-        // Get user ID from URL parameters
         function getUserIdFromUrl() {
             const urlParams = new URLSearchParams(window.location.search);
-            return urlParams.get('id');
+            const id = urlParams.get('id');
+            return id ? parseInt(id) : null;
         }
 
-        // Go back to previous page or users list
         function goBack() {
             if (document.referrer && document.referrer.includes('/beheerder/')) {
                 window.history.back();
@@ -204,7 +315,6 @@
             }
         }
 
-        // Toggle password reset request
         function togglePasswordReset() {
             passwordResetRequested = !passwordResetRequested;
             const btn = document.getElementById('reset-password-btn');
@@ -213,7 +323,7 @@
             if (passwordResetRequested) {
                 btn.innerHTML = '<i class="fas fa-undo"></i> Annuleren Reset';
                 btn.className = 'btn btn-danger btn-small';
-                status.style.display = 'inline';
+                status.style.display = 'block';
             } else {
                 btn.innerHTML = '<i class="fas fa-key"></i> Wachtwoord Resetten';
                 btn.className = 'btn btn-warning btn-small';
@@ -221,8 +331,127 @@
             }
         }
 
+        // Validation functions
+        function clearAllErrors() {
+            document.querySelectorAll('.field-error').forEach(error => {
+                error.classList.remove('show');
+                error.textContent = '';
+            });
+            document.querySelectorAll('input, select').forEach(field => {
+                field.classList.remove('error');
+            });
+        }
+
+        function showFieldError(fieldId, message) {
+            const field = document.getElementById(fieldId);
+            const errorElement = document.getElementById(fieldId.replace('user-', '') + '-error');
+            
+            if (field) field.classList.add('error');
+            if (errorElement) {
+                errorElement.textContent = message;
+                errorElement.classList.add('show');
+            }
+        }
+
+        function validateField(fieldId, value) {
+            const fieldName = fieldId.replace('user-', '');
+            const rules = validationRules[fieldName];
+            
+            if (!rules) return true;
+
+            // Required validation
+            if (rules.required && (!value || (typeof value === 'string' && value.trim() === ''))) {
+                showFieldError(fieldId, `${getFieldLabel(fieldName)} is verplicht`);
+                return false;
+            }
+
+            // String validations
+            if (typeof value === 'string' && value.trim() !== '') {
+                const trimmedValue = value.trim();
+                
+                if (rules.minLength && trimmedValue.length < rules.minLength) {
+                    showFieldError(fieldId, `Minimaal ${rules.minLength} karakters vereist`);
+                    return false;
+                }
+                if (rules.maxLength && trimmedValue.length > rules.maxLength) {
+                    showFieldError(fieldId, `Maximaal ${rules.maxLength} karakters toegestaan`);
+                    return false;
+                }
+                if (rules.pattern && !rules.pattern.test(trimmedValue)) {
+                    if (fieldName === 'email') {
+                        showFieldError(fieldId, 'Voer een geldig e-mailadres in');
+                    } else {
+                        showFieldError(fieldId, 'Alleen letters, spaties, streepjes en apostrofs toegestaan');
+                    }
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        function getFieldLabel(fieldName) {
+            const labels = {
+                firstname: 'Voornaam',
+                lastname: 'Achternaam',
+                email: 'E-mailadres',
+                admin: 'Rol'
+            };
+            return labels[fieldName] || fieldName;
+        }
+
+        function validateForm() {
+            clearAllErrors();
+            
+            const formData = getFormData();
+            let isValid = true;
+
+            // Validate each field
+            for (const [key, value] of Object.entries(formData)) {
+                if (key !== 'reset') {
+                    if (!validateField('user-' + key, value)) {
+                        isValid = false;
+                    }
+                }
+            }
+
+            return isValid;
+        }
+
+        function getFormData() {
+            return {
+                firstname: document.getElementById('user-firstname').value.trim(),
+                lastname: document.getElementById('user-lastname').value.trim(),
+                email: document.getElementById('user-email').value.trim(),
+                admin: document.getElementById('user-admin').value,
+                reset: passwordResetRequested
+            };
+        }
+
+        // Error handling
+        function retryLoad() {
+            const userId = getUserIdFromUrl();
+            if (userId && retryCount < MAX_RETRIES) {
+                retryCount++;
+                document.getElementById('error-message').style.display = 'none';
+                document.getElementById('loading').style.display = 'block';
+                loadUser(userId);
+            } else {
+                showError('Maximaal aantal pogingen bereikt. Probeer later opnieuw.');
+            }
+        }
+
+        function showError(message = 'Er is een fout opgetreden bij het laden van de gebruiker.') {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('user-form').style.display = 'none';
+            document.getElementById('error-text').textContent = message;
+            document.getElementById('error-message').style.display = 'block';
+        }
+
+        // Main functions
         document.addEventListener('DOMContentLoaded', function() {
             const userId = getUserIdFromUrl();
+            
             if (userId) {
                 isEditMode = true;
                 document.getElementById('page-title').textContent = 'Gebruiker Bewerken';
@@ -237,134 +466,144 @@
                 document.getElementById('user-form').style.display = 'block';
             }
 
+            // Add real-time validation
+            document.querySelectorAll('#user-form input, #user-form select').forEach(field => {
+                field.addEventListener('blur', function() {
+                    const fieldName = this.id.replace('user-', '');
+                    if (validationRules[fieldName]) {
+                        validateField(this.id, this.value);
+                    }
+                });
+                
+                field.addEventListener('input', function() {
+                    // Clear error when user starts typing
+                    this.classList.remove('error');
+                    const errorElement = document.getElementById(this.id.replace('user-', '') + '-error');
+                    if (errorElement) {
+                        errorElement.classList.remove('show');
+                    }
+                });
+            });
+
             // Handle form submission
             document.getElementById('user-form').addEventListener('submit', handleSubmit);
         });
 
         async function loadUser(id) {
+            if (!id) {
+                showError('Geen gebruiker ID gevonden.');
+                return;
+            }
+
             try {
-                const response = await fetch(`${API_URL}?id=${id}&token=${token}`);
-                
-                if (response.ok) {
-                    const users = await response.json();
-                    // API returns array, find the specific user
-                    const user = Array.isArray(users) ? 
-                        users.find(usr => usr.id == id) : users;
-                    
-                    if (user) {
-                        currentUser = user;
-                        populateForm(user);
-                    } else {
-                        showError();
+                const response = await fetch(`${API_URL}?id=${id}&token=${token}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
                     }
-                } else {
-                    showError();
+                });
+                
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        showError('U bent niet geautoriseerd. Log opnieuw in.');
+                        setTimeout(() => window.location.href = '/login', 2000);
+                        return;
+                    } else if (response.status === 404) {
+                        showError('Gebruiker niet gevonden.');
+                        return;
+                    } else {
+                        throw new Error(`HTTP ${response.status}`);
+                    }
                 }
+
+                const user = await response.json();
+                
+                if (!user || (Array.isArray(user) && user.length === 0)) {
+                    showError('Gebruiker niet gevonden.');
+                    return;
+                }
+                
+                // Handle both single object and array responses
+                const userData = Array.isArray(user) ? 
+                    user.find(usr => usr.id == id) : user;
+                
+                if (userData) {
+                    currentUser = userData;
+                    populateForm(userData);
+                } else {
+                    showError('Gebruiker niet gevonden.');
+                }
+                
             } catch (error) {
                 console.error('Error loading user:', error);
-                showError();
+                const errorMessage = retryCount < MAX_RETRIES ? 
+                    'Fout bij laden van gebruiker. Probeer het opnieuw.' : 
+                    'Kan gebruiker niet laden na meerdere pogingen.';
+                showError(errorMessage);
             }
         }
 
         function populateForm(user) {
-            document.getElementById('user-firstname').value = user.firstname || '';
-            document.getElementById('user-lastname').value = user.lastname || '';
-            document.getElementById('user-email').value = user.email || '';
-            document.getElementById('user-admin').value = user.admin ? '1' : '2';
-            
-            // Show form and hide loading
-            document.getElementById('loading').style.display = 'none';
-            document.getElementById('user-form').style.display = 'block';
+            try {
+                document.getElementById('user-firstname').value = user.firstname || '';
+                document.getElementById('user-lastname').value = user.lastname || '';
+                document.getElementById('user-email').value = user.email || '';
+                document.getElementById('user-admin').value = user.role === 1 ? '1' : '2';
+                
+                // Show form and hide loading
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('user-form').style.display = 'block';
+                
+            } catch (error) {
+                console.error('Error populating form:', error);
+                showError('Fout bij het vullen van het formulier.');
+            }
         }
 
         async function handleSubmit(e) {
             e.preventDefault();
             
-            const firstname = document.getElementById('user-firstname').value.trim();
-            const lastname = document.getElementById('user-lastname').value.trim();
-            const email = document.getElementById('user-email').value.trim();
-            const password = passwordResetRequested;
-            const role = parseInt(document.getElementById('user-admin').value);
-
-            // Reset previous error messages
-            const emailErrorEl = document.getElementById('user-email-error');
-            if (emailErrorEl) {
-                emailErrorEl.style.display = "none";
-                emailErrorEl.textContent = "";
-            }
-
-            // Validate fields
-            if (!firstname || !lastname) {
-                alert('Voornaam en achternaam zijn verplicht!');
-                return;
-            }
-
-            if (!email) {
-                if (emailErrorEl) {
-                    emailErrorEl.textContent = "Email is verplicht!";
-                    emailErrorEl.style.display = "block";
-                } else {
-                    alert('Email is verplicht!');
+            if (!validateForm()) {
+                // Scroll to first error
+                const firstError = document.querySelector('.field-error.show');
+                if (firstError) {
+                    firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }
                 return;
             }
 
-            // Email validation
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailRegex.test(email)) {
-                if (emailErrorEl) {
-                    emailErrorEl.textContent = "Voer een geldig e-mailadres in!";
-                    emailErrorEl.style.display = "block";
-                } else {
-                    alert('Voer een geldig e-mailadres in!');
-                }
-                return;
-            }
-
+            const formData = getFormData();
+            
             // Confirm password reset if requested
             if (passwordResetRequested && isEditMode) {
-                if (!confirm('Weet je zeker dat je het wachtwoord van deze gebruiker wilt resetten? De gebruiker krijgt automatisch een nieuw wachtwoord toegestuurd per email.')) {
+                if (!confirm('Weet je zeker dat je het wachtwoord van deze gebruiker wilt resetten? De gebruiker krijgt automatisch een nieuwe inloglink toegestuurd per email.')) {
                     return;
                 }
             }
 
-            // Pre-check for duplicate emails on the frontend
-            try {
-                const users = await fetch(`${API_URL}?token=${token}`).then(res => res.json());
-                if (users.some(u => {
-                    if (isEditMode && currentUser) {
-                        if (u.id !== currentUser.id) {
-                            return u.email.toLowerCase() === email.toLowerCase();
-                        }
-                    } else {
-                        return u.email.toLowerCase() === email.toLowerCase();
-                    }
-                    return false;
-                })) {
-                    if (emailErrorEl) {
-                        emailErrorEl.textContent = "Dit e-mailadres is al in gebruik!";
-                        emailErrorEl.style.display = "block";
-                    } else {
-                        alert('Dit e-mailadres is al in gebruik!');
-                    }
-                    return;
-                }
-            } catch (err) {
-                console.warn("Kon gebruikers niet vooraf controleren:", err);
+            // Check for duplicate email
+            if (await isDuplicateEmail(formData.email)) {
+                showFieldError('user-email', 'Dit e-mailadres is al in gebruik');
+                return;
             }
 
             // Build request payload
-            const formData = { email, role, firstname, lastname };
+            const requestData = {
+                email: formData.email,
+                role: parseInt(formData.admin),
+                firstname: formData.firstname,
+                lastname: formData.lastname
+            };
+
             if (isEditMode && currentUser) {
-                formData.id = currentUser.id;
-                formData.reset = password;
+                requestData.id = currentUser.id;
+                requestData.reset = formData.reset;
             }
 
-            // Disable submit button to prevent double submission
             const submitBtn = document.getElementById('submit-btn');
             const originalText = submitBtn.textContent;
             submitBtn.disabled = true;
-            submitBtn.textContent = 'Bezig...';
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Bezig...';
 
             try {
                 const response = await fetch(`${API_URL}?token=${token}`, {
@@ -372,40 +611,73 @@
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(formData)
+                    body: JSON.stringify(requestData)
                 });
 
-                if (response.ok) {
-                    let message = isEditMode ? 'Gebruiker bijgewerkt!' : 'Gebruiker toegevoegd!';
-                    if (passwordResetRequested && isEditMode) {
-                        message += '\n\nHet wachtwoord is gereset en de gebruiker ontvangt een nieuwe inloglink per email.';
-                    }
-                    alert(message);
+                if (!response.ok) {
+                    const errorText = await response.text();
                     
-                    // Redirect to users list
-                    window.location.href = '/beheerder/gebruikers.html';
-                } else {
-                    const error = await response.text();
-                    if (error.includes("Email is already in use") && emailErrorEl) {
-                        emailErrorEl.textContent = "Dit e-mailadres is al in gebruik!";
-                        emailErrorEl.style.display = "block";
-                    } else {
-                        alert('Fout: ' + error);
+                    if (errorText.includes('Email is already in use')) {
+                        showFieldError('user-email', 'Dit e-mailadres is al in gebruik');
+                        return;
+                    } else if (errorText.includes('Unauthorized')) {
+                        alert('U bent niet geautoriseerd. Log opnieuw in.');
+                        setTimeout(() => window.location.href = '/login', 2000);
+                        return;
                     }
+                    
+                    throw new Error(errorText || `HTTP ${response.status}`);
                 }
+
+                const result = await response.json();
+                
+                // Show success message
+                let successMessage = isEditMode ? 'Gebruiker succesvol bijgewerkt!' : 'Gebruiker succesvol toegevoegd!';
+                if (passwordResetRequested && isEditMode) {
+                    successMessage += '\n\nHet wachtwoord is gereset en de gebruiker ontvangt een nieuwe inloglink per email.';
+                }
+                
+                alert(successMessage);
+                
+                // Redirect after short delay
+                setTimeout(() => {
+                    window.location.href = '/beheerder/gebruikers.html';
+                }, 500);
+                
             } catch (error) {
                 console.error('Error saving user:', error);
-                alert('Fout bij opslaan van gebruiker');
+                let errorMessage = 'Er is een fout opgetreden bij het opslaan.';
+                
+                if (error.message.includes('required fields')) {
+                    errorMessage = 'Niet alle verplichte velden zijn ingevuld.';
+                } else if (error.message.includes('400')) {
+                    errorMessage = 'Ongeldige gegevens. Controleer uw invoer.';
+                }
+                
+                alert(errorMessage);
             } finally {
-                // Re-enable submit button
                 submitBtn.disabled = false;
                 submitBtn.textContent = originalText;
             }
         }
 
-        function showError() {
-            document.getElementById('loading').style.display = 'none';
-            document.getElementById('error-message').style.display = 'block';
+        async function isDuplicateEmail(email) {
+            try {
+                const response = await fetch(`${API_URL}?token=${token}`);
+                if (!response.ok) return false;
+                
+                const users = await response.json();
+                return users.some(u => {
+                    if (isEditMode && currentUser) {
+                        return u.id !== currentUser.id && u.email.toLowerCase() === email.toLowerCase();
+                    } else {
+                        return u.email.toLowerCase() === email.toLowerCase();
+                    }
+                });
+            } catch (err) {
+                console.warn("Kon gebruikers niet controleren:", err);
+                return false;
+            }
         }
     </script>
 </body>

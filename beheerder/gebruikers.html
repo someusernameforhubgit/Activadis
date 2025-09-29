@@ -21,7 +21,7 @@
                 </div>
                 <div>
                     <a class="login" href="/login"><i class="fas fa-sign-in-alt"></i>Login</a>
-                    <p class="logout name">NAME HERE</p>
+                    <p class="logout name"></p>
                     <a class="logout" onclick="logout()">Logout</a>
                 </div>
             </nav>
@@ -45,6 +45,22 @@
                 </button>
             </div>
 
+            <div id="users-list" class="content-section">
+                <h3>Alle Gebruikers</h3>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th><i class="fas fa-envelope"></i> Email</th>
+                            <th><i class="fas fa-user-tag"></i> Rol</th>
+                            <th class="justify-right">Acties</th>
+                        </tr>
+                    </thead>
+                    <tbody id="users-table-body">
+                    </tbody>
+                </table>
+            </div>
+        </main>
+        <div id="sideContent">
             <div id="user-stats">
                 <h3>Statistieken</h3>
                 <div class="item split-row">
@@ -68,25 +84,7 @@
                     <p><span id="regular-count">-</span></p>
                 </div>
             </div>
-
-            <div id="users-list" class="content-section">
-                <h3>Alle Gebruikers</h3>
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th><i class="fas fa-envelope"></i> Email</th>
-                            <th><i class="fas fa-user-tag"></i> Rol</th>
-                            <th><i class="fas fa-cogs"></i> Acties</th>
-                        </tr>
-                    </thead>
-                    <tbody id="users-table-body">
-                    </tbody>
-                </table>
-            </div>
-        </main>
-        <!-- <div id="sideContent">
-
-        </div> -->
+        </div>
     </section>
 
     <script>
@@ -124,7 +122,7 @@
                     <td>${user.email}</td>
                     <td>${user.role === 1 ? 'Admin' : 'Gebruiker'}</td>
                     <td onclick="event.stopPropagation()">
-                        <div style="display: flex; gap: 5px; flex-wrap: wrap;">
+                        <div class="justify-right" style="display: flex; gap: 5px; flex-wrap: wrap;">
                             <button class="btn btn-primary btn-small" onclick="window.location.href='/beheerder/gebruiker-edit.html?id=${user.id}'">
                                 <i class="fas fa-edit"></i>
                             </button>

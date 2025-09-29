@@ -21,7 +21,7 @@
                 </div>
                 <div>
                     <a class="login" href="/login"><i class="fas fa-sign-in-alt"></i>Login</a>
-                    <p class="logout name">NAME HERE</p>
+                    <p class="logout name"></p>
                     <a class="logout" onclick="logout()">Logout</a>
                 </div>
             </nav>
@@ -46,50 +46,61 @@
             </div>
 
             <div id="activity-form-section" class="content-section">
-                <div id="loading">
+                <div id="loading" class="loading-container">
+                    <div class="loading-spinner"></div>
                     <p>Laden...</p>
                 </div>
                 <form id="activity-form" style="display: none;">
                     <div class="form-grid">
                         <div class="form-group">
                             <label for="activity-naam">Naam *</label>
-                            <input type="text" id="activity-naam" required>
+                            <input type="text" id="activity-naam" required maxlength="255" autocomplete="off">
+                            <div class="field-error" id="naam-error"></div>
                         </div>
                         <div class="form-group">
                             <label for="activity-locatie">Locatie *</label>
-                            <input type="text" id="activity-locatie" required>
+                            <input type="text" id="activity-locatie" required maxlength="255" autocomplete="off">
+                            <div class="field-error" id="locatie-error"></div>
                         </div>
                         <div class="form-group checkbox">
-                            <label for="activity-eten">Inclusief Eten *</label>
+                            <label for="activity-eten">Inclusief Eten</label>
                             <input type="checkbox" id="activity-eten">
                         </div>
                         <div class="form-group full-width">
                             <label for="activity-omschrijving">Omschrijving *</label>
-                            <textarea id="activity-omschrijving" required rows="4"></textarea>
+                            <textarea id="activity-omschrijving" required rows="4" maxlength="2000" placeholder="Beschrijf de activiteit in detail..."></textarea>
+                            <small class="field-help">Maximaal 2000 karakters</small>
+                            <div class="field-error" id="omschrijving-error"></div>
                         </div>
                         <div class="form-group">
                             <label for="activity-begin">Begin datum/tijd *</label>
                             <input type="datetime-local" id="activity-begin" required>
+                            <div class="field-error" id="begin-error"></div>
                         </div>
                         <div class="form-group">
                             <label for="activity-eind">Eind datum/tijd *</label>
                             <input type="datetime-local" id="activity-eind" required>
+                            <div class="field-error" id="eind-error"></div>
                         </div>
                         <div class="form-group">
                             <label for="activity-kost">Kosten (€) *</label>
-                            <input type="number" id="activity-kost" step="0.01" required>
+                            <input type="number" id="activity-kost" step="0.01" min="0" max="9999.99" required placeholder="0.00">
+                            <div class="field-error" id="kost-error"></div>
                         </div>
                         <div class="form-group">
                             <label for="activity-max">Maximum deelnemers *</label>
-                            <input type="number" id="activity-max" required>
+                            <input type="number" id="activity-max" min="1" max="1000" required placeholder="10">
+                            <div class="field-error" id="max-error"></div>
                         </div>
                         <div class="form-group">
                             <label for="activity-min">Minimum deelnemers *</label>
-                            <input type="number" id="activity-min" required>
+                            <input type="number" id="activity-min" min="1" max="1000" required placeholder="1">
+                            <div class="field-error" id="min-error"></div>
                         </div>
                         <div class="form-group full-width">
                             <label for="activity-afbeelding">Afbeelding URL *</label>
-                            <input type="url" id="activity-afbeelding" required>
+                            <input type="url" id="activity-afbeelding" required maxlength="500" placeholder="https://voorbeeld.com/afbeelding.jpg">
+                            <div class="field-error" id="afbeelding-error"></div>
                         </div>
                     </div>
                     <div class="form-actions">
@@ -98,8 +109,15 @@
                     </div>
                 </form>
                 <div id="error-message" style="display: none;">
-                    <p class="text-danger">Fout bij het laden van de activiteit.</p>
-                    <button class="btn btn-secondary" onclick="goBack()">Terug naar overzicht</button>
+                    <div class="error-container">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <h3>Fout bij laden</h3>
+                        <p id="error-text">Er is een fout opgetreden bij het laden van de activiteit.</p>
+                        <div class="error-actions">
+                            <button class="btn btn-primary" onclick="retryLoad()">Opnieuw proberen</button>
+                            <button class="btn btn-secondary" onclick="goBack()">Terug naar overzicht</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </main>
@@ -123,13 +141,13 @@
         }
         
         .form-group.checkbox {
-            flex-direction: row;
-            align-items: center;
+            flex-direction: column;
+            justify-content: center;
             gap: 10px;
         }
         
         .form-group.checkbox input[type="checkbox"] {
-            width: auto;
+            width: fit-content;
         }
         
         .form-group label {
@@ -149,14 +167,84 @@
             border: 1px solid #ddd;
             border-radius: 4px;
             font-size: 14px;
+            transition: border-color 0.2s, box-shadow 0.2s;
         }
         
         .form-group input:focus,
         .form-group textarea:focus,
         .form-group select:focus {
             outline: none;
-            border-color: #007bff;
+            border-color: var(--primary-color);
             box-shadow: 0 0 0 2px rgba(0,123,255,.25);
+        }
+        
+        .form-group input.error,
+        .form-group textarea.error,
+        .form-group select.error {
+            border-color: #dc3545;
+            box-shadow: 0 0 0 2px rgba(220,53,69,.25);
+        }
+        
+        .field-error {
+            color: #dc3545;
+            font-size: 0.875rem;
+            margin-top: 5px;
+            display: none;
+        }
+        
+        .field-error.show {
+            display: block;
+        }
+        
+        .field-help {
+            font-size: 0.8rem;
+            color: #6c757d;
+            margin-top: 3px;
+        }
+        
+        .loading-container {
+            text-align: center;
+            padding: 60px 20px;
+        }
+        
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .error-container {
+            text-align: center;
+            padding: 40px 20px;
+            color: #721c24;
+        }
+        
+        .error-container i {
+            font-size: 3rem;
+            color: #dc3545;
+            margin-bottom: 20px;
+        }
+        
+        .error-container h3 {
+            margin-bottom: 10px;
+            color: #721c24;
+        }
+        
+        .error-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+            flex-wrap: wrap;
         }
         
         .form-actions {
@@ -167,6 +255,11 @@
             border-top: 1px solid #eee;
         }
         
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
         @media (max-width: 768px) {
             .form-grid {
                 grid-template-columns: 1fr;
@@ -174,6 +267,15 @@
             
             .form-group.full-width {
                 grid-column: span 1;
+            }
+            
+            .form-actions {
+                justify-content: center;
+            }
+            
+            .error-actions {
+                flex-direction: column;
+                align-items: center;
             }
         }
     </style>
@@ -183,8 +285,23 @@
         const API_URL = '/api/activiteit';
         let currentActivity = null;
         let isEditMode = false;
+        let retryCount = 0;
+        const MAX_RETRIES = 3;
 
-        // Helper functions for text handling
+        // Validation rules
+        const validationRules = {
+            naam: { required: true, minLength: 2, maxLength: 255 },
+            locatie: { required: true, minLength: 2, maxLength: 255 },
+            omschrijving: { required: true, minLength: 10, maxLength: 2000 },
+            begin: { required: true },
+            eind: { required: true },
+            kost: { required: true, min: 0, max: 9999.99 },
+            max: { required: true, min: 1, max: 1000 },
+            min: { required: true, min: 1, max: 1000 },
+            afbeelding: { required: true, pattern: /^https?:\/\/.+\.(jpg|jpeg|png|gif|webp)(\?.*)?$/i }
+        };
+
+        // Helper functions
         function escapeHtml(text) {
             if (!text) return '';
             const div = document.createElement('div');
@@ -192,13 +309,12 @@
             return div.innerHTML;
         }
 
-        // Get activity ID from URL parameters
         function getActivityIdFromUrl() {
             const urlParams = new URLSearchParams(window.location.search);
-            return urlParams.get('id');
+            const id = urlParams.get('id');
+            return id ? parseInt(id) : null;
         }
 
-        // Go back to previous page or activities list
         function goBack() {
             if (document.referrer && document.referrer.includes('/beheerder/')) {
                 window.history.back();
@@ -207,73 +323,129 @@
             }
         }
 
-        document.addEventListener('DOMContentLoaded', function() {
-            const activityId = getActivityIdFromUrl();
-            if (activityId) {
-                isEditMode = true;
-                document.getElementById('page-title').textContent = 'Activiteit Bewerken';
-                document.getElementById('submit-btn').textContent = 'Bijwerken';
-                document.title = 'Activadis - Activiteit Bewerken';
-                loadActivity(activityId);
-            } else {
-                // New activity mode
-                isEditMode = false;
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('activity-form').style.display = 'block';
+        // Validation functions
+        function clearAllErrors() {
+            document.querySelectorAll('.field-error').forEach(error => {
+                error.classList.remove('show');
+                error.textContent = '';
+            });
+            document.querySelectorAll('input, textarea').forEach(field => {
+                field.classList.remove('error');
+            });
+        }
+
+        function showFieldError(fieldId, message) {
+            const field = document.getElementById(fieldId);
+            const errorElement = document.getElementById(fieldId.replace('activity-', '') + '-error');
+            
+            if (field) field.classList.add('error');
+            if (errorElement) {
+                errorElement.textContent = message;
+                errorElement.classList.add('show');
+            }
+        }
+
+        function validateField(fieldId, value) {
+            const fieldName = fieldId.replace('activity-', '');
+            const rules = validationRules[fieldName];
+            
+            if (!rules) return true;
+
+            // Required validation
+            if (rules.required && (!value || (typeof value === 'string' && value.trim() === ''))) {
+                showFieldError(fieldId, `${fieldName.charAt(0).toUpperCase() + fieldName.slice(1)} is verplicht`);
+                return false;
             }
 
-            // Handle form submission
-            document.getElementById('activity-form').addEventListener('submit', handleSubmit);
-        });
-
-        async function loadActivity(id) {
-            try {
-                const response = await fetch(`${API_URL}?id=${id}&token=${token}`);
-                
-                if (response.ok) {
-                    const activities = await response.json();
-                    // API returns array, find the specific activity
-                    const activity = Array.isArray(activities) ? 
-                        activities.find(act => act.id == id) : activities;
-                    
-                    if (activity) {
-                        currentActivity = activity;
-                        populateForm(activity);
-                    } else {
-                        showError();
-                    }
-                } else {
-                    showError();
+            // String validations
+            if (typeof value === 'string') {
+                if (rules.minLength && value.length < rules.minLength) {
+                    showFieldError(fieldId, `Minimaal ${rules.minLength} karakters vereist`);
+                    return false;
                 }
-            } catch (error) {
-                console.error('Error loading activity:', error);
-                showError();
+                if (rules.maxLength && value.length > rules.maxLength) {
+                    showFieldError(fieldId, `Maximaal ${rules.maxLength} karakters toegestaan`);
+                    return false;
+                }
+                if (rules.pattern && !rules.pattern.test(value)) {
+                    showFieldError(fieldId, 'Ongeldig formaat (verwacht: geldige afbeelding URL)');
+                    return false;
+                }
             }
+
+            // Number validations
+            if (typeof value === 'number') {
+                if (rules.min !== undefined && value < rules.min) {
+                    showFieldError(fieldId, `Minimale waarde is ${rules.min}`);
+                    return false;
+                }
+                if (rules.max !== undefined && value > rules.max) {
+                    showFieldError(fieldId, `Maximale waarde is ${rules.max}`);
+                    return false;
+                }
+            }
+
+            return true;
         }
 
-        function populateForm(activity) {
-            document.getElementById('activity-naam').value = activity.naam || '';
-            document.getElementById('activity-locatie').value = activity.locatie || '';
-            document.getElementById('activity-eten').checked = Boolean(activity.eten);
-            document.getElementById('activity-omschrijving').value = activity.omschrijving || '';
-            document.getElementById('activity-begin').value = activity.begin ? 
-                new Date(activity.begin).toISOString().slice(0, 16) : '';
-            document.getElementById('activity-eind').value = activity.eind ? 
-                new Date(activity.eind).toISOString().slice(0, 16) : '';
-            document.getElementById('activity-kost').value = activity.kost || '';
-            document.getElementById('activity-max').value = activity.max || '';
-            document.getElementById('activity-min').value = activity.min || '';
-            document.getElementById('activity-afbeelding').value = activity.afbeelding || '';
+        function validateForm() {
+            clearAllErrors();
             
-            // Show form and hide loading
-            document.getElementById('loading').style.display = 'none';
-            document.getElementById('activity-form').style.display = 'block';
+            const formData = getFormData();
+            let isValid = true;
+
+            // Validate each field
+            for (const [key, value] of Object.entries(formData)) {
+                if (!validateField('activity-' + key, value)) {
+                    isValid = false;
+                }
+            }
+
+            // Custom cross-field validation
+            if (formData.min > formData.max) {
+                showFieldError('activity-min', 'Minimum kan niet groter zijn dan maximum');
+                showFieldError('activity-max', 'Maximum kan niet kleiner zijn dan minimum');
+                isValid = false;
+            }
+
+            // Date validation
+            const beginDate = new Date(formData.begin);
+            const eindDate = new Date(formData.eind);
+            const now = new Date();
+
+            if (beginDate <= now && !isEditMode) {
+                showFieldError('activity-begin', 'Begin datum moet in de toekomst liggen');
+                isValid = false;
+            }
+
+            if (beginDate >= eindDate) {
+                showFieldError('activity-eind', 'Eind datum moet na begin datum liggen');
+                isValid = false;
+            } else {
+                // Calculate duration more precisely
+                const durationMs = eindDate - beginDate;
+                const durationHours = Math.floor(durationMs / (1000 * 60 * 60));
+                const durationDays = Math.floor(durationMs / (1000 * 60 * 60 * 24));
+                
+                // Check maximum duration (3 days = 72 hours)
+                if (durationHours > 72) {
+                    const daysOver = Math.floor((durationHours - 72) / 24);
+                    showFieldError('activity-eind', `Activiteit duurt te lang (${durationDays} dagen). Maximaal 3 dagen (72 uur) toegestaan`);
+                    isValid = false;
+                }
+                
+                // Check minimum duration (15 minutes)
+                if (durationMs < 15 * 60 * 1000) {
+                    showFieldError('activity-eind', 'Activiteit moet minimaal 15 minuten duren');
+                    isValid = false;
+                }
+            }
+
+            return isValid;
         }
 
-        async function handleSubmit(e) {
-            e.preventDefault();
-            
-            const formData = {
+        function getFormData() {
+            return {
                 naam: document.getElementById('activity-naam').value.trim(),
                 locatie: document.getElementById('activity-locatie').value.trim(),
                 eten: document.getElementById('activity-eten').checked ? 1 : 0,
@@ -285,38 +457,194 @@
                 min: parseInt(document.getElementById('activity-min').value),
                 afbeelding: document.getElementById('activity-afbeelding').value.trim()
             };
+        }
 
-            // Validate required fields
-            for (const [key, value] of Object.entries(formData)) {
-                if (!value && value !== 0) {
-                    alert(`Vul het veld "${key}" in!`);
+        // Loading and error handling
+        function retryLoad() {
+            const activityId = getActivityIdFromUrl();
+            if (activityId && retryCount < MAX_RETRIES) {
+                retryCount++;
+                document.getElementById('error-message').style.display = 'none';
+                document.getElementById('loading').style.display = 'block';
+                loadActivity(activityId);
+            } else {
+                showError('Maximaal aantal pogingen bereikt. Probeer later opnieuw.');
+            }
+        }
+
+        function showError(message = 'Er is een fout opgetreden bij het laden van de activiteit.') {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('activity-form').style.display = 'none';
+            document.getElementById('error-text').textContent = message;
+            document.getElementById('error-message').style.display = 'block';
+        }
+
+        // Main functions
+        document.addEventListener('DOMContentLoaded', function() {
+            const activityId = getActivityIdFromUrl();
+            
+            if (activityId) {
+                isEditMode = true;
+                document.getElementById('page-title').textContent = 'Activiteit Bewerken';
+                document.getElementById('submit-btn').textContent = 'Bijwerken';
+                document.title = 'Activadis - Activiteit Bewerken';
+                loadActivity(activityId);
+            } else {
+                // New activity mode
+                isEditMode = false;
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('activity-form').style.display = 'block';
+                
+                // Set default values for new activity
+                const now = new Date();
+                const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+                const dayAfter = new Date(now.getTime() + 48 * 60 * 60 * 1000);
+                
+                document.getElementById('activity-begin').value = tomorrow.toISOString().slice(0, 16);
+                document.getElementById('activity-eind').value = dayAfter.toISOString().slice(0, 16);
+            }
+
+            // Add real-time validation
+            document.querySelectorAll('#activity-form input, #activity-form textarea').forEach(field => {
+                field.addEventListener('blur', function() {
+                    const fieldName = this.id.replace('activity-', '');
+                    if (validationRules[fieldName]) {
+                        let value = this.value;
+                        if (this.type === 'number') {
+                            value = parseFloat(value);
+                        }
+                        validateField(this.id, value);
+                    }
+                });
+                
+                field.addEventListener('input', function() {
+                    // Clear error when user starts typing
+                    this.classList.remove('error');
+                    const errorElement = document.getElementById(this.id.replace('activity-', '') + '-error');
+                    if (errorElement) {
+                        errorElement.classList.remove('show');
+                    }
+                });
+            });
+
+            // Handle form submission
+            document.getElementById('activity-form').addEventListener('submit', handleSubmit);
+        });
+
+        async function loadActivity(id) {
+            if (!id) {
+                showError('Geen activiteit ID gevonden.');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}?id=${id}&token=${token}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        showError('U bent niet geautoriseerd. Log opnieuw in.');
+                        setTimeout(() => window.location.href = '/login', 2000);
+                        return;
+                    } else if (response.status === 404) {
+                        showError('Activiteit niet gevonden.');
+                        return;
+                    } else {
+                        throw new Error(`HTTP ${response.status}`);
+                    }
+                }
+
+                const activity = await response.json();
+                
+                if (!activity || (Array.isArray(activity) && activity.length === 0)) {
+                    showError('Activiteit niet gevonden.');
                     return;
                 }
+                
+                // Handle both single object and array responses
+                const activityData = Array.isArray(activity) ? 
+                    activity.find(act => act.id == id) : activity;
+                
+                if (activityData) {
+                    currentActivity = activityData;
+                    populateForm(activityData);
+                } else {
+                    showError('Activiteit niet gevonden.');
+                }
+                
+            } catch (error) {
+                console.error('Error loading activity:', error);
+                const errorMessage = retryCount < MAX_RETRIES ? 
+                    'Fout bij laden van activiteit. Probeer het opnieuw.' : 
+                    'Kan activiteit niet laden na meerdere pogingen.';
+                showError(errorMessage);
             }
+        }
 
-            // Validate min <= max
-            if (formData.min > formData.max) {
-                alert('Minimum deelnemers kan niet groter zijn dan maximum deelnemers!');
+        function populateForm(activity) {
+            try {
+                document.getElementById('activity-naam').value = activity.naam || '';
+                document.getElementById('activity-locatie').value = activity.locatie || '';
+                document.getElementById('activity-eten').checked = Boolean(activity.eten);
+                document.getElementById('activity-omschrijving').value = activity.omschrijving || '';
+                
+                // Handle date formatting safely
+                if (activity.begin) {
+                    const beginDate = new Date(activity.begin);
+                    if (!isNaN(beginDate.getTime())) {
+                        document.getElementById('activity-begin').value = beginDate.toISOString().slice(0, 16);
+                    }
+                }
+                
+                if (activity.eind) {
+                    const eindDate = new Date(activity.eind);
+                    if (!isNaN(eindDate.getTime())) {
+                        document.getElementById('activity-eind').value = eindDate.toISOString().slice(0, 16);
+                    }
+                }
+                
+                document.getElementById('activity-kost').value = activity.kost || '';
+                document.getElementById('activity-max').value = activity.max || '';
+                document.getElementById('activity-min').value = activity.min || '';
+                document.getElementById('activity-afbeelding').value = activity.afbeelding || '';
+                
+                // Show form and hide loading
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('activity-form').style.display = 'block';
+                
+            } catch (error) {
+                console.error('Error populating form:', error);
+                showError('Fout bij het vullen van het formulier.');
+            }
+        }
+
+        async function handleSubmit(e) {
+            e.preventDefault();
+            
+            if (!validateForm()) {
+                // Scroll to first error
+                const firstError = document.querySelector('.field-error.show');
+                if (firstError) {
+                    firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
                 return;
             }
 
-            // Validate dates
-            const beginDate = new Date(formData.begin);
-            const eindDate = new Date(formData.eind);
-            if (beginDate >= eindDate) {
-                alert('Begin datum moet voor eind datum liggen!');
-                return;
-            }
-
+            const formData = getFormData();
+            
             if (isEditMode && currentActivity) {
                 formData.id = currentActivity.id;
+                formData.hidden = currentActivity.hidden || 0; // Preserve hidden status
             }
 
-            // Disable submit button to prevent double submission
             const submitBtn = document.getElementById('submit-btn');
             const originalText = submitBtn.textContent;
             submitBtn.disabled = true;
-            submitBtn.textContent = 'Bezig...';
+            submitBtn.innerHTML = '<i class=\"fas fa-spinner fa-spin\"></i> Bezig...';
 
             try {
                 const response = await fetch(`${API_URL}?token=${token}`, {
@@ -327,28 +655,43 @@
                     body: JSON.stringify(formData)
                 });
 
-                if (response.ok) {
-                    alert(isEditMode ? 'Activiteit bijgewerkt!' : 'Activiteit toegevoegd!');
-                    
-                    // Redirect to activities list
-                    window.location.href = '/beheerder/activiteiten.html';
-                } else {
-                    const error = await response.text();
-                    alert('Fout: ' + error);
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(errorText || `HTTP ${response.status}`);
                 }
+
+                const result = await response.json();
+                
+                // Show success message
+                const successMessage = isEditMode ? 
+                    'Activiteit succesvol bijgewerkt!' : 
+                    'Activiteit succesvol toegevoegd!';
+                    
+                alert(successMessage);
+                
+                // Redirect after short delay to allow user to see success
+                setTimeout(() => {
+                    window.location.href = '/beheerder/activiteiten.html';
+                }, 500);
+                
             } catch (error) {
                 console.error('Error saving activity:', error);
-                alert('Fout bij opslaan van activiteit');
+                let errorMessage = 'Er is een fout opgetreden bij het opslaan.';
+                
+                if (error.message.includes('required fields')) {
+                    errorMessage = 'Niet alle verplichte velden zijn ingevuld.';
+                } else if (error.message.includes('Unauthorized')) {
+                    errorMessage = 'U bent niet geautoriseerd. Log opnieuw in.';
+                    setTimeout(() => window.location.href = '/login', 2000);
+                } else if (error.message.includes('400')) {
+                    errorMessage = 'Ongeldige gegevens. Controleer uw invoer.';
+                }
+                
+                alert(errorMessage);
             } finally {
-                // Re-enable submit button
                 submitBtn.disabled = false;
                 submitBtn.textContent = originalText;
             }
-        }
-
-        function showError() {
-            document.getElementById('loading').style.display = 'none';
-            document.getElementById('error-message').style.display = 'block';
         }
     </script>
 </body>
