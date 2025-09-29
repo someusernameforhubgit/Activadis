@@ -1,136 +1,14 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport"
-        content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Activadis</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Activadis - Verleden Activiteiten</title>
     <link rel="stylesheet" href="../css/style.css">
     <link rel="stylesheet" href="../css/header.css">
     <link rel="stylesheet" href="../css/mainsite.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        .activity-sections {
-            display: flex;
-            flex-direction: column;
-            gap: 2rem;
-            padding: 2rem 1rem;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        
-        .activity-section h1 {
-            color: #2c3e50;
-            font-size: 1.8rem;
-            margin: 2rem 0 1rem 0;
-            padding-bottom: 0.5rem;
-            border-bottom: 2px solid #f0f0f0;
-        }
-        
-        .events {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 1.5rem;
-        }
-        
-        .event {
-            background: #f9f9f9;
-            border-radius: 8px;
-            padding: 1.25rem;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-        
-        .event:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
-        
-        .event-info {
-            margin-bottom: 1rem;
-        }
-        
-        .event-title {
-            color: #2c3e50;
-            margin-top: 0;
-            margin-bottom: 0.5rem;
-        }
-        
-        .location, .date {
-            color: #666;
-            font-size: 0.9rem;
-            margin: 0.25rem 0;
-        }
-        
-        .description {
-            color: #444;
-            margin: 0.75rem 0;
-            line-height: 1.5;
-        }
-        
-        .icons {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 1rem;
-            padding-top: 1rem;
-            border-top: 1px solid #eee;
-        }
-        
-        .btn {
-            padding: 0.5rem 1rem;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            text-decoration: none;
-            font-size: 0.9rem;
-            transition: background-color 0.2s;
-        }
-        
-        .btn-primary {
-            background-color: #3498db;
-            color: white;
-        }
-        
-        .btn-primary:hover {
-            background-color: #2980b9;
-        }
-        
-        .btn-danger {
-            background-color: #e74c3c;
-            color: white;
-        }
-        
-        .btn-danger:hover {
-            background-color: #c0392b;
-        }
-        
-        .no-activities {
-            color: #7f8c8d;
-            font-style: italic;
-            text-align: center;
-            padding: 2rem;
-            grid-column: 1 / -1;
-        }
-        
-        @media (max-width: 768px) {
-            .events {
-                grid-template-columns: 1fr;
-            }
-            
-            .activity-section h1 {
-                font-size: 1.5rem;
-                margin: 1.5rem 0 0.75rem 0;
-            }
-        }
-    </style>
-    <script src="./script.js"></script>
 </head>
-
 <body>
     <header>
         <div class="container">
@@ -149,19 +27,13 @@
             </div>
         </div>
     </header>
-    <main class="activity-sections">
-        <div class="filters">
-            <a href="/aankomend"><i class="fas fa-calendar-alt"></i>Aankomende Activiteiten</a>
-            <a href="/ingeschreven"><i class="fas fa-user-check"></i>Ingeschreven Activiteiten</a>
-        </div>
+        <main class="activity-sections">
+            <div class="filters">
+                <a href="/aankomend"><i class="fas fa-calendar-alt"></i>Aankomende Activiteiten</a>
+                <a href="/ingeschreven"><i class="fas fa-user-check"></i>Ingeschreven Activiteiten</a>
+            </div>
         <section class="activity-section">
-            <h2>Beschikbaar</h2>
-            <div id="availableActivities" class="events"></div>
-        </section>
-        
-        <section class="activity-section logged-in">
-            <h2>Ingeschreven</h2>
-            <div id="myUpcomingActivities" class="events"></div>
+            <div id="pastActivities" class="events"></div>
         </section>
     </main>
     <script>
@@ -176,13 +48,8 @@
             
             if (jwtData.id) {
                 userId = jwtData.id;
-                // Load user enrollments
                 const enrollmentsRes = await fetch(`/api/inschrijving?gebruiker=${userId}&token=${jwt}`);
                 userEnrollments = await enrollmentsRes.json() || [];
-
-                document.querySelectorAll(".logged-in").forEach(section => section.style.display = "block");
-            } else {
-                document.querySelectorAll(".logged-in").forEach(section => section.style.display = "none");
             }
 
             // Load all activities
@@ -194,29 +61,10 @@
 
         function updateActivitySections() {
             const now = new Date();
-            const enrolledActivityIds = userEnrollments.map(e => e.activiteit);
-            
-            // Filter activities
-            const availableActivities = allActivities.filter(activity => 
-                !enrolledActivityIds.includes(activity.id) && 
-                new Date(activity.begin) > now
-            );
-            
-            const myUpcomingActivities = allActivities.filter(activity => 
-                enrolledActivityIds.includes(activity.id) && 
-                new Date(activity.begin) > now
-            );
-            
-            const ongoingActivities = allActivities.filter(activity => 
-                enrolledActivityIds.includes(activity.id) &&
-                new Date(activity.begin) <= now && 
-                new Date(activity.eind) >= now
-            );
-            
-            // Render each section
-            renderActivities('availableActivities', availableActivities, false);
-            renderActivities('myUpcomingActivities', myUpcomingActivities, true);
-            // renderActivities('ongoingActivities', ongoingActivities, true);
+            const past = allActivities.filter(activity => new Date(activity.eind) < now);
+            // sort descending by end date (most recent first)
+            past.sort((a,b) => new Date(b.eind) - new Date(a.eind));
+            renderActivities('pastActivities', past, false);
         }
 
         function renderActivities(containerId, activities, isEnrolled) {
@@ -252,9 +100,9 @@
             });
         }
         
-        // Helper function to escape HTML
         function escapeHtml(unsafe) {
-            return unsafe
+            if (unsafe === null || unsafe === undefined) return '';
+            return String(unsafe)
                 .replace(/&/g, "&amp;")
                 .replace(/</g, "&lt;")
                 .replace(/>/g, "&gt;")
@@ -262,7 +110,6 @@
                 .replace(/'/g, "&#039;");
         }
 
-        // Initialize the page when loaded
         document.addEventListener('DOMContentLoaded', () => {
             initializePage();
         });
@@ -287,14 +134,9 @@
                 });
 
                 if (response.ok) {
-                    // Update the enrollments list
                     const enrollmentsRes = await fetch(`/api/inschrijving?gebruiker=${jwtData.id}&token=${jwt}`);
                     userEnrollments = await enrollmentsRes.json() || [];
-                    
-                    // Refresh the activity sections
                     updateActivitySections();
-                    
-                    // Show success message
                     alert(`Je bent ${isEnrolled ? 'uitgeschreven' : 'ingeschreven'} voor deze activiteit`);
                 } else {
                     throw new Error('Failed to update enrollment');
@@ -305,6 +147,7 @@
             }
         }
     </script>
+    <!-- Shared authentication / nav state script -->
+    <script src="/script.js"></script>
 </body>
-
 </html>

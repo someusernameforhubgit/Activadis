@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Activadis - Aankomende Activiteiten</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/header.css">
+    <link rel="stylesheet" href="../css/mainsite.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="left">
+                <p><b><span class="accent">Acti</span>vadis</b></p>
+                <nav>
+                    <div class="nav-left">
+                        <a href="/"><i class="fas fa-home"></i>Home</a>
+                    </div>
+                    <div>
+                        <a class="login" href="/login"><i class="fas fa-sign-in-alt"></i>Login</a>
+                        <p class="logout name">NAME HERE</p>
+                        <a class="logout" onclick="logout()">Logout</a>
+                    </div>
+                </nav>
+            </div>
+        </div>
+    </header>
+        <main class="activity-sections">
+            <div class="filters">
+                <a href="/aankomend.html" class="active"><i class="fas fa-calendar-alt"></i>Aankomende Activiteiten</a>
+                <a href="/ingeschreven.html"><i class="fas fa-user-check"></i>Ingeschreven Activiteiten</a>
+            </div>
+            <section class="activity-section">
+                <div id="availableActivities" class="events"></div>
+            </section>
+    </main>
+    <script>
+        const jwt = sessionStorage.getItem("JWT");
+        let userId = null;
+        let userEnrollments = [];
+        let allActivities = [];
+
+        async function initializePage() {
+            const res = await fetch("/api/verify?token=" + jwt);
+            const jwtData = await res.json();
+            
+            if (jwtData.id) {
+                userId = jwtData.id;
+                const enrollmentsRes = await fetch(`/api/inschrijving?gebruiker=${userId}&token=${jwt}`);
+                userEnrollments = await enrollmentsRes.json() || [];
+            }
+
+            // Load all activities
+            const activitiesRes = await fetch('/api/activiteit');
+            allActivities = await activitiesRes.json();
+
+            updateActivitySections();
+        }
+
+        function updateActivitySections() {
+            const now = new Date();
+            const upcoming = allActivities.filter(activity => new Date(activity.begin) > now);
+            renderActivities('availableActivities', upcoming, false);
+        }
+
+        function renderActivities(containerId, activities, isEnrolled) {
+            const container = document.getElementById(containerId);
+            if (!container) {
+                console.warn('Container not found:', containerId);
+                return;
+            }
+            container.innerHTML = '';
+            
+            if (activities.length === 0) {
+                container.innerHTML = '<p class="no-activities">Geen activiteiten gevonden</p>';
+                return;
+            }
+            
+            activities.forEach(activity => {
+                const eventElement = document.createElement('div');
+                eventElement.classList.add('event');
+                
+                const beginDate = new Date(activity.begin);
+                const endDate = new Date(activity.eind);
+                
+                eventElement.innerHTML = `
+                    <div class="event-info">
+                        <h2 class="event-title">${escapeHtml(activity.naam)}</h2>
+                        <h3 class="location">${escapeHtml(activity.locatie)}</h3>
+                        <p class="date">Begin: ${beginDate.toLocaleString('nl-NL')}</p>
+                        <p class="date">Einde: ${endDate.toLocaleString('nl-NL')}</p>
+                        ${activity.omschrijving ? `<p class="description">${escapeHtml(activity.omschrijving)}</p>` : ''}
+                    </div>
+                    <div class="icons">
+                        <a href="activiteit.html?id=${activity.id}" class="btn">Info</a>
+                    </div>
+                `;
+                
+                container.appendChild(eventElement);
+            });
+        }
+        
+        function escapeHtml(unsafe) {
+            if (unsafe === null || unsafe === undefined) return '';
+            return String(unsafe)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initializePage();
+        });
+
+        async function joinActivity(id) {
+            try {
+                const res = await fetch("/api/verify?token=" + jwt);
+                const jwtData = await res.json();
+                
+                if (!jwtData.id) {
+                    alert("Je moet ingelogd zijn om je in te schrijven voor een activiteit.");
+                    return;
+                }
+
+                const isEnrolled = userEnrollments.some(e => e.activiteit === id);
+                const method = isEnrolled ? 'DELETE' : 'POST';
+                
+                const response = await fetch(`/api/inschrijving?gebruiker=${jwtData.id}&activiteit=${id}&token=${jwt}`, {
+                    method: method,
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ gebruiker: jwtData.id, activiteit: id })
+                });
+
+                if (response.ok) {
+                    const enrollmentsRes = await fetch(`/api/inschrijving?gebruiker=${jwtData.id}&token=${jwt}`);
+                    userEnrollments = await enrollmentsRes.json() || [];
+                    updateActivitySections();
+                    alert(`Je bent ${isEnrolled ? 'uitgeschreven' : 'ingeschreven'} voor deze activiteit`);
+                } else {
+                    throw new Error('Failed to update enrollment');
+                }
+            } catch (error) {
+                console.error('Error updating enrollment:', error);
+                alert('Er is een fout opgetreden. Probeer het opnieuw.');
+            }
+        }
+    </script>
+    <!-- Shared authentication / nav state script -->
+    <script src="/script.js"></script>
+</body>
+</html>
