@@ -18,6 +18,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             });
 
             document.querySelector("#password").addEventListener("input", checkPassword);
+            document.querySelector("#resetLink").classList.add("display-none");
         }
     }
 
