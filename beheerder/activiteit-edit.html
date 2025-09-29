@@ -98,8 +98,8 @@
                             <div class="field-error" id="min-error"></div>
                         </div>
                         <div class="form-group full-width">
-                            <label for="activity-afbeelding">Afbeelding URL *</label>
-                            <input type="url" id="activity-afbeelding" required maxlength="500" placeholder="https://voorbeeld.com/afbeelding.jpg">
+                            <label for="activity-afbeelding">Afbeelding URL</label>
+                            <input type="url" id="activity-afbeelding" maxlength="500" placeholder="https://voorbeeld.com/afbeelding.jpg">
                             <div class="field-error" id="afbeelding-error"></div>
                         </div>
                     </div>
@@ -298,7 +298,7 @@
             kost: { required: true, min: 0, max: 9999.99 },
             max: { required: true, min: 1, max: 1000 },
             min: { required: true, min: 1, max: 1000 },
-            afbeelding: { required: true, pattern: /^https?:\/\/.+\.(jpg|jpeg|png|gif|webp)(\?.*)?$/i }
+            afbeelding: { required: false, pattern: /^https?:\/\/.+\.(jpg|jpeg|png|gif|webp)(\?.*)?$/i }
         };
 
         // Helper functions
@@ -355,6 +355,11 @@
             if (rules.required && (!value || (typeof value === 'string' && value.trim() === ''))) {
                 showFieldError(fieldId, `${fieldName.charAt(0).toUpperCase() + fieldName.slice(1)} is verplicht`);
                 return false;
+            }
+
+            // Skip other validations if field is not required and empty
+            if (!rules.required && (!value || (typeof value === 'string' && value.trim() === ''))) {
+                return true;
             }
 
             // String validations
@@ -428,11 +433,11 @@
                 const durationDays = Math.floor(durationMs / (1000 * 60 * 60 * 24));
                 
                 // Check maximum duration (3 days = 72 hours)
-                if (durationHours > 72) {
-                    const daysOver = Math.floor((durationHours - 72) / 24);
-                    showFieldError('activity-eind', `Activiteit duurt te lang (${durationDays} dagen). Maximaal 3 dagen (72 uur) toegestaan`);
-                    isValid = false;
-                }
+                // if (durationHours > 72) {
+                //     const daysOver = Math.floor((durationHours - 72) / 24);
+                //     showFieldError('activity-eind', `Activiteit duurt te lang (${durationDays} dagen). Maximaal 3 dagen (72 uur) toegestaan`);
+                //     isValid = false;
+                // }
                 
                 // Check minimum duration (15 minutes)
                 if (durationMs < 15 * 60 * 1000) {
@@ -660,7 +665,11 @@
                     throw new Error(errorText || `HTTP ${response.status}`);
                 }
 
-                const result = await response.json();
+                if (isEditMode) {
+                    // No response expected for PUT request
+                } else {
+                    const result = await response.json();
+                }
                 
                 // Show success message
                 const successMessage = isEditMode ? 
@@ -678,13 +687,21 @@
                 console.error('Error saving activity:', error);
                 let errorMessage = 'Er is een fout opgetreden bij het opslaan.';
                 
-                if (error.message.includes('required fields')) {
-                    errorMessage = 'Niet alle verplichte velden zijn ingevuld.';
+                // Parse the actual server error message
+                if (error.message.includes('required fields') || error.message.includes('missing')) {
+                    errorMessage = 'Niet alle verplichte velden zijn correct ingevuld: ' + error.message;
                 } else if (error.message.includes('Unauthorized')) {
                     errorMessage = 'U bent niet geautoriseerd. Log opnieuw in.';
                     setTimeout(() => window.location.href = '/login', 2000);
+                } else if (error.message.includes('Database error')) {
+                    errorMessage = 'Database fout opgetreden. Probeer het later opnieuw.';
                 } else if (error.message.includes('400')) {
                     errorMessage = 'Ongeldige gegevens. Controleer uw invoer.';
+                } else if (error.message.includes('500')) {
+                    errorMessage = 'Server fout opgetreden. Probeer het later opnieuw.';
+                } else if (error.message.trim() !== '') {
+                    // Use the actual error message from the server
+                    errorMessage = error.message;
                 }
                 
                 alert(errorMessage);
