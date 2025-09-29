@@ -10,6 +10,7 @@ app.use("/beheerder", express.static("beheerder"));
 app.use("/login", express.static("login"));
 app.use("/css", express.static("css"));
 app.use("/img", express.static("img"));
+app.use("/reset", express.static("reset"));
 
 // Serve test page
 app.get('/test-newlines', (req, res) => {
