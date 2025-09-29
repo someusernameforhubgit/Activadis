@@ -310,18 +310,8 @@
 
         // Function to handle sharing
         function handleShare() {
-            if (navigator.share) {
-                navigator.share({
-                    title: document.getElementById('activityTitle').textContent,
-                    text: 'Bekijk deze activiteit op Activadis!',
-                    url: window.location.href
-                });
-            } else {
-                // Fallback: copy to clipboard
-                navigator.clipboard.writeText(window.location.href).then(() => {
-                    alert('Link gekopieerd naar klembord!');
-                });
-            }
+            const currentUrl = encodeURIComponent(window.location.href);
+            window.open(`instagram://story-camera?url=${currentUrl}`, "_blank");
         }
 
         async function loadButtons() {
