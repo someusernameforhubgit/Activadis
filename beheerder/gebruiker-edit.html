@@ -75,7 +75,7 @@
                                 </button>
                                 <div id="reset-status" style="display: none;" class="reset-warning">
                                     <i class="fas fa-exclamation-triangle"></i>
-                                    <span>Wachtwoord wordt gereset en gebruiker ontvangt een nieuwe inloglink per email</span>
+                                    <span>Wachtwoord wordt gereset na het publiceren van uw wijzigingen</span>
                                 </div>
                             </div>
                         </div>
@@ -638,7 +638,7 @@
                 // Show success message
                 let successMessage = isEditMode ? 'Gebruiker succesvol bijgewerkt!' : 'Gebruiker succesvol toegevoegd!';
                 if (passwordResetRequested && isEditMode) {
-                    successMessage += '\n\nHet wachtwoord is gereset en de gebruiker ontvangt een nieuwe inloglink per email.';
+                    successMessage += '\n\nDe gebruiker ontvangt een nieuwe inloglink per email.';
                 }
                 
                 alert(successMessage);
