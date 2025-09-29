@@ -21,7 +21,7 @@
     --line-color: rgba(255, 255, 255, 0.1);
 
     --main-padding: 20px;
-    --header-main-height: calc(44px + var(--header-offset-top, 0px));
+    --header-main-height: calc(61px + var(--header-offset-top, 0px));
     --header-offset-top: 30px;
 }
 
@@ -42,6 +42,33 @@ body {
     max-width: calc(1600px + var(--main-padding) * 2);
     margin: 0 auto;
     padding: 0 var(--main-padding);
+}
+
+.row {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.split-row {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+
+.justify-right {
+    display: flex;
+    justify-content: flex-end;
+    text-align: right;
+}
+
+.fa-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 24px;
 }
 
 .display-none {
@@ -334,6 +361,9 @@ ul {
     text-decoration: none;
     display: inline-block;
     text-align: center;
+    width: fit-content;
+    height: fit-content;
+    min-width: fit-content;
 }
 
 .btn-small {
@@ -393,6 +423,21 @@ ul {
 
 /* Beheerder Page Specific Styling */
 
+/* Headings */
+#mainContent .heading.split-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid var(--primary-color);
+    /* padding: 0 10px 20px 10px; */
+    padding-bottom: 20px;
+    margin-bottom: 25px;
+
+    i {
+        margin-right: 6px;
+    }
+}
+
 /* Dashboard Stats */
 #dashboard-stats {
     background: linear-gradient(135deg, var(--background-light-color) 0%, var(--background-light-color-dark) 100%);
@@ -400,7 +445,7 @@ ul {
     padding: 25px;
     margin-bottom: 30px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    border: 1px solid #e0e0e0;
+    border: 1px solid #ccc;
 }
 
 #dashboard-stats h3 {
@@ -449,7 +494,7 @@ ul {
     padding: 25px;
     margin-bottom: 25px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-    border: 1px solid #e0e0e0;
+    border: 1px solid #ccc;
     color: var(--font-secondary-color);
 }
 
@@ -474,7 +519,7 @@ ul {
     padding: 25px;
     margin-bottom: 25px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-    border: 1px solid #e0e0e0;
+    border: 1px solid #ccc;
     color: var(--font-secondary-color);
 }
 
@@ -511,8 +556,8 @@ ul {
 .actions {
     margin: 20px 0;
     padding: 15px 0;
-    border-top: 1px solid #e0e0e0;
-    border-bottom: 1px solid #e0e0e0;
+    border-top: 1px solid #ccc;
+    border-bottom: 1px solid #ccc;
     display: flex;
     gap: 15px;
     align-items: center;
@@ -532,7 +577,7 @@ ul {
 /* Activity/User Cards */
 .activity-card, .user-card {
     background: var(--background-light-color);
-    border: 1px solid #e0e0e0;
+    border: 1px solid #ccc;
     border-radius: 12px;
     padding: 20px;
     margin-bottom: 20px;
@@ -591,6 +636,10 @@ ul {
     font-size: 14px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+
+    i {
+        margin-right: 3px;
+    }
 }
 
 .data-table td {
@@ -606,7 +655,6 @@ ul {
 
 .data-table tbody tr:hover {
     background: #f8f9fa;
-    transform: scale(1.01);
 }
 
 .data-table tbody tr:last-child td {
@@ -620,7 +668,7 @@ ul {
     padding: 25px;
     margin-bottom: 25px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-    border: 1px solid #e0e0e0;
+    border: 1px solid #ccc;
     color: var(--font-secondary-color);
 }
 
@@ -656,7 +704,7 @@ ul {
     font-family: inherit;
     font-weight: 500;
     transition: all 0.3s ease;
-    margin: 5px;
+    /* margin: 5px; */
 }
 
 .settings-section button:hover {
@@ -683,26 +731,20 @@ ul {
 
 /* Side Content Stats */
 #activity-stats, #user-stats, #quick-stats {
-    background: var(--background-light-color);
-    border-radius: 12px;
-    padding: 20px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-    border: 1px solid #e0e0e0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 20px;
 }
 
 #activity-stats h3, #user-stats h3, #quick-stats h3 {
-    color: var(--font-secondary-color);
-    margin-bottom: 15px;
+    color: var(--font-primary-color);
     font-weight: 600;
     font-size: 1.1em;
 }
 
 #activity-stats p, #user-stats p, #quick-stats p {
-    color: var(--font-secondary-color);
-    margin-bottom: 10px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    color: var(--font-primary-color);
 }
 
 #activity-stats span, #user-stats span, #quick-stats span {
@@ -712,6 +754,8 @@ ul {
 
 /* Logs Textarea */
 #logs {
+    width: 100%;
+    height: 300px;
     background: #1e1e1e;
     color: #f0f0f0;
     border: 1px solid #444;
@@ -730,7 +774,7 @@ ul {
     padding: 25px;
     margin-bottom: 25px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-    border: 1px solid #e0e0e0;
+    border: 1px solid #ccc;
     color: var(--font-secondary-color);
 }
 
@@ -760,7 +804,7 @@ ul {
 /* Activity Container */
 #activiteiten-container > div {
     background: var(--background-light-color);
-    border: 1px solid #e0e0e0;
+    border: 1px solid #ccc;
     border-radius: 12px;
     padding: 20px;
     margin-bottom: 20px;
@@ -832,7 +876,7 @@ ul {
 .section-separator {
     margin: 25px 0;
     border: none;
-    border-top: 1px solid #e0e0e0;
+    border-top: 1px solid #ccc;
 }
 
 .section-separator.thick {
@@ -848,7 +892,7 @@ ul {
     flex-wrap: wrap;
     margin: 15px 0;
     padding: 15px 0;
-    border-top: 1px solid #e0e0e0;
+    border-top: 1px solid #ccc;
 }
 
 .button-group:first-of-type {
@@ -857,7 +901,7 @@ ul {
 }
 
 .button-group:last-of-type {
-    border-bottom: 1px solid #e0e0e0;
+    border-bottom: 1px solid #ccc;
     padding-bottom: 15px;
 }
 
@@ -938,10 +982,6 @@ ul {
     margin-bottom: 30px;
 }
 
-.activity-header {
-    text-align: center;
-}
-
 .activity-title {
     font-size: 2.5rem;
     font-weight: 700;
@@ -987,7 +1027,7 @@ ul {
     border-radius: 15px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
     overflow: hidden;
-    border: 1px solid #e0e0e0;
+    border: 1px solid #ccc;
 }
 
 .card-header {
@@ -1023,8 +1063,8 @@ ul {
     gap: 15px;
     padding: 20px;
     background: #f8f9fa;
+    border: 1px solid #e9ecef;
     border-radius: 10px;
-    border-left: 4px solid var(--primary-color);
 }
 
 .detail-icon {

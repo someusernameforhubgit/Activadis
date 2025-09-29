@@ -7,7 +7,6 @@
     <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="/css/header.css">
     <script src="/beheerder/verifyAdmin.js"></script>
-    <script src="/beheerder/modal-utils.js"></script>
     <title>Activadis - Gebruikers Beheer</title>
 </head>
 <body>
@@ -22,7 +21,7 @@
                 </div>
                 <div>
                     <a class="login" href="/login"><i class="fas fa-sign-in-alt"></i>Login</a>
-                    <p class="logout name">NAME HERE</p>
+                    <p class="logout name"></p>
                     <a class="logout" onclick="logout()">Logout</a>
                 </div>
             </nav>
@@ -33,31 +32,27 @@
         <aside id="sidebar">
             <h1>Navigatie</h1>
             <ul>
-                <li><a href="/beheerder/index.html">Dashboard</a></li>
+                <li><a href="/beheerder/">Dashboard</a></li>
                 <li><a href="/beheerder/gebruikers.html">Gebruikers</a></li>
                 <li><a href="/beheerder/activiteiten.html">Activiteiten</a></li>
-                <li><a href="/beheerder/instellingen.html">Instellingen</a></li>
             </ul>
         </aside>
         <main id="mainContent">
-            <h2><i class="fas fa-users"></i> Gebruikers Beheer</h2>
-            
-            <div class="page-actions">
-                <h3><i class="fas fa-user-plus"></i> Nieuwe Gebruiker</h3>
-                <button class="btn btn-primary" onclick="ModalManager.instance.showEditUserModal()">
+            <div class="heading split-row">
+                <h2>Gebruikers Beheer</h2>
+                <button class="btn btn-primary" onclick="window.location.href='/beheerder/gebruiker-edit.html'">
                     <i class="fas fa-plus"></i> Nieuwe Gebruiker Toevoegen
                 </button>
             </div>
 
             <div id="users-list" class="content-section">
-                <h3><i class="fas fa-list"></i> Alle Gebruikers</h3>
+                <h3>Alle Gebruikers</h3>
                 <table class="data-table">
                     <thead>
                         <tr>
-                            <th><i class="fas fa-hashtag"></i> ID</th>
                             <th><i class="fas fa-envelope"></i> Email</th>
                             <th><i class="fas fa-user-tag"></i> Rol</th>
-                            <th><i class="fas fa-cogs"></i> Acties</th>
+                            <th class="justify-right">Acties</th>
                         </tr>
                     </thead>
                     <tbody id="users-table-body">
@@ -67,10 +62,27 @@
         </main>
         <div id="sideContent">
             <div id="user-stats">
-                <h3><i class="fas fa-chart-pie"></i> Gebruiker Statistieken</h3>
-                <p><i class="fas fa-users"></i> Totaal gebruikers: <span id="total-users">-</span></p>
-                <p><i class="fas fa-crown"></i> Admins: <span id="admin-count">-</span></p>
-                <p><i class="fas fa-user"></i> Reguliere gebruikers: <span id="regular-count">-</span></p>
+                <h3>Statistieken</h3>
+                <div class="item split-row">
+                    <div class="item split-row">
+                        <div class="row">
+                            <div class="fa-container"><i class="fas fa-users"></i></div><p>Totaal</p>
+                        </div>
+                        <p><span id="total-users">-</span></p>
+                    </div>
+                </div>
+                <div class="item split-row">
+                    <div class="row">
+                        <div class="fa-container"><i class="fas fa-crown"></i></div><p>Admins</p>
+                    </div>
+                    <p><span id="admin-count">-</span></p>
+                </div>
+                <div class="item split-row">
+                    <div class="row">
+                        <div class="fa-container"><i class="fas fa-user"></i></div><p>Reguliere gebruikers</p>
+                    </div>
+                    <p><span id="regular-count">-</span></p>
+                </div>
             </div>
         </div>
     </section>
@@ -101,20 +113,21 @@
 
             users.forEach(user => {
                 const row = document.createElement('tr');
+                row.style.cursor = 'pointer';
+                row.onclick = function() {
+                    window.location.href = `/beheerder/gebruiker-view.html?id=${user.id}`;
+                };
+                
                 row.innerHTML = `
-                    <td>${user.id}</td>
-                    <td><i class="fas fa-envelope"></i> ${user.email}</td>
-                    <td>${user.role === 1 ? '<i class="fas fa-crown"></i> Admin' : '<i class="fas fa-user"></i> Gebruiker'}</td>
-                    <td>
-                        <div style="display: flex; gap: 5px; flex-wrap: wrap;">
-                            <button class="btn btn-info btn-small" onclick="ModalManager.instance.showViewUserModal(${JSON.stringify(user).replace(/"/g, '&quot;')})">
-                                <i class="fas fa-eye"></i> Bekijken
-                            </button>
-                            <button class="btn btn-primary btn-small" onclick="ModalManager.instance.showEditUserModal(${JSON.stringify(user).replace(/"/g, '&quot;')})">
-                                <i class="fas fa-edit"></i> Bewerken
+                    <td>${user.email}</td>
+                    <td>${user.role === 1 ? 'Admin' : 'Gebruiker'}</td>
+                    <td onclick="event.stopPropagation()">
+                        <div class="justify-right" style="display: flex; gap: 5px; flex-wrap: wrap;">
+                            <button class="btn btn-primary btn-small" onclick="window.location.href='/beheerder/gebruiker-edit.html?id=${user.id}'">
+                                <i class="fas fa-edit"></i>
                             </button>
                             <button class="btn btn-danger btn-small" onclick="deleteUser(${user.id})">
-                                <i class="fas fa-trash"></i> Verwijderen
+                                <i class="fas fa-trash"></i>
                             </button>
                         </div>
                     </td>
@@ -132,8 +145,6 @@
             document.getElementById('admin-count').textContent = adminCount;
             document.getElementById('regular-count').textContent = regularCount;
         }
-
-        // User creation now handled by ModalManager
 
         async function deleteUser(id) {
             if (confirm('Weet je zeker dat je deze gebruiker wilt verwijderen?')) {
@@ -154,8 +165,6 @@
                 }
             }
         }
-
-        // User editing now handled by ModalManager
     </script>
 </body>
 </html>
