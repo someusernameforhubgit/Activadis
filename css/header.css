@@ -5,7 +5,7 @@ header {
     width: 100%;
     transform: translateX(-50%);
     /* padding-top: var(--header-offset-top); */
-    background-image: linear-gradient(to bottom, rgba(10, 13, 47, 0.8) 0%, rgba(10, 13, 47, 0) 100%);
+    background-image: linear-gradient(to bottom, rgba(10, 13, 47, 1) 0%, rgba(10, 13, 47, 0.6) 100%);
     padding: var(--header-offset-top) var(--main-padding) 0 var(--main-padding);
     border-bottom-left-radius: calc(var(--header-main-height) / 1.5 - var(--header-offset-top));
     border-bottom-right-radius: calc(var(--header-main-height) / 1.5 - var(--header-offset-top));
