@@ -156,10 +156,6 @@
                                 <i class="fas fa-user-minus"></i>
                                 Uitschrijven voor activiteit
                             </button>
-                            <button id="shareBtn" class="btn btn-secondary">
-                                <i class="fas fa-share-alt"></i>
-                                Delen
-                            </button>
                         </div>
                         
                         <div class="registration-note">
@@ -306,12 +302,6 @@
             } else {
                 alert("Je moet ingelogd zijn om je in te schrijven voor een activiteit.");
             }
-        }
-
-        // Function to handle sharing
-        function handleShare() {
-            const currentUrl = encodeURIComponent(window.location.href);
-            window.open(`instagram://story-camera?url=${currentUrl}`, "_blank");
         }
 
         async function loadButtons() {
