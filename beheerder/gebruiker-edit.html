@@ -54,12 +54,12 @@
                     <div class="form-grid">
                         <div class="form-group">
                             <label for="user-firstname">Voornaam *</label>
-                            <input type="text" id="user-firstname" required maxlength="100" autocomplete="given-name" pattern="[A-Za-z\s-']{2,}" title="Alleen letters, spaties, streepjes en apostrofs toegestaan (min. 2 karakters)">
+                            <input type="text" id="user-firstname" required maxlength="100" autocomplete="given-name" pattern="[A-Za-z\s\-']{2,}" title="Alleen letters, spaties, streepjes en apostrofs toegestaan (min. 2 karakters)">
                             <div class="field-error" id="firstname-error"></div>
                         </div>
                         <div class="form-group">
                             <label for="user-lastname">Achternaam *</label>
-                            <input type="text" id="user-lastname" required maxlength="100" autocomplete="family-name" pattern="[A-Za-z\s-']{2,}" title="Alleen letters, spaties, streepjes en apostrofs toegestaan (min. 2 karakters)">
+                            <input type="text" id="user-lastname" required maxlength="100" autocomplete="family-name" pattern="[A-Za-z\s\-']{2,}" title="Alleen letters, spaties, streepjes en apostrofs toegestaan (min. 2 karakters)">
                             <div class="field-error" id="lastname-error"></div>
                         </div>
                         <div class="form-group full-width">
@@ -75,7 +75,7 @@
                                 </button>
                                 <div id="reset-status" style="display: none;" class="reset-warning">
                                     <i class="fas fa-exclamation-triangle"></i>
-                                    <span>Wachtwoord wordt gereset en gebruiker ontvangt een nieuwe inloglink per email</span>
+                                    <span>Wachtwoord wordt gereset na het publiceren van uw wijzigingen</span>
                                 </div>
                             </div>
                         </div>
@@ -290,7 +290,7 @@
             firstname: { required: true, minLength: 2, maxLength: 100, pattern: /^[A-Za-z\s\-']+$/ },
             lastname: { required: true, minLength: 2, maxLength: 100, pattern: /^[A-Za-z\s\-']+$/ },
             email: { required: true, maxLength: 255, pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/ },
-            admin: { required: true }
+            admin: { required: true }, 
         };
 
         // Helper functions
@@ -629,12 +629,16 @@
                     throw new Error(errorText || `HTTP ${response.status}`);
                 }
 
-                const result = await response.json();
+                if (isEditMode) {
+                    // No response expected for PUT request
+                } else {
+                    const result = await response.json();
+                }
                 
                 // Show success message
                 let successMessage = isEditMode ? 'Gebruiker succesvol bijgewerkt!' : 'Gebruiker succesvol toegevoegd!';
                 if (passwordResetRequested && isEditMode) {
-                    successMessage += '\n\nHet wachtwoord is gereset en de gebruiker ontvangt een nieuwe inloglink per email.';
+                    successMessage += '\n\nDe gebruiker ontvangt een nieuwe inloglink per email.';
                 }
                 
                 alert(successMessage);
@@ -648,10 +652,18 @@
                 console.error('Error saving user:', error);
                 let errorMessage = 'Er is een fout opgetreden bij het opslaan.';
                 
-                if (error.message.includes('required fields')) {
-                    errorMessage = 'Niet alle verplichte velden zijn ingevuld.';
+                // Parse the actual server error message
+                if (error.message.includes('required fields') || error.message.includes('missing')) {
+                    errorMessage = 'Niet alle verplichte velden zijn correct ingevuld: ' + error.message;
+                } else if (error.message.includes('Email is already in use')) {
+                    errorMessage = 'Dit e-mailadres is al in gebruik. Kies een ander e-mailadres.';
+                } else if (error.message.includes('Database error') || error.message.includes('500')) {
+                    errorMessage = 'Database fout opgetreden. Probeer het later opnieuw.';
                 } else if (error.message.includes('400')) {
                     errorMessage = 'Ongeldige gegevens. Controleer uw invoer.';
+                } else if (error.message.trim() !== '') {
+                    // Use the actual error message from the server
+                    errorMessage = error.message;
                 }
                 
                 alert(errorMessage);
@@ -664,9 +676,17 @@
         async function isDuplicateEmail(email) {
             try {
                 const response = await fetch(`${API_URL}?token=${token}`);
-                if (!response.ok) return false;
+                if (!response.ok) {
+                    console.warn("Could not check for duplicate emails, server responded with:", response.status);
+                    return false; // Allow submission, let server handle validation
+                }
                 
                 const users = await response.json();
+                if (!Array.isArray(users)) {
+                    console.warn("Unexpected response format when checking for duplicate emails");
+                    return false;
+                }
+                
                 return users.some(u => {
                     if (isEditMode && currentUser) {
                         return u.id !== currentUser.id && u.email.toLowerCase() === email.toLowerCase();
@@ -675,8 +695,8 @@
                     }
                 });
             } catch (err) {
-                console.warn("Kon gebruikers niet controleren:", err);
-                return false;
+                console.warn("Error checking for duplicate emails:", err);
+                return false; // Allow submission, let server handle validation
             }
         }
     </script>
