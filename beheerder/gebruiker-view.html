@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/header.css">
+    <script src="/beheerder/verifyAdmin.js"></script>
+    <title>Activadis - Gebruiker Details</title>
+</head>
+<body>
+<header>
+    <div class="container">
+        <div class="left">
+            <p><b><span class="accent">Acti</span>vadis</b>: Gebruiker Details</p>
+            <nav>
+                <div class="nav-left">
+                    <a href="/"><i class="fas fa-home"></i>Home</a>
+                    <a href="/beheerder">Beheerder</a>
+                </div>
+                <div>
+                    <a class="login" href="/login"><i class="fas fa-sign-in-alt"></i>Login</a>
+                    <p class="logout name">NAME HERE</p>
+                    <a class="logout" onclick="logout()">Logout</a>
+                </div>
+            </nav>
+        </div>
+    </div>
+</header>
+    <section id="mainContainer">
+        <aside id="sidebar">
+            <h1>Navigatie</h1>
+            <ul>
+                <li><a href="/beheerder/index.html">Dashboard</a></li>
+                <li><a href="/beheerder/gebruikers.html">Gebruikers</a></li>
+                <li><a href="/beheerder/activiteiten.html">Activiteiten</a></li>
+            </ul>
+        </aside>
+        <main id="mainContent">
+            <div class="heading split-row">
+                <h2 id="page-title">Gebruiker Details</h2>
+                <div>
+                    <button class="btn btn-secondary" onclick="goBack()">
+                        <i class="fas fa-arrow-left"></i> Terug
+                    </button>
+                    <button class="btn btn-primary" id="edit-btn" onclick="editUser()">
+                        <i class="fas fa-edit"></i> Bewerken
+                    </button>
+                </div>
+            </div>
+
+            <div id="user-details" class="content-section">
+                <div id="loading">
+                    <p>Laden...</p>
+                </div>
+                <div id="user-content" style="display: none;">
+                    <div class="view-item">
+                        <label>Email:</label>
+                        <div class="value" id="user-email"></div>
+                    </div>
+                    <div class="view-item">
+                        <label>Voornaam:</label>
+                        <div class="value" id="user-firstname"></div>
+                    </div>
+                    <div class="view-item">
+                        <label>Achternaam:</label>
+                        <div class="value" id="user-lastname"></div>
+                    </div>
+                    <div class="view-item">
+                        <label>Rol:</label>
+                        <div class="value" id="user-role"></div>
+                    </div>
+                </div>
+                <div id="error-message" style="display: none;">
+                    <p class="text-danger">Fout bij het laden van de gebruiker.</p>
+                    <button class="btn btn-secondary" onclick="goBack()">Terug naar overzicht</button>
+                </div>
+            </div>
+        </main>
+    </section>
+
+    <script>
+        const token = sessionStorage.getItem("JWT");
+        const API_URL = '/api/gebruiker';
+        let currentUser = null;
+
+        // Helper functions for text handling
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Get user ID from URL parameters
+        function getUserIdFromUrl() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get('id');
+        }
+
+        // Go back to previous page or users list
+        function goBack() {
+            if (document.referrer && document.referrer.includes('/beheerder/')) {
+                window.history.back();
+            } else {
+                window.location.href = '/beheerder/gebruikers.html';
+            }
+        }
+
+        // Navigate to edit page
+        function editUser() {
+            if (currentUser) {
+                window.location.href = `/beheerder/gebruiker-edit.html?id=${currentUser.id}`;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const userId = getUserIdFromUrl();
+            if (userId) {
+                loadUser(userId);
+            } else {
+                showError();
+            }
+        });
+
+        async function loadUser(id) {
+            try {
+                const response = await fetch(`${API_URL}?id=${id}&token=${token}`);
+                
+                if (response.ok) {
+                    const users = await response.json();
+                    // API returns array, find the specific user
+                    const user = Array.isArray(users) ? 
+                        users.find(usr => usr.id == id) : users;
+                    
+                    if (user) {
+                        currentUser = user;
+                        displayUser(user);
+                    } else {
+                        showError();
+                    }
+                } else {
+                    showError();
+                }
+            } catch (error) {
+                console.error('Error loading user:', error);
+                showError();
+            }
+        }
+
+        function displayUser(user) {
+            // Update page title
+            const fullName = `${user.firstname || ''} ${user.lastname || ''}`.trim();
+            const displayName = fullName || user.email;
+            document.getElementById('page-title').textContent = `Gebruiker: ${displayName}`;
+            document.title = `Activadis - ${displayName}`;
+            
+            // Fill in the details
+            document.getElementById('user-email').innerHTML = escapeHtml(user.email);
+            document.getElementById('user-firstname').innerHTML = escapeHtml(user.firstname || 'Niet ingesteld');
+            document.getElementById('user-lastname').innerHTML = escapeHtml(user.lastname || 'Niet ingesteld');
+            document.getElementById('user-role').innerHTML = user.role === 1 ? 
+                '<span style="color: #dc3545;"><i class="fas fa-crown"></i> Admin</span>' : 
+                '<span style="color: #28a745;"><i class="fas fa-user"></i> Gebruiker</span>';
+            
+            // Show content and hide loading
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('user-content').style.display = 'block';
+        }
+
+        function showError() {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('error-message').style.display = 'block';
+        }
+    </script>
+</body>
+</html>

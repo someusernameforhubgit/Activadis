@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/header.css">
+    <script src="/beheerder/verifyAdmin.js"></script>
+    <title>Activadis - Activiteit Details</title>
+</head>
+<body>
+<header>
+    <div class="container">
+        <div class="left">
+            <p><b><span class="accent">Acti</span>vadis</b>: Activiteit Details</p>
+            <nav>
+                <div class="nav-left">
+                    <a href="/"><i class="fas fa-home"></i>Home</a>
+                    <a href="/beheerder">Beheerder</a>
+                </div>
+                <div>
+                    <a class="login" href="/login"><i class="fas fa-sign-in-alt"></i>Login</a>
+                    <p class="logout name">NAME HERE</p>
+                    <a class="logout" onclick="logout()">Logout</a>
+                </div>
+            </nav>
+        </div>
+    </div>
+</header>
+    <section id="mainContainer">
+        <aside id="sidebar">
+            <h1>Navigatie</h1>
+            <ul>
+                <li><a href="/beheerder/index.html">Dashboard</a></li>
+                <li><a href="/beheerder/gebruikers.html">Gebruikers</a></li>
+                <li><a href="/beheerder/activiteiten.html">Activiteiten</a></li>
+            </ul>
+        </aside>
+        <main id="mainContent">
+            <div class="heading split-row">
+                <h2 id="page-title">Activiteit Details</h2>
+                <div>
+                    <button class="btn btn-secondary" onclick="goBack()">
+                        <i class="fas fa-arrow-left"></i> Terug
+                    </button>
+                    <button class="btn btn-primary" id="edit-btn" onclick="editActivity()">
+                        <i class="fas fa-edit"></i> Bewerken
+                    </button>
+                </div>
+            </div>
+
+            <div id="activity-details" class="content-section">
+                <div id="loading">
+                    <p>Laden...</p>
+                </div>
+                <div id="activity-content" style="display: none;">
+                    <div class="view-item">
+                        <label>Naam:</label>
+                        <div class="value" id="activity-naam"></div>
+                    </div>
+                    <div class="view-item">
+                        <label>Locatie:</label>
+                        <div class="value" id="activity-locatie"></div>
+                    </div>
+                    <div class="view-item">
+                        <label>Omschrijving:</label>
+                        <div class="value" id="activity-omschrijving"></div>
+                    </div>
+                    <div class="view-item">
+                        <label>Begin datum/tijd:</label>
+                        <div class="value" id="activity-begin"></div>
+                    </div>
+                    <div class="view-item">
+                        <label>Eind datum/tijd:</label>
+                        <div class="value" id="activity-eind"></div>
+                    </div>
+                    <div class="view-item">
+                        <label>Inclusief Eten:</label>
+                        <div class="value" id="activity-eten"></div>
+                    </div>
+                    <div class="view-item">
+                        <label>Kosten:</label>
+                        <div class="value" id="activity-kost"></div>
+                    </div>
+                    <div class="view-item">
+                        <label>Deelnemers:</label>
+                        <div class="value" id="activity-deelnemers"></div>
+                    </div>
+                    <div class="view-item">
+                        <label>Afbeelding:</label>
+                        <div class="value" id="activity-afbeelding"></div>
+                    </div>
+                </div>
+                <div id="error-message" style="display: none;">
+                    <p class="text-danger">Fout bij het laden van de activiteit.</p>
+                    <button class="btn btn-secondary" onclick="goBack()">Terug naar overzicht</button>
+                </div>
+            </div>
+        </main>
+    </section>
+
+    <script>
+        const token = sessionStorage.getItem("JWT");
+        const API_URL = '/api/activiteit';
+        let currentActivity = null;
+
+        // Helper functions for text handling
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function formatTextWithNewlines(text) {
+            if (!text) return '';
+            return escapeHtml(text).replace(/\n/g, '<br>');
+        }
+
+        // Get activity ID from URL parameters
+        function getActivityIdFromUrl() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get('id');
+        }
+
+        // Go back to previous page or activities list
+        function goBack() {
+            if (document.referrer && document.referrer.includes('/beheerder/')) {
+                window.history.back();
+            } else {
+                window.location.href = '/beheerder/activiteiten.html';
+            }
+        }
+
+        // Navigate to edit page
+        function editActivity() {
+            if (currentActivity) {
+                window.location.href = `/beheerder/activiteit-edit.html?id=${currentActivity.id}`;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const activityId = getActivityIdFromUrl();
+            if (activityId) {
+                loadActivity(activityId);
+            } else {
+                showError();
+            }
+        });
+
+        async function loadActivity(id) {
+            try {
+                const response = await fetch(`${API_URL}?id=${id}&token=${token}`);
+                
+                if (response.ok) {
+                    const activities = await response.json();
+                    // API returns array, find the specific activity
+                    const activity = Array.isArray(activities) ? 
+                        activities.find(act => act.id == id) : activities;
+                    
+                    if (activity) {
+                        currentActivity = activity;
+                        displayActivity(activity);
+                    } else {
+                        showError();
+                    }
+                } else {
+                    showError();
+                }
+            } catch (error) {
+                console.error('Error loading activity:', error);
+                showError();
+            }
+        }
+
+        function displayActivity(activity) {
+            const beginDate = new Date(activity.begin);
+            const eindDate = new Date(activity.eind);
+            
+            // Update page title
+            document.getElementById('page-title').textContent = `Activiteit: ${activity.naam}`;
+            document.title = `Activadis - ${activity.naam}`;
+            
+            // Fill in the details
+            document.getElementById('activity-naam').innerHTML = escapeHtml(activity.naam);
+            document.getElementById('activity-locatie').innerHTML = escapeHtml(activity.locatie);
+            document.getElementById('activity-omschrijving').innerHTML = formatTextWithNewlines(activity.omschrijving);
+            document.getElementById('activity-begin').innerHTML = beginDate.toLocaleString();
+            document.getElementById('activity-eind').innerHTML = eindDate.toLocaleString();
+            document.getElementById('activity-eten').innerHTML = activity.eten ? 'Ja' : 'Nee';
+            document.getElementById('activity-kost').innerHTML = `€${activity.kost}`;
+            document.getElementById('activity-deelnemers').innerHTML = `${activity.min} - ${activity.max}`;
+            document.getElementById('activity-afbeelding').innerHTML = 
+                `<a href="${escapeHtml(activity.afbeelding)}" target="_blank" class="btn btn-info btn-small">Bekijk Afbeelding</a>`;
+            
+            // Show content and hide loading
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('activity-content').style.display = 'block';
+        }
+
+        function showError() {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('error-message').style.display = 'block';
+        }
+    </script>
+</body>
+</html>

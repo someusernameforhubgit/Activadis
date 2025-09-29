@@ -7,7 +7,6 @@
     <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="/css/header.css">
     <script src="/beheerder/verifyAdmin.js"></script>
-    <script src="/beheerder/modal-utils.js"></script>
     <title>Activadis - Gebruikers Beheer</title>
 </head>
 <body>
@@ -36,13 +35,12 @@
                 <li><a href="/beheerder/index.html">Dashboard</a></li>
                 <li><a href="/beheerder/gebruikers.html">Gebruikers</a></li>
                 <li><a href="/beheerder/activiteiten.html">Activiteiten</a></li>
-                <li><a href="/beheerder/instellingen.html">Instellingen</a></li>
             </ul>
         </aside>
         <main id="mainContent">
             <div class="heading split-row">
                 <h2>Gebruikers Beheer</h2>
-                <button class="btn btn-primary" onclick="ModalManager.instance.showEditUserModal()">
+                <button class="btn btn-primary" onclick="window.location.href='/beheerder/gebruiker-edit.html'">
                     <i class="fas fa-plus"></i> Nieuwe Gebruiker Toevoegen
                 </button>
             </div>
@@ -119,7 +117,7 @@
                 const row = document.createElement('tr');
                 row.style.cursor = 'pointer';
                 row.onclick = function() {
-                    ModalManager.instance.showViewUserModal(user);
+                    window.location.href = `/beheerder/gebruiker-view.html?id=${user.id}`;
                 };
                 
                 row.innerHTML = `
@@ -127,7 +125,7 @@
                     <td>${user.role === 1 ? 'Admin' : 'Gebruiker'}</td>
                     <td onclick="event.stopPropagation()">
                         <div style="display: flex; gap: 5px; flex-wrap: wrap;">
-                            <button class="btn btn-primary btn-small" onclick="ModalManager.instance.showEditUserModal(${JSON.stringify(user).replace(/"/g, '&quot;')})">
+                            <button class="btn btn-primary btn-small" onclick="window.location.href='/beheerder/gebruiker-edit.html?id=${user.id}'">
                                 <i class="fas fa-edit"></i>
                             </button>
                             <button class="btn btn-danger btn-small" onclick="deleteUser(${user.id})">
@@ -150,8 +148,6 @@
             document.getElementById('regular-count').textContent = regularCount;
         }
 
-        // User creation now handled by ModalManager
-
         async function deleteUser(id) {
             if (confirm('Weet je zeker dat je deze gebruiker wilt verwijderen?')) {
                 try {
@@ -171,8 +167,6 @@
                 }
             }
         }
-
-        // User editing now handled by ModalManager
     </script>
 </body>
 </html>

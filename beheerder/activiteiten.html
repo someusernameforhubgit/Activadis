@@ -7,7 +7,6 @@
     <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="/css/header.css">
     <script src="/beheerder/verifyAdmin.js"></script>
-    <script src="/beheerder/modal-utils.js"></script>
     <title>Activadis - Activiteiten Beheer</title>
 </head>
 <body>
@@ -36,13 +35,12 @@
                 <li><a href="/beheerder/index.html">Dashboard</a></li>
                 <li><a href="/beheerder/gebruikers.html">Gebruikers</a></li>
                 <li><a href="/beheerder/activiteiten.html">Activiteiten</a></li>
-                <li><a href="/beheerder/instellingen.html">Instellingen</a></li>
             </ul>
         </aside>
         <main id="mainContent">
             <div class="heading split-row">
                 <h2>Activiteiten Beheer</h2>
-                <button class="btn btn-primary" onclick="ModalManager.instance.showEditActivityModal()">
+                <button class="btn btn-primary" onclick="window.location.href='/beheerder/activiteit-edit.html'">
                     <i class="fas fa-plus"></i> Nieuwe Activiteit Toevoegen
                 </button>
             </div>
@@ -121,7 +119,7 @@
                 const row = document.createElement('tr');
                 row.style.cursor = 'pointer';
                 row.onclick = function() {
-                    ModalManager.instance.showViewActivityModal(act);
+                    window.location.href = `/beheerder/activiteit-view.html?id=${act.id}`;
                 };
                 
                 row.innerHTML = `
@@ -134,7 +132,7 @@
                         '<span style="color: #6c757d;"><i class="fas fa-check"></i> Afgelopen</span>'}</td>
                     <td onclick="event.stopPropagation()">
                         <div style="display: flex; gap: 5px; flex-wrap: wrap;">
-                            <button class="btn btn-primary btn-small" onclick="ModalManager.instance.showEditActivityModal(${JSON.stringify(act).replace(/"/g, '&quot;')})">
+                            <button class="btn btn-primary btn-small" onclick="window.location.href='/beheerder/activiteit-edit.html?id=${act.id}'">
                                 <i class="fas fa-edit"></i>
                             </button>
                             <button class="btn btn-danger btn-small" onclick="deleteActiviteit(${act.id})">
@@ -160,8 +158,6 @@
             document.getElementById('past-count').textContent = pastCount;
         }
 
-        // These functions are now handled by ModalManager
-
         async function deleteActiviteit(id) {
             if (confirm('Weet je zeker dat je deze activiteit wilt verwijderen?')) {
                 try {
@@ -181,8 +177,6 @@
                 }
             }
         }
-
-        // Edit functions now handled by ModalManager
     </script>
 </body>
 </html>

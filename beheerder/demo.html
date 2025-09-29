@@ -7,14 +7,13 @@
     <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="/css/header.css">
     <script src="/beheerder/verifyAdmin.js"></script>
-    <script src="/beheerder/modal-utils.js"></script>
-    <title>Activadis - Modal Demo</title>
+    <title>Activadis - Navigation Demo</title>
 </head>
 <body>
 <header>
     <div class="container">
         <div class="left">
-            <p><b><span class="accent">Acti</span>vadis</b>: Modal Demo</p>
+            <p><b><span class="accent">Acti</span>vadis</b>: Navigation Demo</p>
             <nav>
                 <div class="nav-left">
                     <a href="/"><i class="fas fa-home"></i>Home</a>
@@ -40,27 +39,27 @@
             </ul>
         </aside>
         <main id="mainContent">
-            <h2><i class="fas fa-palette"></i> Styling & Modal Demo</h2>
+            <h2><i class="fas fa-palette"></i> Styling & Navigation Demo</h2>
             
             <div class="content-section">
-                <h3><i class="fas fa-magic"></i> Improved Beheerder Styling</h3>
-                <p>This page demonstrates the enhanced styling with Font Awesome icons and improved layout separation across all beheerder pages.</p>
+                <h3><i class="fas fa-magic"></i> Improved Beheerder Navigation</h3>
+                <p>This page demonstrates the new page-based navigation system that replaced the modal popups for a better user experience.</p>
             </div>
 
             <hr class="section-separator thick">
             
             <div class="content-section">
-                <h3><i class="fas fa-calendar-alt"></i> Activity Modals</h3>
+                <h3><i class="fas fa-calendar-alt"></i> Activity Pages</h3>
                 
                 <div class="button-group">
-                    <button class="btn btn-primary" onclick="ModalManager.instance.showEditActivityModal()">
-                        <i class="fas fa-plus"></i> New Activity Modal
+                    <button class="btn btn-primary" onclick="window.location.href='/beheerder/activiteit-edit.html'">
+                        <i class="fas fa-plus"></i> New Activity Page
                     </button>
-                    <button class="btn btn-info" onclick="showSampleActivityView()">
-                        <i class="fas fa-eye"></i> View Activity Modal
+                    <button class="btn btn-info" onclick="window.location.href='/beheerder/activiteit-view.html?id=1'">
+                        <i class="fas fa-eye"></i> View Activity Page
                     </button>
-                    <button class="btn btn-primary" onclick="showSampleActivityEdit()">
-                        <i class="fas fa-edit"></i> Edit Activity Modal
+                    <button class="btn btn-primary" onclick="window.location.href='/beheerder/activiteit-edit.html?id=1'">
+                        <i class="fas fa-edit"></i> Edit Activity Page
                     </button>
                 </div>
             </div>
@@ -68,17 +67,17 @@
             <hr class="section-separator">
             
             <div class="content-section">
-                <h3><i class="fas fa-users"></i> User Modals</h3>
+                <h3><i class="fas fa-users"></i> User Pages</h3>
                 
                 <div class="button-group">
-                    <button class="btn btn-primary" onclick="ModalManager.instance.showEditUserModal()">
-                        <i class="fas fa-plus"></i> New User Modal
+                    <button class="btn btn-primary" onclick="window.location.href='/beheerder/gebruiker-edit.html'">
+                        <i class="fas fa-plus"></i> New User Page
                     </button>
-                    <button class="btn btn-info" onclick="showSampleUserView()">
-                        <i class="fas fa-eye"></i> View User Modal
+                    <button class="btn btn-info" onclick="window.location.href='/beheerder/gebruiker-view.html?id=1'">
+                        <i class="fas fa-eye"></i> View User Page
                     </button>
-                    <button class="btn btn-primary" onclick="showSampleUserEdit()">
-                        <i class="fas fa-edit"></i> Edit User Modal
+                    <button class="btn btn-primary" onclick="window.location.href='/beheerder/gebruiker-edit.html?id=1'">
+                        <i class="fas fa-edit"></i> Edit User Page
                     </button>
                 </div>
             </div>
@@ -131,62 +130,12 @@
     </section>
 
     <script>
-        // Sample data for demonstrations
-        function showSampleActivityView() {
-            const sampleActivity = {
-                id: 1,
-                naam: "Sample Workshop",
-                locatie: "Conference Room A",
-                omschrijving: "This is a sample activity for demonstration purposes.\nIt shows how the view modal displays activity information.",
-                begin: "2024-01-15T09:00:00",
-                eind: "2024-01-15T17:00:00",
-                eten: "Lunch included",
-                kost: 25.50,
-                max: 20,
-                min: 5,
-                afbeelding: "https://example.com/sample-image.jpg"
-            };
-            
-            ModalManager.instance.showViewActivityModal(sampleActivity);
-        }
+        // Modal system has been replaced with dedicated pages for better UX
+        // Navigation now uses separate pages for viewing/editing activities and users
+        // This provides better user experience, improved performance, and easier maintenance
         
-        function showSampleActivityEdit() {
-            const sampleActivity = {
-                id: 1,
-                naam: "Sample Workshop",
-                locatie: "Conference Room A",
-                omschrijving: "This is a sample activity for demonstration purposes.\nIt shows how the edit modal works.",
-                begin: "2024-01-15T09:00:00",
-                eind: "2024-01-15T17:00:00",
-                eten: "Lunch included",
-                kost: 25.50,
-                max: 20,
-                min: 5,
-                afbeelding: "https://example.com/sample-image.jpg"
-            };
-            
-            ModalManager.instance.showEditActivityModal(sampleActivity);
-        }
-        
-        function showSampleUserView() {
-            const sampleUser = {
-                id: 1,
-                email: "admin@example.com",
-                admin: true
-            };
-            
-            ModalManager.instance.showViewUserModal(sampleUser);
-        }
-        
-        function showSampleUserEdit() {
-            const sampleUser = {
-                id: 1,
-                email: "user@example.com",
-                admin: false
-            };
-            
-            ModalManager.instance.showEditUserModal(sampleUser);
-        }
+        // All functionality is now accessible through the navigation buttons above
+        // which redirect to the appropriate page-based interfaces
     </script>
 </body>
 </html>

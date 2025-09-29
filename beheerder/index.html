@@ -7,7 +7,6 @@
     <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="/css/header.css">
     <script src="/beheerder/verifyAdmin.js"></script>
-    <script src="/beheerder/modal-utils.js"></script>
     <title>Activadis - Beheerder</title>
 </head>
 <body>
@@ -36,7 +35,6 @@
                 <li><a href="/beheerder/index.html">Dashboard</a></li>
                 <li><a href="/beheerder/gebruikers.html">Gebruikers</a></li>
                 <li><a href="/beheerder/activiteiten.html">Activiteiten</a></li>
-                <li><a href="/beheerder/instellingen.html">Instellingen</a></li>
             </ul>
         </aside>
         <main id="mainContent">
@@ -44,7 +42,7 @@
                 <h2>Dashboard</h2>
             </div>
             <div id="dashboard-stats">
-                <h3><i class="fas fa-chart-bar"></i> Systeem Overzicht</h3>
+                <h3><i class="fas fa-chart-bar"></i> Insights</h3>
                 <div id="stats-container">
                     <div>
                         <div><i class="fas fa-calendar-alt"></i> Activiteiten</div>
@@ -78,7 +76,7 @@
                     <h4><i class="fas fa-calendar-alt"></i> Activiteiten Beheer</h4>
                     
                     <div class="button-group">
-                        <button class="btn btn-primary btn-small" onclick="ModalManager.instance.showEditActivityModal()">
+                        <button class="btn btn-primary btn-small" onclick="window.location.href='/beheerder/activiteit-edit.html'">
                             <i class="fas fa-plus"></i> Nieuwe Activiteit
                         </button>
                     </div>
@@ -105,7 +103,7 @@
                     <h4><i class="fas fa-users"></i> Gebruikers Beheer</h4>
                     
                     <div class="button-group">
-                        <button class="btn btn-primary btn-small" onclick="ModalManager.instance.showEditUserModal()">
+                        <button class="btn btn-primary btn-small" onclick="window.location.href='/beheerder/gebruiker-edit.html'">
                             <i class="fas fa-plus"></i> Nieuwe Gebruiker
                         </button>
                     </div>
@@ -113,7 +111,6 @@
                     <table class="data-table">
                         <thead>
                             <tr>
-                                <th><i class="fas fa-hashtag"></i> ID</th>
                                 <th><i class="fas fa-envelope"></i> Email</th>
                                 <th><i class="fas fa-user-tag"></i> Rol</th>
                                 <th><i class="fas fa-cogs"></i> Acties</th>
@@ -208,7 +205,7 @@
                 const row = document.createElement('tr');
                 row.style.cursor = 'pointer';
                 row.onclick = function() {
-                    ModalManager.instance.showViewActivityModal(act);
+                    window.location.href = `/beheerder/activiteit-view.html?id=${act.id}`;
                 };
                 
                 const beginDate = new Date(act.begin);
@@ -220,7 +217,7 @@
                     <td>€${act.kost}</td>
                     <td onclick="event.stopPropagation()">
                         <div style="display: flex; gap: 5px; flex-wrap: wrap;">
-                            <button class="btn btn-primary btn-small" onclick="ModalManager.instance.showEditActivityModal(${JSON.stringify(act).replace(/"/g, '&quot;')})">
+                            <button class="btn btn-primary btn-small" onclick="window.location.href='/beheerder/activiteit-edit.html?id=${act.id}'">
                                 <i class="fas fa-edit"></i>
                             </button>
                             <button class="btn btn-danger btn-small" onclick="deleteActiviteit(${act.id})">
@@ -241,16 +238,15 @@
                 const row = document.createElement('tr');
                 row.style.cursor = 'pointer';
                 row.onclick = function() {
-                    ModalManager.instance.showViewUserModal(user);
+                    window.location.href = `/beheerder/gebruiker-view.html?id=${user.id}`;
                 };
                 
                 row.innerHTML = `
-                    <td>${user.id}</td>
                     <td><i class="fas fa-envelope"></i> ${user.email}</td>
                     <td>${user.role === 1 ? '<i class="fas fa-crown"></i> Admin' : '<i class="fas fa-user"></i> Gebruiker'}</td>
                     <td onclick="event.stopPropagation()">
                         <div style="display: flex; gap: 5px; flex-wrap: wrap;">
-                            <button class="btn btn-primary btn-small" onclick="ModalManager.instance.showEditUserModal(${JSON.stringify(user).replace(/"/g, '&quot;')})">
+                            <button class="btn btn-primary btn-small" onclick="window.location.href='/beheerder/gebruiker-edit.html?id=${user.id}'">
                                 <i class="fas fa-edit"></i>
                             </button>
                             <button class="btn btn-danger btn-small" onclick="deleteGebruiker(${user.id})">
@@ -262,8 +258,6 @@
                 tbody.appendChild(row);
             });
         }
-
-        // Activity management now handled by ModalManager
 
         async function deleteActiviteit(id) {
             if (confirm('Weet je zeker dat je deze activiteit wilt verwijderen?')) {
@@ -285,8 +279,6 @@
             }
         }
 
-        // User management now handled by ModalManager
-
         async function deleteGebruiker(id) {
             if (confirm('Weet je zeker dat je deze gebruiker wilt verwijderen?')) {
                 try {
@@ -306,8 +298,6 @@
                 }
             }
         }
-
-        // Dashboard editing now handled by ModalManager
     </script>
 </body>
 </html>
