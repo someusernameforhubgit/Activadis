@@ -156,10 +156,6 @@
                                 <i class="fas fa-user-minus"></i>
                                 Uitschrijven voor activiteit
                             </button>
-                            <button id="shareBtn" class="btn btn-secondary">
-                                <i class="fas fa-share-alt"></i>
-                                Delen
-                            </button>
                         </div>
                         
                         <div class="registration-note">
@@ -305,22 +301,6 @@
                 loadPage();
             } else {
                 alert("Je moet ingelogd zijn om je in te schrijven voor een activiteit.");
-            }
-        }
-
-        // Function to handle sharing
-        function handleShare() {
-            if (navigator.share) {
-                navigator.share({
-                    title: document.getElementById('activityTitle').textContent,
-                    text: 'Bekijk deze activiteit op Activadis!',
-                    url: window.location.href
-                });
-            } else {
-                // Fallback: copy to clipboard
-                navigator.clipboard.writeText(window.location.href).then(() => {
-                    alert('Link gekopieerd naar klembord!');
-                });
             }
         }
 
