@@ -12,6 +12,13 @@ document.addEventListener("DOMContentLoaded", async () => {
             document.querySelector("#emailadress").value = data.email;
             document.querySelector("#emailadress").disabled = true;
             document.querySelector("#password").placeholder = "Voor je nieuwe wachtwoord in";
+            document.querySelector("#passwordRestrictions").style.display = "block";
+            document.querySelectorAll(".passVerify").forEach((element) => {
+                element.style.display = "block";
+            });
+
+            document.querySelector("#password").addEventListener("input", checkPassword);
+            document.querySelector("#resetLink").classList.add("display-none");
         }
     }
 
@@ -23,33 +30,51 @@ async function submitForm(e) {
 
     const email = document.querySelector("#emailadress").value;
     const password = document.querySelector("#password").value;
+    const errorMessage = document.querySelector("#errorMessage");
 
     if (document.querySelector("#reset").value === "true") {
         const reset_token = document.querySelector("#reset_token").value;
         const response = await fetch("../api/verify?token=" + reset_token);
         const data = await response.json();
         if (data.reset) {
-            const gebruiker = await fetch("../api/gebruiker?id=" + data.id + "&token=" + reset_token);
-            const gebruikerData = await gebruiker.json();
+            if (checkPassword()) {
+                if (document.querySelector("#password").value !== document.querySelector("#passwordVerify").value) {
+                    errorMessage.classList.remove("display-none");
+                    errorMessage.textContent = "Wachtwoord komt niet overeen";
+                    errorMessage.style.color = "red";
+                    return;
+                }
+                const gebruiker = await fetch("../api/gebruiker?id=" + data.id + "&token=" + reset_token);
+                const gebruikerData = await gebruiker.json();
 
-            await fetch("../api/gebruiker?token=" + reset_token, {
-                method: "PUT",
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    id: data.id,
-                    email: gebruikerData.email,
-                    firstname: gebruikerData.firstname,
-                    lastname: gebruikerData.lastname,
-                    password: password,
-                    role: gebruikerData.role
-                })
-            });
+                const response = await fetch("../api/gebruiker?token=" + reset_token, {
+                    method: "PUT",
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        id: data.id,
+                        email: gebruikerData.email,
+                        firstname: gebruikerData.firstname,
+                        lastname: gebruikerData.lastname,
+                        password: password,
+                        role: gebruikerData.role
+                    })
+                });
+                if (response.status === 400) {
+                    errorMessage.classList.remove("display-none");
+                    errorMessage.textContent = "Wachtwoord voldoet niet aan de eisen";
+                    errorMessage.style.color = "red";
+                    return;
+                }
+            } else {
+                errorMessage.classList.remove("display-none");
+                errorMessage.textContent = "Wachtwoord voldoet niet aan de eisen";
+                errorMessage.style.color = "red";
+                return;
+            }
         }
     }
-
-    const errorMessage = document.querySelector("#errorMessage");
 
     try {
         errorMessage.classList.add("display-none");
@@ -57,7 +82,6 @@ async function submitForm(e) {
         const response = await fetch("../api/login?email=" + encodeURIComponent(email) + "&password=" + encodeURIComponent(password), {
             method: "GET",
         });
-        console.log(response);
         const data = await response.json();
 
         if (Object.keys(data).length === 0) {
@@ -76,3 +100,37 @@ async function submitForm(e) {
     }
 }
 
+function checkPassword() {
+    const password = document.querySelector("#password").value;
+
+    const validations = [
+        {
+            id: "lengthRestriction",
+            isValid: (pwd) => pwd.length >= 8
+        },
+        {
+            id: "uppercaseRestriction",
+            isValid: (pwd) => /[A-Z]/.test(pwd)
+        },
+        {
+            id: "numberRestriction",
+            isValid: (pwd) => /[0-9]/.test(pwd)
+        },
+        {
+            id: "specialRestriction",
+            isValid: (pwd) => /[^a-zA-Z0-9]/.test(pwd)
+        }
+    ];
+
+    validations.forEach(({ id, isValid }) => {
+        const element = document.querySelector(`#${id}`);
+        const parent = element.parentElement;
+        const isValidPassword = isValid(password);
+
+        parent.classList.toggle("valid", isValidPassword);
+        element.classList.toggle("fa-check", isValidPassword);
+        element.classList.toggle("fa-xmark", !isValidPassword);
+    });
+
+    return !validations.some(({ isValid }) => !isValid(password));
+}
