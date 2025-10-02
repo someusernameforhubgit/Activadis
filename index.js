@@ -10,10 +10,23 @@ app.use("/beheerder", express.static("beheerder"));
 app.use("/login", express.static("login"));
 app.use("/css", express.static("css"));
 app.use("/img", express.static("img"));
+app.use("/reset", express.static("reset"));
 
 // Serve test page
 app.get('/test-newlines', (req, res) => {
     res.sendFile('test-newlines.html', { root: '.' });
+});
+
+app.get('/aankomend', (req, res) => {
+    res.sendFile('aankomend.html', { root: './gebruiker' });
+});
+
+app.get('/ingeschreven', (req, res) => {
+    res.sendFile('ingeschreven.html', { root: './gebruiker' });
+});
+
+app.get('/verleden', (req, res) => {
+    res.sendFile('verleden.html', { root: './gebruiker' });
 });
 
 // Database

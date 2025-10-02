@@ -7,7 +7,6 @@
     <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="/css/header.css">
     <script src="/beheerder/verifyAdmin.js"></script>
-    <script src="/beheerder/modal-utils.js"></script>
     <title>Activadis - Activiteiten Beheer</title>
 </head>
 <body>
@@ -22,7 +21,7 @@
                 </div>
                 <div>
                     <a class="login" href="/login"><i class="fas fa-sign-in-alt"></i>Login</a>
-                    <p class="logout name">NAME HERE</p>
+                    <p class="logout name"></p>
                     <a class="logout" onclick="logout()">Logout</a>
                 </div>
             </nav>
@@ -33,35 +32,40 @@
         <aside id="sidebar">
             <h1>Navigatie</h1>
             <ul>
-                <li><a href="/beheerder/index.html">Dashboard</a></li>
+                <li><a href="/beheerder/">Dashboard</a></li>
                 <li><a href="/beheerder/gebruikers.html">Gebruikers</a></li>
                 <li><a href="/beheerder/activiteiten.html">Activiteiten</a></li>
-                <li><a href="/beheerder/instellingen.html">Instellingen</a></li>
             </ul>
         </aside>
         <main id="mainContent">
-            <h2><i class="fas fa-calendar-alt"></i> Activiteiten Beheer</h2>
-            
-            <div class="page-actions">
-                <!-- <h3><i class="fas fa-plus-circle"></i> Nieuwe Activiteit</h3> -->
-                <button class="btn btn-primary btnNewActivity" onclick="ModalManager.instance.showEditActivityModal()">
+            <div class="heading split-row">
+                <h2>Activiteiten Beheer</h2>
+                <button class="btn btn-primary" onclick="window.location.href='/beheerder/activiteit-edit.html'">
                     <i class="fas fa-plus"></i> Nieuwe Activiteit Toevoegen
                 </button>
             </div>
 
             <div id="activiteiten-list" class="content-section">
-                <h3><i class="fas fa-list"></i> Alle Activiteiten</h3>
-                <div id="activiteiten-container"></div>
+                <h3>Alle Activiteiten</h3>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th><i class="fas fa-calendar-check"></i> Naam</th>
+                            <th><i class="fas fa-map-marker-alt"></i> Locatie</th>
+                            <th><i class="fas fa-calendar"></i> Begin</th>
+                            <th>Eind</th>
+                            <th><i class="fas fa-info-circle"></i> Status</th>
+                            <th class="justify-right">Acties</th>
+                        </tr>
+                    </thead>
+                    <tbody id="activiteiten-table-body">
+                    </tbody>
+                </table>
             </div>
         </main>
-        <div id="sideContent">
-            <div id="activity-stats">
-                <h3><i class="fas fa-chart-pie"></i> Activiteit Statistieken</h3>
-                <p><i class="fas fa-calendar-alt"></i> Totaal activiteiten: <span id="total-activities">-</span></p>
-                <p><i class="fas fa-arrow-up"></i> Komende activiteiten: <span id="upcoming-count">-</span></p>
-                <p><i class="fas fa-check"></i> Afgelopen activiteiten: <span id="past-count">-</span></p>
-            </div>
-        </div>
+        <!-- <div id="sideContent">
+
+        </div> -->
     </section>
 
     <script>
@@ -97,46 +101,47 @@
                 const activiteiten = await response.json();
                 
                 displayActiviteiten(activiteiten);
-                updateStats(activiteiten);
+                // updateStats(activiteiten);
             } catch (error) {
                 console.error('Error loading activiteiten:', error);
             }
         }
 
         function displayActiviteiten(activiteiten) {
-            const container = document.getElementById('activiteiten-container');
-            container.innerHTML = '';
+            const tbody = document.getElementById('activiteiten-table-body');
+            tbody.innerHTML = '';
 
             activiteiten.forEach(act => {
-                const div = document.createElement('div');
-                div.className = 'activity-card';
-                
                 const beginDate = new Date(act.begin);
                 const eindDate = new Date(act.eind);
                 const isUpcoming = eindDate > new Date();
                 
-                div.innerHTML = `
-                    <h4><i class="fas fa-calendar-check"></i> ${escapeHtml(act.naam)} ${isUpcoming ? 
-                        '<span style="color: #28a745; font-size: 0.8em;"><i class="fas fa-arrow-up"></i> Aankomend</span>' :
-                        '<span style="color: #6c757d; font-size: 0.8em;"><i class="fas fa-check"></i> Afgelopen</span>'}</h4>
-                    <p><strong><i class="fas fa-map-marker-alt"></i> Locatie:</strong> ${escapeHtml(act.locatie)}</p>
-                    <p><strong><i class="fas fa-calendar"></i> Datum:</strong> ${beginDate.toLocaleDateString("en-UK")} - ${eindDate.toLocaleDateString("en-UK")}</p>
-                    <p><strong><i class="fas fa-clock"></i> Tijd:</strong> ${beginDate.toLocaleTimeString('nl-NL', {hour: '2-digit', minute: '2-digit'})} - ${eindDate.toLocaleTimeString('nl-NL', {hour: '2-digit', minute: '2-digit'})}</p>
-                    <p><strong><i class="fas fa-euro-sign"></i> Kosten:</strong> €${act.kost} | <strong><i class="fas fa-users"></i> Deelnemers:</strong> ${act.min} - ${act.max} personen</p>
-                    ${act.omschrijving ? `<p><strong><i class="fas fa-file-text"></i> Omschrijving:</strong> ${escapeHtml(act.omschrijving).substring(0, 100)}${act.omschrijving.length > 100 ? '...' : ''}</p>` : ''}
-                    <div class="actions">
-                        <button class="btn btn-info btn-small" onclick="ModalManager.instance.showViewActivityModal(${JSON.stringify(act).replace(/"/g, '&quot;')})">
-                            <i class="fas fa-eye"></i> Bekijken
-                        </button>
-                        <button class="btn btn-primary btn-small" onclick="ModalManager.instance.showEditActivityModal(${JSON.stringify(act).replace(/"/g, '&quot;')})">
-                            <i class="fas fa-edit"></i> Bewerken
-                        </button>
-                        <button class="btn btn-danger btn-small" onclick="deleteActiviteit(${act.id})">
-                            <i class="fas fa-trash"></i> Verwijderen
-                        </button>
-                    </div>
+                const row = document.createElement('tr');
+                row.style.cursor = 'pointer';
+                row.onclick = function() {
+                    window.location.href = `/beheerder/activiteit-view.html?id=${act.id}`;
+                };
+                
+                row.innerHTML = `
+                    <td><strong>${escapeHtml(act.naam)}</strong></td>
+                    <td>${escapeHtml(act.locatie)}</td>
+                    <td>${beginDate.toLocaleDateString("en-UK")}<br><small>${beginDate.toLocaleTimeString('nl-NL', {hour: '2-digit', minute: '2-digit'})}</small></td>
+                    <td>${eindDate.toLocaleDateString("en-UK")}<br><small>${eindDate.toLocaleTimeString('nl-NL', {hour: '2-digit', minute: '2-digit'})}</small></td>
+                    <td>${isUpcoming ? 
+                        '<span style="color: #28a745;"><i class="fas fa-arrow-up"></i> Aankomend</span>' :
+                        '<span style="color: #6c757d;"><i class="fas fa-check"></i> Afgelopen</span>'}</td>
+                    <td onclick="event.stopPropagation()">
+                        <div class="justify-right" style="display: flex; gap: 5px; flex-wrap: wrap;">
+                            <button class="btn btn-primary btn-small" onclick="window.location.href='/beheerder/activiteit-edit.html?id=${act.id}'">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-danger btn-small" onclick="deleteActiviteit(${act.id})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
                 `;
-                container.appendChild(div);
+                tbody.appendChild(row);
             });
         }
 
@@ -152,8 +157,6 @@
             document.getElementById('upcoming-count').textContent = upcomingCount;
             document.getElementById('past-count').textContent = pastCount;
         }
-
-        // These functions are now handled by ModalManager
 
         async function deleteActiviteit(id) {
             if (confirm('Weet je zeker dat je deze activiteit wilt verwijderen?')) {
@@ -174,8 +177,6 @@
                 }
             }
         }
-
-        // Edit functions now handled by ModalManager
     </script>
 </body>
 </html>

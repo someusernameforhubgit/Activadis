@@ -21,7 +21,7 @@
                 </div>
                 <div>
                     <a class="login" href="/login"><i class="fas fa-sign-in-alt"></i>Login</a>
-                    <p class="logout name">NAME HERE</p>
+                    <p class="logout name"></p>
                     <a class="logout" onclick="logout()">Logout</a>
                 </div>
             </nav>
@@ -32,19 +32,21 @@
         <aside id="sidebar">
             <h1>Navigatie</h1>
             <ul>
-                <li><a href="/beheerder/index.html">Dashboard</a></li>
+                <li><a href="/beheerder/">Dashboard</a></li>
                 <li><a href="/beheerder/gebruikers.html">Gebruikers</a></li>
                 <li><a href="/beheerder/activiteiten.html">Activiteiten</a></li>
                 <li><a href="/beheerder/instellingen.html">Instellingen</a></li>
             </ul>
         </aside>
         <main id="mainContent">
-            <h2><i class="fas fa-cogs"></i> Systeem Instellingen</h2>
+            <div class="heading split-row">
+                <h2>Dashboard</h2>
+            </div>
             
             <div class="settings-section">
-                <h3><i class="fas fa-database"></i> Database Informatie</h3>
+                <h3>Database Informatie</h3>
                 <div id="db-info">
-                    <p><i class="fas fa-plug"></i> Status: <span id="db-status" class="status-checking">Checking...</span></p>
+                    <p>Status: <span id="db-status" class="status-checking">Checking...</span></p>
                     <hr class="section-separator">
                     <button onclick="testConnection()">
                         <i class="fas fa-search"></i> Test Database Verbinding
@@ -53,12 +55,12 @@
             </div>
 
             <div class="settings-section">
-                <h3><i class="fas fa-link"></i> API Endpoints</h3>
+                <h3>API Endpoints</h3>
                 <div id="api-info">
-                    <p><i class="fas fa-calendar-alt"></i> Activiteiten API: <span id="activiteiten-status" class="status-checking">Checking...</span></p>
-                    <p><i class="fas fa-users"></i> Gebruikers API: <span id="gebruikers-status" class="status-checking">Checking...</span></p>
-                    <p><i class="fas fa-clipboard-list"></i> Inschrijvingen API: <span id="inschrijvingen-status" class="status-checking">Checking...</span></p>
-                    <p><i class="fas fa-box"></i> Benodigdheden API: <span id="benodigdheden-status" class="status-checking">Checking...</span></p>
+                    <p>Activiteiten API: <span id="activiteiten-status" class="status-checking">Checking...</span></p>
+                    <p>Gebruikers API: <span id="gebruikers-status" class="status-checking">Checking...</span></p>
+                    <p>Inschrijvingen API: <span id="inschrijvingen-status" class="status-checking">Checking...</span></p>
+                    <p>Benodigdheden API: <span id="benodigdheden-status" class="status-checking">Checking...</span></p>
                     <hr class="section-separator">
                     <button onclick="testAllAPIs()">
                         <i class="fas fa-search"></i> Test Alle APIs
@@ -67,7 +69,7 @@
             </div>
 
             <div class="settings-section">
-                <h3><i class="fas fa-tools"></i> Beheer Opties</h3>
+                <h3>Beheer Opties</h3>
                 <div class="button-group">
                     <button onclick="clearAllData()" class="btn btn-danger">
                         <i class="fas fa-exclamation-triangle"></i> Alle Data Wissen (GEVAARLIJK)
@@ -79,22 +81,22 @@
             </div>
 
             <div class="settings-section">
-                <h3><i class="fas fa-file-alt"></i> Systeem Logs</h3>
+                <h3>Systeem Logs</h3>
                 <div>
                     <textarea id="logs" readonly></textarea>
                     <hr class="section-separator">
-                    <button onclick="refreshLogs()">
+                    <!-- <button onclick="refreshLogs()">
                         <i class="fas fa-sync-alt"></i> Logs Verversen
-                    </button>
+                    </button> -->
                 </div>
             </div>
         </main>
         <div id="sideContent">
             <div id="quick-stats">
-                <h3><i class="fas fa-tachometer-alt"></i> Quick Stats</h3>
-                <p><i class="fas fa-server"></i> Server Status: <span id="server-status" class="status-online">Online</span></p>
-                <p><i class="fas fa-clock"></i> Laatste Update: <span id="last-update">-</span></p>
-                <p><i class="fas fa-chart-line"></i> Totaal Requests: <span id="total-requests">-</span></p>
+                <h3>Quick Stats</h3>
+                <p>Server Status: <span id="server-status" class="status-online">Online</span></p>
+                <p>Laatste Update: <span id="last-update">-</span></p>
+                <p>Totaal Requests: <span id="total-requests">-</span></p>
             </div>
         </div>
     </section>

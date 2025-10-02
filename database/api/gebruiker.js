@@ -18,6 +18,34 @@ export default function GebruikerAPI(app, database) {
         }
     });
 
+    app.get(url + "/reset", async (req, res) => {
+        if (req.query.email) {
+            const gebruiker = (await database.query("SELECT * FROM gebruiker WHERE email = ?", [req.query.email]))[0];
+            if (!gebruiker) return res.status(404).send("User not found");
+            const reset_token = jwt.sign(
+                { id: gebruiker.id, email: gebruiker.email, reset: true },
+                process.env.JWT_SECRET,
+                { expiresIn: "15m" }
+            );
+            const reset_link = `${process.env.PROTOCOL}://${process.env.HOSTNAME}/login?reset_token=${reset_token}`;
+
+            await mail(
+                req.query.email,
+                "Wachtwoord resetten",
+                `
+                    <h1>Wachtwoord resetten</h1><br>
+                    <p>Er is een wachtwoord reset voor uw email aangevraagd.</p>
+                    <p>Was U dit niet? dan kunt u deze link negeren.</p>
+                    <p>Als U dit was was kunt u <a href="${reset_link}">hier</a> uw wachtwoord resetten.</p>
+                    <p>Deze link verloopt over 15 minuten.</p>
+                    `
+            );
+            res.send("Reset link gestuurd");
+        } else {
+            res.status(400).send("No id provided");
+        }
+    });
+
     app.post(url, async (req, res) => {
         if (!(await verifyAdmin(req.query.token))) {
             return res.status(401).send("Unauthorized");
@@ -80,8 +108,6 @@ export default function GebruikerAPI(app, database) {
         }
     });
 
-
-
     app.put(url, async (req, res) => {
         const jwtData = await verifyToken(req.query.token);
         if (!(await verifyAdmin(req.query.token)) && !jwtData.jwt.reset) {
@@ -104,6 +130,9 @@ export default function GebruikerAPI(app, database) {
 
         try {
             if (isPasswordReset) {
+                if (!checkPassword(req.body.password)) {
+                    return res.status(400).send("Password does not meet requirements");
+                }
                 const salt = crypto.randomBytes(16).toString("hex");
                 const hash = hashPassword(req.body.password, salt);
                 await database.query(
@@ -164,4 +193,27 @@ export default function GebruikerAPI(app, database) {
 
 function hashPassword(password, salt) {
     return crypto.createHash("sha256").update(password + salt).digest("hex");
+}
+
+function checkPassword(password) {
+    const validations = [
+        {
+            id: "lengthRestriction",
+            isValid: (pwd) => pwd.length >= 8
+        },
+        {
+            id: "uppercaseRestriction",
+            isValid: (pwd) => /[A-Z]/.test(pwd)
+        },
+        {
+            id: "numberRestriction",
+            isValid: (pwd) => /[0-9]/.test(pwd)
+        },
+        {
+            id: "specialRestriction",
+            isValid: (pwd) => /[^a-zA-Z0-9]/.test(pwd)
+        }
+    ];
+
+    return !validations.some(({ isValid }) => !isValid(password));
 }

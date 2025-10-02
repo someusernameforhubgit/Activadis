@@ -13,13 +13,30 @@
     <div id="bgCover"></div>
     <form id="loginForm" action="">
         <h2>Activadis</h2>
-        <input type="hidden" id="reset" name="reset" value="false">
-        <input type="hidden" id="reset_token" name="reset_token" value="">
-        <label for="emailadress">Email adres</label>
-        <input type="email" id="emailadress" placeholder="Voer je email adres in" required>
-        <label for="password">Wachtwoord</label>
-        <input type="password" id="password" placeholder="Voer je wachtwoord in" required>
+        <div class="hidden">
+            <input type="hidden" id="reset" name="reset" value="false">
+            <input type="hidden" id="reset_token" name="reset_token" value="">
+        </div>
+        <div>
+            <label for="emailadress">Email adres</label>
+            <input type="email" id="emailadress" placeholder="Voer je email adres in" required>
+        </div>
+        <div>
+            <label for="password">Wachtwoord</label>
+            <input type="password" id="password" placeholder="Voer je wachtwoord in" required>
+            <div id="passwordRestrictions">
+                <p class="restriction"><i id="lengthRestriction" class="fa-solid fa-xmark"></i>Minimaal 8 tekens</p>
+                <p class="restriction"><i id="uppercaseRestriction" class="fa-solid fa-xmark"></i>Minimaal 1 hoofdletter</p>
+                <p class="restriction"><i id="numberRestriction" class="fa-solid fa-xmark"></i>Minimaal 1 nummer</p>
+                <p class="restriction"><i id="specialRestriction" class="fa-solid fa-xmark"></i>Minimaal 1 speciaal teken</p>
+            </div>
+        </div>
+        <div class="hidden">
+            <label for="passwordVerify" class="passVerify">Wachtwoord Verificatie</label>
+            <input type="password" class="passVerify" id="passwordVerify" placeholder="Voer je wachtwoord nogmaals in" required>
+        </div>
         <button type="submit" id="login">Inloggen</button>
+        <a href="../reset" id="resetLink">Wachtwoord vergeten?</a>
         <p id="errorMessage" class="display-none"></p>
     </form>
 </body>

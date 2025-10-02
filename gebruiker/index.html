@@ -143,7 +143,7 @@
                     </div>
                     <div>
                         <a class="login" href="/login"><i class="fas fa-sign-in-alt"></i>Login</a>
-                        <p class="logout name">NAME HERE</p>
+                        <p class="logout name"></p>
                         <a class="logout" onclick="logout()">Logout</a>
                     </div>
                 </nav>
@@ -151,8 +151,12 @@
         </div>
     </header>
     <main class="activity-sections">
+        <div class="filters">
+            <a href="/aankomend"><i class="fas fa-calendar-alt"></i>Aankomende Activiteiten</a>
+            <a href="/ingeschreven"><i class="fas fa-user-check"></i>Ingeschreven Activiteiten</a>
+        </div>
         <section class="activity-section">
-            <h2>Beschrikbaar</h2>
+            <h2>Beschikbaar</h2>
             <div id="availableActivities" class="events"></div>
         </section>
 
