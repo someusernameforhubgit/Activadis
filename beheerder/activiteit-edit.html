@@ -97,10 +97,19 @@
                             <input type="number" id="activity-min" min="1" max="1000" required placeholder="1">
                             <div class="field-error" id="min-error"></div>
                         </div>
-                        <div class="form-group full-width">
+                        <!-- <div class="form-group full-width">
                             <label for="activity-afbeelding">Afbeelding URL</label>
                             <input type="url" id="activity-afbeelding" maxlength="500" placeholder="https://voorbeeld.com/afbeelding.jpg">
                             <div class="field-error" id="afbeelding-error"></div>
+                        </div> -->
+                        <div class="form-group full-width">
+                            <label for="activity-afbeelding">Afbeeldingen</label>
+                            <div>
+                                <input type="text" name="" id="activity-afbeeldingUrl" placeholder="Image URL">
+                                <button type="button" class="btn btn-primary" id="add-afbeelding" onclick="addImage()">+</button>
+                            </div>
+                            <div id="activity-afbeeldingen">
+                            </div>
                         </div>
                     </div>
                     <div class="form-actions">
@@ -278,6 +287,23 @@
                 align-items: center;
             }
         }
+        
+        /* Image section styles */
+        #activity-afbeeldingen {
+            padding-top: 10px;
+        }
+        
+        .image-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .image-picture {
+            max-width: 50px;
+            max-height: 50px;
+        }
     </style>
 
     <script>
@@ -298,7 +324,7 @@
             kost: { required: true, min: 0, max: 9999.99 },
             max: { required: true, min: 1, max: 1000 },
             min: { required: true, min: 1, max: 1000 },
-            afbeelding: { required: false, pattern: /^https?:\/\/.+\.(jpg|jpeg|png|gif|webp)(\?.*)?$/i }
+            // afbeelding: { required: false, pattern: /^https?:\/\/.+\.(jpg|jpeg|png|gif|webp)(\?.*)?$/i }
         };
 
         // Helper functions
@@ -372,10 +398,10 @@
                     showFieldError(fieldId, `Maximaal ${rules.maxLength} karakters toegestaan`);
                     return false;
                 }
-                if (rules.pattern && !rules.pattern.test(value)) {
-                    showFieldError(fieldId, 'Ongeldig formaat (verwacht: geldige afbeelding URL)');
-                    return false;
-                }
+                // if (rules.pattern && !rules.pattern.test(value)) {
+                //     showFieldError(fieldId, 'Ongeldig formaat (verwacht: geldige afbeelding URL)');
+                //     return false;
+                // }
             }
 
             // Number validations
@@ -460,7 +486,7 @@
                 kost: parseFloat(document.getElementById('activity-kost').value),
                 max: parseInt(document.getElementById('activity-max').value),
                 min: parseInt(document.getElementById('activity-min').value),
-                afbeelding: document.getElementById('activity-afbeelding').value.trim()
+                // afbeelding: document.getElementById('activity-afbeelding').value.trim()
             };
         }
 
@@ -592,6 +618,8 @@
 
         function populateForm(activity) {
             try {
+                console.log('Data = ', activity);
+
                 document.getElementById('activity-naam').value = activity.naam || '';
                 document.getElementById('activity-locatie').value = activity.locatie || '';
                 document.getElementById('activity-eten').checked = Boolean(activity.eten);
@@ -615,7 +643,22 @@
                 document.getElementById('activity-kost').value = activity.kost || '';
                 document.getElementById('activity-max').value = activity.max || '';
                 document.getElementById('activity-min').value = activity.min || '';
-                document.getElementById('activity-afbeelding').value = activity.afbeelding || '';
+                // document.getElementById('activity-afbeelding').value = activity.afbeelding || '';
+
+                if(activity.afbeeldingen[0] == null){
+                    document.getElementById('activity-afbeeldingen').innerHTML = '<p>Geen afbeelding toegevoegd.</p>';
+                }else{
+                    // document.getElementById('activity-afbeeldingen').innerHTML = 'dfgds';
+                    activity.afbeeldingen.forEach(afbeelding => {
+                        document.getElementById('activity-afbeeldingen').innerHTML += `
+                            <div class="image-item">
+                                <img src="${afbeelding.afbeeldingUrl}" alt="activiteit afbeelding" class="image-picture">
+                                <p>${afbeelding.afbeeldingUrl}</p>
+                                <button type="button" onClick="removeImage(event, '${afbeelding.id}')">X</button>
+                            </div>
+                        `;
+                    })
+                }
                 
                 // Show form and hide loading
                 document.getElementById('loading').style.display = 'none';
@@ -625,6 +668,7 @@
                 console.error('Error populating form:', error);
                 showError('Fout bij het vullen van het formulier.');
             }
+
         }
 
         async function handleSubmit(e) {
@@ -708,6 +752,132 @@
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.textContent = originalText;
+            }
+        }
+
+        async function removeImage(event, afbeeldingId) {
+            event.preventDefault();
+            
+            console.log('Removing image with ID:', afbeeldingId);
+            
+            // Show confirmation dialog
+            if (!confirm('Weet je zeker dat je deze afbeelding wilt verwijderen?')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/afbeelding?id=${afbeeldingId}&token=${token}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        alert('U bent niet geautoriseerd. Log opnieuw in.');
+                        setTimeout(() => window.location.href = '/login', 2000);
+                        return;
+                    } else {
+                        throw new Error(`HTTP ${response.status}`);
+                    }
+                }
+                
+                console.log('Image successfully deleted');
+                
+                // Remove the image from the UI
+                const imageElement = event.target.closest('div');
+                if (imageElement) {
+                    imageElement.remove();
+                }
+                
+                // Optional: Show success message
+                alert('Afbeelding succesvol verwijderd!');
+                
+            } catch (error) {
+                console.error('Error deleting image:', error);
+                alert('Er is een fout opgetreden bij het verwijderen van de afbeelding.');
+            }
+        }
+
+        async function addImage(event) {
+            if (event) {
+                event.preventDefault();
+            }
+            
+            const afbeeldingUrlInput = document.getElementById('activity-afbeeldingUrl');
+            const afbeeldingUrl = afbeeldingUrlInput.value.trim();
+            
+            console.log("Adding image URL:", afbeeldingUrl);
+            
+            // Validate input
+            if (!afbeeldingUrl) {
+                alert('Voer een afbeelding URL in.');
+                return;
+            }
+            
+            // Basic URL validation
+            try {
+                new URL(afbeeldingUrl);
+            } catch (error) {
+                alert('Voer een geldige URL in.');
+                return;
+            }
+            
+            // Get activity ID - either from current activity or from URL if editing
+            let activiteitId;
+            if (isEditMode && currentActivity) {
+                activiteitId = currentActivity.id;
+            } else {
+                // For new activities, we need to save the activity first
+                alert('Sla eerst de activiteit op voordat je afbeeldingen toevoegt.');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/afbeelding?token=${token}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        activiteitId: activiteitId,
+                        afbeeldingUrl: afbeeldingUrl
+                    })
+                });
+                
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        alert('U bent niet geautoriseerd. Log opnieuw in.');
+                        setTimeout(() => window.location.href = '/login', 2000);
+                        return;
+                    } else {
+                        throw new Error(`HTTP ${response.status}`);
+                    }
+                }
+                
+                const result = await response.json();
+                console.log('Image successfully added:', result);
+                
+                // Clear the input field
+                afbeeldingUrlInput.value = '';
+                
+                // Add the new image to the UI
+                const imageContainer = document.getElementById('activity-afbeeldingen');
+                const newImageDiv = document.createElement('div');
+                newImageDiv.className = 'image-item';
+                newImageDiv.innerHTML = `
+                    <img src="${afbeeldingUrl}" alt="activiteit afbeelding" class="image-picture" onerror="this.style.display='none';">
+                    <p>${afbeeldingUrl}</p>
+                    <button type="button" onClick="removeImage(event, '${result.insertId || result.id}')">X</button>
+                `;
+                imageContainer.appendChild(newImageDiv);
+                
+                alert('Afbeelding succesvol toegevoegd!');
+                
+            } catch (error) {
+                console.error('Error adding image:', error);
+                alert('Er is een fout opgetreden bij het toevoegen van de afbeelding.');
             }
         }
     </script>
