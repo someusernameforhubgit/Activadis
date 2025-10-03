@@ -11,6 +11,7 @@ app.use("/login", express.static("login"));
 app.use("/css", express.static("css"));
 app.use("/img", express.static("img"));
 app.use("/reset", express.static("reset"));
+app.use("/util", express.static("util/public"));
 
 // Serve test page
 app.get('/test-newlines', (req, res) => {
