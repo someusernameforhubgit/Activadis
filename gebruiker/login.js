@@ -18,6 +18,8 @@ document.addEventListener("DOMContentLoaded", async () => {
                 document.querySelector(".nav-left").innerHTML += `<a href="beheerder">Beheerder</a>`;
             }
         }
+    } else {
+        document.querySelector(".filters").style.display = "none";
     }
 });
 
