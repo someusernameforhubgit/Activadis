@@ -50,7 +50,7 @@ export default function InschrijvingAPI(app, database) {
                     [req.body.gebruiker, req.body.activiteit, req.body.notitie || null]
                 );
                 res.send(inschrijving);
-                const reset_link = `${process.env.PROTOCOL}://${process.env.HOSTNAME}/activiteit.html?id=${req.body.activiteit}`;
+                const reset_link = `${process.env.PROTOCOL}://${process.env.HOSTNAME}/activiteit/${req.body.activiteit}`;
                 const email = (await database.query("SELECT email FROM gebruiker WHERE id = ?", [req.body.gebruiker]))[0].email;
                 const activiteitNaam = (await database.query("SELECT naam FROM activiteit WHERE id = ?", [req.body.activiteit]))[0].naam;
 
@@ -185,7 +185,7 @@ export default function InschrijvingAPI(app, database) {
             const inschrijving = await database.query("DELETE FROM inschrijving WHERE gebruiker = ? AND activiteit = ?", [req.body.gebruiker, req.body.activiteit]);
             res.send(inschrijving);
 
-            const reset_link = `${process.env.PROTOCOL}://${process.env.HOSTNAME}/activiteit.html?id=${req.body.activiteit}`;
+            const reset_link = `${process.env.PROTOCOL}://${process.env.HOSTNAME}/activiteit/${req.body.activiteit}`;
             const email = (await database.query("SELECT email FROM gebruiker WHERE id = ?", [req.body.gebruiker]))[0].email;
             const activiteitNaam = (await database.query("SELECT naam FROM activiteit WHERE id = ?", [req.body.activiteit]))[0].naam;
 

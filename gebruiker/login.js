@@ -15,7 +15,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             document.querySelector(".name").textContent = gebruikerData.firstname + " " + gebruikerData.lastname;
 
             if (gebruikerData.role === 1) {
-                document.querySelector(".nav-left").innerHTML += `<a href="beheerder">Beheerder</a>`;
+                document.querySelector(".nav-left").innerHTML += `<a href="/beheerder">Beheerder</a>`;
             }
         }
     } else {
