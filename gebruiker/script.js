@@ -14,7 +14,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             const gebruikerData = await gebruiker.json();
             document.querySelector(".name").textContent = gebruikerData.firstname + " " + gebruikerData.lastname;
 
-            if (gebruikerData.isAdmin === 1 || gebruikerData.isAdmin === true) {
+            if (gebruikerData.role === 1) {
                 document.querySelector(".nav-left").innerHTML += `<a href="/beheerder">Beheerder</a>`;
             }
         }
