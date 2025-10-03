@@ -17,7 +17,7 @@
             <nav>
                 <div class="nav-left">
                     <a href="/"><i class="fas fa-home"></i>Home</a>
-                    <a href="/beheerder">Beheerder</a>
+                    <a href="/beheerder" class="active">Beheerder</a>
                 </div>
                 <div>
                     <a class="login" href="/login"><i class="fas fa-sign-in-alt"></i>Login</a>
@@ -33,14 +33,14 @@
             <h1>Navigatie</h1>
             <ul>
                 <li><a href="/beheerder/">Dashboard</a></li>
-                <li><a href="/beheerder/gebruikers.html">Gebruikers</a></li>
-                <li><a href="/beheerder/activiteiten.html">Activiteiten</a></li>
+                <li><a href="/beheerder/gebruikers" class="active">Gebruikers</a></li>
+                <li><a href="/beheerder/activiteiten">Activiteiten</a></li>
             </ul>
         </aside>
         <main id="mainContent">
             <div class="heading split-row">
                 <h2>Gebruikers Beheer</h2>
-                <button class="btn btn-primary" onclick="window.location.href='/beheerder/gebruiker-edit.html'">
+                <button class="btn btn-primary" onclick="window.location.href='/beheerder/gebruikers/new'">
                     <i class="fas fa-plus"></i> Nieuwe Gebruiker Toevoegen
                 </button>
             </div>
@@ -50,8 +50,8 @@
                 <table class="data-table">
                     <thead>
                         <tr>
-                            <th><i class="fas fa-envelope"></i> Email</th>
-                            <th><i class="fas fa-user-tag"></i> Rol</th>
+                            <th>Email</th>
+                            <th style="text-align: center;">Admin</th>
                             <th class="justify-right">Acties</th>
                         </tr>
                     </thead>
@@ -115,15 +115,15 @@
                 const row = document.createElement('tr');
                 row.style.cursor = 'pointer';
                 row.onclick = function() {
-                    window.location.href = `/beheerder/gebruiker-view.html?id=${user.id}`;
+                    window.location.href = `/beheerder/gebruikers/${user.id}`;
                 };
                 
                 row.innerHTML = `
                     <td>${user.email}</td>
-                    <td>${user.role === 1 ? 'Admin' : 'Gebruiker'}</td>
+                    <td>${(user.isAdmin === 1 || user.isAdmin === true) ? '<i class="fas fa-check" style="color: green; text-align: center; width:100%;"></i>' : '<i class="fas fa-times" style="color: red; text-align: center; width:100%;"></i>'}</td>
                     <td onclick="event.stopPropagation()">
                         <div class="justify-right" style="display: flex; gap: 5px; flex-wrap: wrap;">
-                            <button class="btn btn-primary btn-small" onclick="window.location.href='/beheerder/gebruiker-edit.html?id=${user.id}'">
+                            <button class="btn btn-primary btn-small" onclick="window.location.href='/beheerder/gebruikers/${user.id}/edit'">
                                 <i class="fas fa-edit"></i>
                             </button>
                             <button class="btn btn-danger btn-small" onclick="deleteUser(${user.id})">
@@ -138,7 +138,7 @@
 
         function updateStats(users) {
             const totalUsers = users.length;
-            const adminCount = users.filter(user => user.role === 1).length;
+            const adminCount = users.filter(user => user.isAdmin === 1 || user.isAdmin === true).length;
             const regularCount = totalUsers - adminCount;
 
             document.getElementById('total-users').textContent = totalUsers;

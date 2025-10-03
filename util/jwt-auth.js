@@ -18,8 +18,8 @@ async function verifyToken(token) {
 async function verifyAdmin(token) {
     const verified = await verifyToken(token);
     if (!verified) return false
-    const admin = (await database.query("SELECT role FROM gebruiker WHERE id = ?", [verified.id]))[0].role;
-    return admin === 1;
+    const admin = (await database.query("SELECT isAdmin FROM gebruiker WHERE id = ?", [verified.id]))[0].isAdmin;
+    return admin === 1 || admin === true;
 }
 
 export {

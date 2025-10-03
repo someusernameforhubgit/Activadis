@@ -33,8 +33,8 @@
             <h1>Navigatie</h1>
             <ul>
                 <li><a href="/beheerder/">Dashboard</a></li>
-                <li><a href="/beheerder/gebruikers.html">Gebruikers</a></li>
-                <li><a href="/beheerder/activiteiten.html">Activiteiten</a></li>
+                <li><a href="/beheerder/gebruikers">Gebruikers</a></li>
+                <li><a href="/beheerder/activiteiten">Activiteiten</a></li>
             </ul>
         </aside>
         <main id="mainContent">
@@ -287,19 +287,19 @@
                 align-items: center;
             }
         }
-        
+
         /* Image section styles */
         #activity-afbeeldingen {
             padding-top: 10px;
         }
-        
+
         .image-item {
             display: flex;
             align-items: center;
             gap: 10px;
             margin-bottom: 10px;
         }
-        
+
         .image-picture {
             max-width: 50px;
             max-height: 50px;
@@ -337,6 +337,8 @@
         }
 
         function getActivityIdFromUrl() {
+            const m = window.location.pathname.match(/\/beheerder\/activiteiten\/(\d+)\/edit/);
+            if (m) return parseInt(m[1]);
             const urlParams = new URLSearchParams(window.location.search);
             const id = urlParams.get('id');
             return id ? parseInt(id) : null;
@@ -346,7 +348,7 @@
             if (document.referrer && document.referrer.includes('/beheerder/')) {
                 window.history.back();
             } else {
-                window.location.href = '/beheerder/activiteiten.html';
+                window.location.href = '/beheerder/activiteiten';
             }
         }
 
@@ -532,7 +534,7 @@
                 const now = new Date();
                 const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
                 const threeLater = new Date(tomorrow.getTime() + 3 * 60 * 60 * 1000); // 3 hours later
-                
+
                 // Set minimum date/time to current time for both fields
                 const minDateTime = now.toISOString().slice(0, 16);
                 document.getElementById('activity-begin').min = minDateTime;
@@ -540,11 +542,11 @@
                 
                 document.getElementById('activity-begin').value = tomorrow.toISOString().slice(0, 16);
                 document.getElementById('activity-eind').value = threeLater.toISOString().slice(0, 16);
-                
+
                 // Initialize image display for new activity
                 displayNewActivityImages();
             }
- 
+
             // Add real-time validation
             document.querySelectorAll('#activity-form input, #activity-form textarea').forEach(field => {
                 field.addEventListener('blur', function() {
@@ -570,15 +572,15 @@
 
             // Handle form submission
             document.getElementById('activity-form').addEventListener('submit', handleSubmit);
-            
+
             // Add date validation to prevent manual entry of past dates
             const beginDateInput = document.getElementById('activity-begin');
             const endDateInput = document.getElementById('activity-eind');
-            
+
             function validateDateInput(input, fieldId) {
                 const inputDate = new Date(input.value);
                 const now = new Date();
-                
+
                 if (input.value && inputDate < now && !isEditMode) {
                     input.value = now.toISOString().slice(0, 16);
                     showFieldError(fieldId, 'Datum kan niet in het verleden liggen');
@@ -590,27 +592,27 @@
                     }, 3000);
                 }
             }
-            
+
             beginDateInput.addEventListener('change', function() {
                 validateDateInput(this, 'activity-begin');
                 // Update minimum end time when begin time changes
                 const beginTime = this.value;
                 if (beginTime) {
                     endDateInput.min = beginTime;
-                    
+
                     // If end time is before begin time, update it to match begin time
                     if (endDateInput.value && endDateInput.value <= beginTime) {
                         endDateInput.value = beginTime;
                     }
                 }
             });
-            
+
             endDateInput.addEventListener('change', function() {
                 validateDateInput(this, 'activity-eind');
                 // Also check that end time is after begin time
                 const beginTime = beginDateInput.value;
                 const endTime = this.value;
-                
+
                 if (beginTime && endTime && new Date(endTime) <= new Date(beginTime)) {
                     // Set end time to exactly the same as begin time
                     this.value = beginTime;
@@ -789,7 +791,7 @@
                     // No response expected for PUT request
                     // Show success message
                     alert('Activiteit succesvol bijgewerkt!');
-                    
+
                     // Redirect after short delay to allow user to see success
                     setTimeout(() => {
                         window.location.href = '/beheerder/activiteiten.html';
@@ -798,17 +800,17 @@
                     const result = await response.json();
                     console.log('Activity creation response:', result);
                     const newActivityId = result; // The result IS the insertId directly
-                    
+
                     console.log('New activity created with ID:', newActivityId);
-                    
+
                     // Now add all images to the new activity
                     if (newActivityImages.length > 0) {
                         console.log('Adding images to new activity:', newActivityImages);
-                        
+
                         for (const imageData of newActivityImages) {
                             try {
                                 console.log('Saving image to database:', imageData.url, 'for activity ID:', newActivityId);
-                                
+
                                 const imageResponse = await fetch(`/api/afbeelding?token=${token}`, {
                                     method: 'POST',
                                     headers: {
@@ -819,7 +821,7 @@
                                         afbeeldingUrl: imageData.url
                                     })
                                 });
-                                
+
                                 if (!imageResponse.ok) {
                                     const errorText = await imageResponse.text();
                                     console.error('Failed to add image:', imageData.url, 'Status:', imageResponse.status, 'Error:', errorText);
@@ -832,13 +834,13 @@
                             }
                         }
                     }
-                    
+
                     // Show success message
                     alert('Activiteit succesvol toegevoegd!');
                     
                     // Redirect after short delay to allow user to see success
                     setTimeout(() => {
-                        window.location.href = '/beheerder/activiteiten.html';
+                        window.location.href = '/beheerder/activiteiten';
                     }, 500);
                 }
                 
@@ -872,14 +874,14 @@
 
         async function removeImage(event, afbeeldingId) {
             event.preventDefault();
-            
+
             console.log('Removing image with ID:', afbeeldingId);
-            
+
             // Show confirmation dialog
             if (!confirm('Weet je zeker dat je deze afbeelding wilt verwijderen?')) {
                 return;
             }
-            
+
             try {
                 const response = await fetch(`/api/afbeelding?id=${afbeeldingId}&token=${token}`, {
                     method: 'DELETE',
@@ -887,7 +889,7 @@
                         'Content-Type': 'application/json'
                     }
                 });
-                
+
                 if (!response.ok) {
                     if (response.status === 401) {
                         alert('U bent niet geautoriseerd. Log opnieuw in.');
@@ -897,15 +899,15 @@
                         throw new Error(`HTTP ${response.status}`);
                     }
                 }
-                
+
                 console.log('Image successfully deleted');
-                
+
                 // Remove the image from the UI
                 const imageElement = event.target.closest('div');
                 if (imageElement) {
                     imageElement.remove();
                 }
-                
+
             } catch (error) {
                 console.error('Error deleting image:', error);
             }
@@ -915,18 +917,18 @@
             if (event) {
                 event.preventDefault();
             }
-            
+
             const afbeeldingUrlInput = document.getElementById('activity-afbeeldingUrl');
             const afbeeldingUrl = afbeeldingUrlInput.value.trim();
-            
+
             console.log("Adding image URL:", afbeeldingUrl);
-            
+
             // Validate input
             if (!afbeeldingUrl) {
                 alert('Voer een afbeelding URL in.');
                 return;
             }
-            
+
             // Basic URL validation
             try {
                 new URL(afbeeldingUrl);
@@ -934,11 +936,11 @@
                 alert('Voer een geldige URL in.');
                 return;
             }
-            
+
             if (isEditMode && currentActivity) {
                 // For editing existing activities, add directly to database
                 const activiteitId = currentActivity.id;
-                
+
                 try {
                     const response = await fetch(`/api/afbeelding?token=${token}`, {
                         method: 'POST',
@@ -950,7 +952,7 @@
                             afbeeldingUrl: afbeeldingUrl
                         })
                     });
-                    
+
                     if (!response.ok) {
                         if (response.status === 401) {
                             alert('U bent niet geautoriseerd. Log opnieuw in.');
@@ -960,22 +962,22 @@
                             throw new Error(`HTTP ${response.status}`);
                         }
                     }
-                    
+
                     const result = await response.json();
                     console.log('Image successfully added:', result);
-                    
+
                     // Clear the input field
                     afbeeldingUrlInput.value = '';
-                    
+
                     // Add the new image to the UI
                     const imageContainer = document.getElementById('activity-afbeeldingen');
-                    
+
                     // Clear any 'geen afbeelding' text if it exists
                     const noImageText = imageContainer.querySelector('p');
                     if (noImageText && noImageText.textContent.includes('Geen afbeelding')) {
                         imageContainer.innerHTML = '';
                     }
-                    
+
                     const newImageDiv = document.createElement('div');
                     newImageDiv.className = 'image-item';
                     newImageDiv.innerHTML = `
@@ -984,7 +986,7 @@
                         <button type="button" onClick="removeImage(event, '${result}')">X</button>
                     `;
                     imageContainer.appendChild(newImageDiv);
-                    
+
                 } catch (error) {
                     console.error('Error adding image:', error);
                     alert('Er is een fout opgetreden bij het toevoegen van de afbeelding.');
@@ -995,27 +997,27 @@
                     url: afbeeldingUrl,
                     tempId: Date.now() + Math.random() // Temporary ID for removal
                 };
-                
+
                 newActivityImages.push(imageData);
-                
+
                 // Clear the input field
                 afbeeldingUrlInput.value = '';
-                
+
                 // Update the display
                 displayNewActivityImages();
-                
+
                 console.log('Image added to new activity array:', newActivityImages);
             }
         }
 
         function displayNewActivityImages() {
             const imageContainer = document.getElementById('activity-afbeeldingen');
-            
+
             if (newActivityImages.length === 0) {
                 imageContainer.innerHTML = '<p>Geen afbeeldingen toegevoegd.</p>';
                 return;
             }
-            
+
             imageContainer.innerHTML = '';
             newActivityImages.forEach(imageData => {
                 const newImageDiv = document.createElement('div');
@@ -1033,10 +1035,10 @@
         window.removeNewActivityImage = function(tempId) {
             // Remove from array
             newActivityImages = newActivityImages.filter(img => img.tempId != tempId);
-            
+
             // Update display
             displayNewActivityImages();
-            
+
             console.log('Image removed from new activity array:', newActivityImages);
         }
     </script>

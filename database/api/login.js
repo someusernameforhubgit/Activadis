@@ -5,7 +5,7 @@ const url = "/api/login";
 export default function LoginAPI(app, database) {
     app.get(url, async (req, res) => {
         const {email, password} = req.query;
-        const gebruiker = await database.query("SELECT * FROM gebruiker WHERE email = ?", [email]);
+        const gebruiker = await database.query("SELECT * FROM gebruiker WHERE LOWER(email) = LOWER(?)", [email]);
         if (gebruiker.length === 0) {
             return res.send({});
         }

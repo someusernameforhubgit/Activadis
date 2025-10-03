@@ -47,11 +47,13 @@ export default function GebruikerAPI(app, database) {
     });
 
     app.post(url, async (req, res) => {
+        console.log("POST /api/gebruiker - Request body:", req.body);
+        
         if (!(await verifyAdmin(req.query.token))) {
             return res.status(401).send("Unauthorized");
         }
 
-        const requiredFields = ['email', 'firstname', 'lastname', 'role'];
+        const requiredFields = ['email', 'firstname', 'lastname'];
 
         // ✅ Collect missing or empty fields (also trims strings)
         const missingFields = requiredFields.filter(field => {
@@ -76,10 +78,43 @@ export default function GebruikerAPI(app, database) {
             }
 
             // ✅ Insert new user
+            const isAdmin = req.body.admin === '1' ? 1 : 0;
+            
+            console.log("Raw role value from request:", req.body.role, "Type:", typeof req.body.role);
+            
+            // Handle role: use 0 for no selection, otherwise use the actual role ID
+            let role = 0; // Default to 0 instead of null
+            console.log('role id from request body:', req.body.role);
+            if (req.body.role && req.body.role !== '') {
+                role = parseInt(req.body.role); // Convert to integer since it's a role ID
+                console.log("Parsed role value:", role);
+            } else {
+                console.log("No role selected, using default value 0");
+            }
+            
+            console.log("Final values - role:", role, "isAdmin:", isAdmin);
+            console.log("About to insert with values:", {
+                email: req.body.email,
+                firstname: req.body.firstname, 
+                lastname: req.body.lastname,
+                isAdmin: isAdmin,
+                role: role
+            });
+            
+            // Direct insert without try/catch since we're not using NULL
             const gebruiker = await database.query(
-                "INSERT INTO gebruiker (email, firstname, lastname, role) VALUES (?, ?, ?, ?)",
-                [req.body.email, req.body.firstname, req.body.lastname, req.body.role]
+                "INSERT INTO gebruiker (email, firstname, lastname, isAdmin, role) VALUES (?, ?, ?, ?, ?)",
+                [req.body.email, req.body.firstname, req.body.lastname, isAdmin, role]
             );
+            
+            console.log("Database insert result:", gebruiker);
+            
+            // Let's also verify what was actually inserted by querying it back
+            const insertedUser = await database.query(
+                "SELECT * FROM gebruiker WHERE email = ? ORDER BY id DESC LIMIT 1",
+                [req.body.email]
+            );
+            console.log("Inserted user from database:", insertedUser[0]);
 
             res.send(gebruiker);
 
@@ -104,7 +139,9 @@ export default function GebruikerAPI(app, database) {
             );
         } catch (error) {
             console.error('Error creating user:', error);
-            res.status(500).send("Error creating user");
+            console.error('Error details:', error.message);
+            console.error('Error stack:', error.stack);
+            res.status(500).send("Error creating user: " + error.message);
         }
     });
 
@@ -118,7 +155,7 @@ export default function GebruikerAPI(app, database) {
         const isPasswordReset = jwtData.jwt && jwtData.jwt.reset;
         const requiredFields = isPasswordReset
             ? ['id', 'password']
-            : ['id', 'email', 'firstname', 'lastname', 'role', 'reset'];
+            : ['id', 'email', 'firstname', 'lastname', 'reset'];
 
         const hasAllRequiredFields = requiredFields.every(field =>
             req.body[field] !== undefined && req.body[field] !== null && req.body[field] !== ''
@@ -142,10 +179,29 @@ export default function GebruikerAPI(app, database) {
                 res.send({ success: true, message: "Password updated successfully" });
             } else {
                 if (req.body.reset) {
-                    const gebruiker = await database.query(
-                        "UPDATE gebruiker SET email = ?, firstname = ?, lastname = ?, role = ?, hash = ?, salt = ? WHERE id = ?",
-                        [req.body.email, req.body.firstname, req.body.lastname, req.body.role, "", "", req.body.id]
-                    );
+                    const isAdmin = req.body.admin === '1' ? 1 : 0;
+                    let role = null;
+                    if (req.body.role && req.body.role !== '') {
+                        role = parseInt(req.body.role);
+                    }
+                    
+                    let gebruiker;
+                    try {
+                        gebruiker = await database.query(
+                            "UPDATE gebruiker SET email = ?, firstname = ?, lastname = ?, isAdmin = ?, role = ?, hash = ?, salt = ? WHERE id = ?",
+                            [req.body.email, req.body.firstname, req.body.lastname, isAdmin, role, "", "", req.body.id]
+                        );
+                    } catch (dbError) {
+                        if (dbError.message.includes('cannot be null') && role === null) {
+                            // Only use 0 if role was actually null (no role selected)
+                            gebruiker = await database.query(
+                                "UPDATE gebruiker SET email = ?, firstname = ?, lastname = ?, isAdmin = ?, role = ?, hash = ?, salt = ? WHERE id = ?",
+                                [req.body.email, req.body.firstname, req.body.lastname, isAdmin, 0, "", "", req.body.id]
+                            );
+                        } else {
+                            throw dbError;
+                        }
+                    }
                     res.send(gebruiker);
 
                     const reset_token = jwt.sign(
@@ -167,10 +223,29 @@ export default function GebruikerAPI(app, database) {
                     `
                     );
                 } else {
-                    const gebruiker = await database.query(
-                        "UPDATE gebruiker SET email = ?, firstname = ?, lastname = ?, role = ? WHERE id = ?",
-                        [req.body.email, req.body.firstname, req.body.lastname, req.body.role, req.body.id]
-                    );
+                    const isAdmin = req.body.admin === '1' ? 1 : 0;
+                    let role = null;
+                    if (req.body.role && req.body.role !== '') {
+                        role = parseInt(req.body.role);
+                    }
+                    
+                    let gebruiker;
+                    try {
+                        gebruiker = await database.query(
+                            "UPDATE gebruiker SET email = ?, firstname = ?, lastname = ?, isAdmin = ?, role = ? WHERE id = ?",
+                            [req.body.email, req.body.firstname, req.body.lastname, isAdmin, role, req.body.id]
+                        );
+                    } catch (dbError) {
+                        if (dbError.message.includes('cannot be null') && role === null) {
+                            // Only use 0 if role was actually null (no role selected)
+                            gebruiker = await database.query(
+                                "UPDATE gebruiker SET email = ?, firstname = ?, lastname = ?, isAdmin = ?, role = ? WHERE id = ?",
+                                [req.body.email, req.body.firstname, req.body.lastname, isAdmin, 0, req.body.id]
+                            );
+                        } else {
+                            throw dbError;
+                        }
+                    }
                     res.send(gebruiker);
                 }
             }

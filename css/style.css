@@ -25,6 +25,11 @@
     --header-offset-top: 30px;
 }
 
+.active {
+    color: var(--primary-color) !important;
+    font-weight: 600;
+}
+
 body {
     font-family: 'Poppins', sans-serif;
     height: 100vh;
@@ -1170,6 +1175,11 @@ ul {
     flex-direction: column;
     gap: 15px;
     margin-bottom: 20px;
+
+    > button {
+        width: 100%;
+        text-align: left;
+    }
 }
 
 .btn-large {
@@ -1297,6 +1307,85 @@ ul {
     
     .card-header h2 {
         font-size: 1.1rem;
+    }
+}
+
+/* Modals */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 1000;
+    background: rgba(0, 0, 0, 0.5);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    > .modal-content {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+
+        p {
+            font-size: 1.2rem;
+
+            &.error {
+                display: none;
+                font-size: 1rem;
+                color: red;
+
+                &.show {
+                    display: block;
+                }
+            }
+        }
+
+        h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: all 0.2s;
+        }
+
+        label {
+            font-weight: 600;
+        }
+
+        input {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-family: inherit;
+            font-size: 14px;
+            width: 100%;
+        }
+
+        .column {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .row {
+            display: flex;
+            gap: 10px;
+        }
     }
 }
 

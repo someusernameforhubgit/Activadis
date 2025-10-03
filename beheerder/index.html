@@ -17,7 +17,7 @@
                 <nav>
                     <div class="nav-left">
                         <a href="/"><i class="fas fa-home"></i>Home</a>
-                        <a href="/beheerder">Beheerder</a>
+                        <a href="/beheerder" class="active">Beheerder</a>
                     </div>
                     <div>
                         <a class="login" href="/login"><i class="fas fa-sign-in-alt"></i>Login</a>
@@ -32,9 +32,9 @@
         <aside id="sidebar">
             <h1>Navigatie</h1>
             <ul>
-                <li><a href="/beheerder/">Dashboard</a></li>
-                <li><a href="/beheerder/gebruikers.html">Gebruikers</a></li>
-                <li><a href="/beheerder/activiteiten.html">Activiteiten</a></li>
+                <li><a href="/beheerder/" class="active">Dashboard</a></li>
+                <li><a href="/beheerder/gebruikers">Gebruikers</a></li>
+                <li><a href="/beheerder/activiteiten">Activiteiten</a></li>
             </ul>
         </aside>
         <main id="mainContent">
@@ -74,7 +74,7 @@
                 <div class="manage-block">
                     <div class="heading split-row">
                         <h3>Activiteiten</h3>
-                        <button class="btn btn-primary btn-small" onclick="window.location.href='/beheerder/activiteit-edit.html'">
+                        <button class="btn btn-primary btn-small" onclick="window.location.href='/beheerder/activiteiten/new'">
                             <i class="fas fa-plus"></i> Nieuwe Activiteit
                         </button>
                     </div>
@@ -99,7 +99,7 @@
                 <div class="manage-block">
                     <div class="heading split-row">
                         <h3>Gebruikers</h3>
-                        <button class="btn btn-primary btn-small" onclick="window.location.href='/beheerder/gebruiker-edit.html'">
+                        <button class="btn btn-primary btn-small" onclick="window.location.href='/beheerder/gebruikers/new'">
                             <i class="fas fa-plus"></i> Nieuwe Gebruiker
                         </button>
                     </div>
@@ -201,7 +201,7 @@
                 const row = document.createElement('tr');
                 row.style.cursor = 'pointer';
                 row.onclick = function() {
-                    window.location.href = `/beheerder/activiteit-view.html?id=${act.id}`;
+                    window.location.href = `/beheerder/activiteiten/${act.id}`;
                 };
                 
                 const beginDate = new Date(act.begin);
@@ -213,7 +213,7 @@
                     <td>€${act.kost}</td>
                     <td onclick="event.stopPropagation()">
                         <div class="justify-right" style="display: flex; gap: 5px; flex-wrap: wrap;">
-                            <button class="btn btn-primary btn-small" onclick="window.location.href='/beheerder/activiteit-edit.html?id=${act.id}'">
+                            <button class="btn btn-primary btn-small" onclick="window.location.href='/beheerder/activiteiten/${act.id}/edit'">
                                 <i class="fas fa-edit"></i>
                             </button>
                             <button class="btn btn-danger btn-small" onclick="deleteActiviteit(${act.id})">
@@ -234,15 +234,15 @@
                 const row = document.createElement('tr');
                 row.style.cursor = 'pointer';
                 row.onclick = function() {
-                    window.location.href = `/beheerder/gebruiker-view.html?id=${user.id}`;
+                    window.location.href = `/beheerder/gebruikers/${user.id}`;
                 };
                 
                 row.innerHTML = `
                     <td>${user.email}</td>
-                    <td>${user.role === 1 ? 'Admin' : 'Gebruiker'}</td>
+                    <td>${(user.isAdmin === 1 || user.isAdmin === true) ? 'Admin' : 'Gebruiker'}</td>
                     <td onclick="event.stopPropagation()">
                         <div class="justify-right" style="display: flex; gap: 5px; flex-wrap: wrap;">
-                            <button class="btn btn-primary btn-small" onclick="window.location.href='/beheerder/gebruiker-edit.html?id=${user.id}'">
+                            <button class="btn btn-primary btn-small" onclick="window.location.href='/beheerder/gebruikers/${user.id}/edit'">
                                 <i class="fas fa-edit"></i>
                             </button>
                             <button class="btn btn-danger btn-small" onclick="deleteGebruiker(${user.id})">
