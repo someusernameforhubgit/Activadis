@@ -89,7 +89,7 @@ export default function InschrijvingAPI(app, database) {
             }
 
             const token = await jwt.sign({email: req.body.email, voornaam: req.body.voornaam, achternaam: req.body.achternaam, activiteit: req.body.activiteit, edit: true}, process.env.JWT_SECRET, {expiresIn: "1h"})
-            const reset_link = `${process.env.PROTOCOL}://${process.env.HOSTNAME}/activiteit.html?id=${req.body.activiteit}&token=${token}`;
+            const reset_link = `${process.env.PROTOCOL}://${process.env.HOSTNAME}/activiteit/${req.body.activiteit}?token=${token}`;
             const activiteitNaam = (await database.query("SELECT naam FROM activiteit WHERE id = ?", [req.body.activiteit]))[0].naam;
 
             await mail(
@@ -218,7 +218,7 @@ export default function InschrijvingAPI(app, database) {
             }
 
             const token = await jwt.sign({email: req.body.email, activiteit: req.body.activiteit, "delete": true}, process.env.JWT_SECRET, {expiresIn: "1h"})
-            const reset_link = `${process.env.PROTOCOL}://${process.env.HOSTNAME}/activiteit.html?id=${req.body.activiteit}&token=${token}`;
+            const reset_link = `${process.env.PROTOCOL}://${process.env.HOSTNAME}/activiteit/${req.body.activiteit}?token=${token}`;
             const activiteitNaam = (await database.query("SELECT naam FROM activiteit WHERE id = ?", [req.body.activiteit]))[0].naam;
 
             await mail(

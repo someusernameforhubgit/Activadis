@@ -10,7 +10,11 @@ import {
 
 // Get activity ID from URL parameters
 const urlParams = new URLSearchParams(window.location.search);
-const activityId = urlParams.get('id');
+let activityId = urlParams.get('id');
+if (!activityId) {
+    const m = window.location.pathname.match(/^\/activiteit\/(\d+)/);
+    if (m) activityId = m[1];
+}
 const jwt = sessionStorage.getItem('JWT');
 
 // DOM elements
@@ -18,6 +22,57 @@ const loadingState = document.getElementById('loadingState');
 const errorState = document.getElementById('errorState');
 const mainContent = document.getElementById('mainContent');
 const errorMessage = document.getElementById('errorMessage');
+
+// Carousel functionality
+let currentSlide = 0;
+let totalSlides = 0;
+
+window.moveCarousel = (direction) => {
+    const carousel = document.querySelector('.carousel-wrapper');
+    if (!carousel) return;
+
+    totalSlides = document.querySelectorAll('.carousel-slide').length;
+    currentSlide += direction;
+
+    // Loop around if needed
+    if (currentSlide >= totalSlides) {
+        currentSlide = 0;
+    } else if (currentSlide < 0) {
+        currentSlide = totalSlides - 1;
+    }
+
+    // Move the carousel
+    const translateX = -(currentSlide * (100 / totalSlides));
+    carousel.style.transform = `translateX(${translateX}%)`;
+
+    // Update indicators
+    updateIndicators();
+}
+
+function goToSlide(slideIndex) {
+    currentSlide = slideIndex;
+    const carousel = document.querySelector('.carousel-wrapper');
+    if (!carousel) return;
+
+    totalSlides = document.querySelectorAll('.carousel-slide').length;
+    const translateX = -(currentSlide * (100 / totalSlides));
+    carousel.style.transform = `translateX(${translateX}%)`;
+
+    updateIndicators();
+}
+
+function updateIndicators() {
+    const indicators = document.querySelectorAll('.indicator');
+    indicators.forEach((indicator, index) => {
+        if (index === currentSlide) {
+            indicator.classList.add('active');
+            indicator.style.background = 'white';
+        } else {
+            indicator.classList.remove('active');
+            indicator.style.background = 'transparent';
+        }
+    });
+}
 
 // Function to show error state
 function showError(message = 'Er is een onbekende fout opgetreden.') {
@@ -72,6 +127,46 @@ async function populateActivityData(data) {
 
     // Registration information
     document.getElementById('registrationPrice').textContent = data.kost ? `€${data.kost}` : 'Gratis';
+
+    let afbeeldingen;
+    if (data.afbeeldingen[0] == null) {
+        afbeeldingen = '<img src="https://covadis.nl/wp-content/themes/id/resource/image/header/1.svg" alt="Afbeelding van activiteit" class="single-image">';
+    } else if (data.afbeeldingen.length == 1) {
+        afbeeldingen = '<img src="' + data.afbeeldingen[0].afbeeldingUrl + '" alt="Afbeelding van activiteit" class="single-image">';
+    } else {
+        // Create carousel for multiple images
+        afbeeldingen = `
+                    <div class="carousel-container">
+                        <div class="carousel-wrapper" style="width: ${data.afbeeldingen.length * 100}%;">`;
+
+        for (let i = 0; i < data.afbeeldingen.length; i++) {
+            afbeeldingen += `
+                        <div class="carousel-slide" style="flex: 0 0 ${100 / data.afbeeldingen.length}%;">
+                            <img src="${data.afbeeldingen[i].afbeeldingUrl}" alt="Afbeelding ${i + 1} van activiteit" class="carousel-image">
+                        </div>`;
+        }
+
+        afbeeldingen += `
+                        </div>
+                        <button class="carousel-btn prev" onclick="moveCarousel(-1)">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <button class="carousel-btn next" onclick="moveCarousel(1)">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                        <div class="carousel-indicators">`;
+
+        for (let i = 0; i < data.afbeeldingen.length; i++) {
+            afbeeldingen += `
+                        <button class="indicator ${i === 0 ? 'active' : ''}" onclick="goToSlide(${i})"></button>`;
+        }
+
+        afbeeldingen += `
+                        </div>
+                    </div>`;
+    }
+
+    document.querySelector('#activityImage').innerHTML = afbeeldingen;
 
     const inschrijvingen = await fetch("/api/inschrijving?activiteit=" + data.id);
     const inschrijvingenData = await inschrijvingen.json();

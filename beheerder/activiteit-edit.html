@@ -139,36 +139,36 @@
             gap: 20px;
             margin-bottom: 20px;
         }
-        
+
         .form-group {
             display: flex;
             flex-direction: column;
         }
-        
+
         .form-group.full-width {
             grid-column: span 2;
         }
-        
+
         .form-group.checkbox {
             flex-direction: column;
             justify-content: center;
             gap: 10px;
         }
-        
+
         .form-group.checkbox input[type="checkbox"] {
             width: fit-content;
         }
-        
+
         .form-group label {
             font-weight: bold;
             margin-bottom: 5px;
             color: #333;
         }
-        
+
         .form-group.checkbox label {
             margin-bottom: 0;
         }
-        
+
         .form-group input,
         .form-group textarea,
         .form-group select {
@@ -178,7 +178,7 @@
             font-size: 14px;
             transition: border-color 0.2s, box-shadow 0.2s;
         }
-        
+
         .form-group input:focus,
         .form-group textarea:focus,
         .form-group select:focus {
@@ -186,36 +186,36 @@
             border-color: var(--primary-color);
             box-shadow: 0 0 0 2px rgba(0,123,255,.25);
         }
-        
+
         .form-group input.error,
         .form-group textarea.error,
         .form-group select.error {
             border-color: #dc3545;
             box-shadow: 0 0 0 2px rgba(220,53,69,.25);
         }
-        
+
         .field-error {
             color: #dc3545;
             font-size: 0.875rem;
             margin-top: 5px;
             display: none;
         }
-        
+
         .field-error.show {
             display: block;
         }
-        
+
         .field-help {
             font-size: 0.8rem;
             color: #6c757d;
             margin-top: 3px;
         }
-        
+
         .loading-container {
             text-align: center;
             padding: 60px 20px;
         }
-        
+
         .loading-spinner {
             border: 4px solid #f3f3f3;
             border-top: 4px solid var(--primary-color);
@@ -225,29 +225,29 @@
             animation: spin 1s linear infinite;
             margin: 0 auto 20px;
         }
-        
+
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        
+
         .error-container {
             text-align: center;
             padding: 40px 20px;
             color: #721c24;
         }
-        
+
         .error-container i {
             font-size: 3rem;
             color: #dc3545;
             margin-bottom: 20px;
         }
-        
+
         .error-container h3 {
             margin-bottom: 10px;
             color: #721c24;
         }
-        
+
         .error-actions {
             display: flex;
             gap: 10px;
@@ -255,7 +255,7 @@
             margin-top: 20px;
             flex-wrap: wrap;
         }
-        
+
         .form-actions {
             display: flex;
             gap: 10px;
@@ -263,25 +263,25 @@
             padding-top: 20px;
             border-top: 1px solid #eee;
         }
-        
+
         .btn:disabled {
             opacity: 0.6;
             cursor: not-allowed;
         }
-        
+
         @media (max-width: 768px) {
             .form-grid {
                 grid-template-columns: 1fr;
             }
-            
+
             .form-group.full-width {
                 grid-column: span 1;
             }
-            
+
             .form-actions {
                 justify-content: center;
             }
-            
+
             .error-actions {
                 flex-direction: column;
                 align-items: center;
@@ -366,7 +366,7 @@
         function showFieldError(fieldId, message) {
             const field = document.getElementById(fieldId);
             const errorElement = document.getElementById(fieldId.replace('activity-', '') + '-error');
-            
+
             if (field) field.classList.add('error');
             if (errorElement) {
                 errorElement.textContent = message;
@@ -377,7 +377,7 @@
         function validateField(fieldId, value) {
             const fieldName = fieldId.replace('activity-', '');
             const rules = validationRules[fieldName];
-            
+
             if (!rules) return true;
 
             // Required validation
@@ -424,7 +424,7 @@
 
         function validateForm() {
             clearAllErrors();
-            
+
             const formData = getFormData();
             let isValid = true;
 
@@ -460,14 +460,14 @@
                 const durationMs = eindDate - beginDate;
                 const durationHours = Math.floor(durationMs / (1000 * 60 * 60));
                 const durationDays = Math.floor(durationMs / (1000 * 60 * 60 * 24));
-                
+
                 // Check maximum duration (3 days = 72 hours)
                 // if (durationHours > 72) {
                 //     const daysOver = Math.floor((durationHours - 72) / 24);
                 //     showFieldError('activity-eind', `Activiteit duurt te lang (${durationDays} dagen). Maximaal 3 dagen (72 uur) toegestaan`);
                 //     isValid = false;
                 // }
-                
+
                 // Check minimum duration (15 minutes)
                 if (durationMs < 15 * 60 * 1000) {
                     showFieldError('activity-eind', 'Activiteit moet minimaal 15 minuten duren');
@@ -517,7 +517,7 @@
         // Main functions
         document.addEventListener('DOMContentLoaded', function() {
             const activityId = getActivityIdFromUrl();
-            
+
             if (activityId) {
                 isEditMode = true;
                 document.getElementById('page-title').textContent = 'Activiteit Bewerken';
@@ -529,7 +529,7 @@
                 isEditMode = false;
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('activity-form').style.display = 'block';
-                
+
                 // Set default values for new activity
                 const now = new Date();
                 const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
@@ -539,7 +539,7 @@
                 const minDateTime = now.toISOString().slice(0, 16);
                 document.getElementById('activity-begin').min = minDateTime;
                 document.getElementById('activity-eind').min = minDateTime;
-                
+
                 document.getElementById('activity-begin').value = tomorrow.toISOString().slice(0, 16);
                 document.getElementById('activity-eind').value = threeLater.toISOString().slice(0, 16);
 
