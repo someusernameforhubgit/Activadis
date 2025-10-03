@@ -1,33 +1,36 @@
 <!doctype html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta name="viewport"
+        content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="/css/header.css">
     <script src="/beheerder/verifyAdmin.js"></script>
     <title>Activadis - Gebruiker Bewerken</title>
 </head>
+
 <body>
-<header>
-    <div class="container">
-        <div class="left">
-            <p><b><span class="accent">Acti</span>vadis</b>: Gebruiker Bewerken</p>
-            <nav>
-                <div class="nav-left">
-                    <a href="/"><i class="fas fa-home"></i>Home</a>
-                    <a href="/beheerder">Beheerder</a>
-                </div>
-                <div>
-                    <a class="login" href="/login"><i class="fas fa-sign-in-alt"></i>Login</a>
-                    <p class="logout name"></p>
-                    <a class="logout" onclick="logout()">Logout</a>
-                </div>
-            </nav>
+    <header>
+        <div class="container">
+            <div class="left">
+                <p><b><span class="accent">Acti</span>vadis</b>: Gebruiker Bewerken</p>
+                <nav>
+                    <div class="nav-left">
+                        <a href="/"><i class="fas fa-home"></i>Home</a>
+                        <a href="/beheerder">Beheerder</a>
+                    </div>
+                    <div>
+                        <a class="login" href="/login"><i class="fas fa-sign-in-alt"></i>Login</a>
+                        <p class="logout name"></p>
+                        <a class="logout" onclick="logout()">Logout</a>
+                    </div>
+                </nav>
+            </div>
         </div>
-    </div>
-</header>
+    </header>
     <section id="mainContainer">
         <aside id="sidebar">
             <h1>Navigatie</h1>
@@ -54,23 +57,42 @@
                     <div class="form-grid">
                         <div class="form-group">
                             <label for="user-firstname">Voornaam *</label>
-                            <input type="text" id="user-firstname" required maxlength="100" autocomplete="given-name" pattern="[A-Za-z\s\-']{2,}" title="Alleen letters, spaties, streepjes en apostrofs toegestaan (min. 2 karakters)">
+                            <input type="text" id="user-firstname" required maxlength="100" autocomplete="given-name"
+                                pattern="[A-Za-z\s\-']{2,}"
+                                title="Alleen letters, spaties, streepjes en apostrofs toegestaan (min. 2 karakters)">
                             <div class="field-error" id="firstname-error"></div>
                         </div>
                         <div class="form-group">
                             <label for="user-lastname">Achternaam *</label>
-                            <input type="text" id="user-lastname" required maxlength="100" autocomplete="family-name" pattern="[A-Za-z\s\-']{2,}" title="Alleen letters, spaties, streepjes en apostrofs toegestaan (min. 2 karakters)">
+                            <input type="text" id="user-lastname" required maxlength="100" autocomplete="family-name"
+                                pattern="[A-Za-z\s\-']{2,}"
+                                title="Alleen letters, spaties, streepjes en apostrofs toegestaan (min. 2 karakters)">
                             <div class="field-error" id="lastname-error"></div>
                         </div>
                         <div class="form-group full-width">
                             <label for="user-email">Email *</label>
-                            <input type="email" id="user-email" required maxlength="255" autocomplete="email" placeholder="gebruiker@voorbeeld.nl">
+                            <input type="email" id="user-email" required maxlength="255" autocomplete="email"
+                                placeholder="gebruiker@voorbeeld.nl">
                             <div class="field-error" id="email-error"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="user-role">Rol (optioneel)</label>
+                            <select id="user-role">
+                                <option value="">Selecteer een rol...</option>
+                            </select>
+                            <div class="field-error" id="role-error"></div>
+                        </div>
+                        <div class="form-group user-admin">
+                            <label for="user-admin">
+                                <input type="checkbox" id="user-admin"> Is Administrator
+                            </label>
+                            <div class="field-error" id="admin-error"></div>
                         </div>
                         <div class="form-group" id="password-reset-group" style="display: none;">
                             <label>Wachtwoord beheer</label>
                             <div class="password-reset-container">
-                                <button type="button" class="btn btn-warning btn-small" id="reset-password-btn" onclick="togglePasswordReset()">
+                                <button type="button" class="btn btn-warning btn-small" id="reset-password-btn"
+                                    onclick="togglePasswordReset()">
                                     <i class="fas fa-key"></i> Wachtwoord Resetten
                                 </button>
                                 <div id="reset-status" style="display: none;" class="reset-warning">
@@ -78,15 +100,6 @@
                                     <span>Wachtwoord wordt gereset na het publiceren van uw wijzigingen</span>
                                 </div>
                             </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="user-admin">Rol *</label>
-                            <select id="user-admin" required>
-                                <option value="">Selecteer een rol...</option>
-                                <option value="2">Gebruiker</option>
-                                <option value="1">Administrator</option>
-                            </select>
-                            <div class="field-error" id="admin-error"></div>
                         </div>
                     </div>
                     <div class="form-actions">
@@ -116,22 +129,22 @@
             gap: 20px;
             margin-bottom: 20px;
         }
-        
+
         .form-group {
             display: flex;
             flex-direction: column;
         }
-        
+
         .form-group.full-width {
             grid-column: span 2;
         }
-        
+
         .form-group label {
             font-weight: bold;
             margin-bottom: 5px;
             color: #333;
         }
-        
+
         .form-group input,
         .form-group textarea,
         .form-group select {
@@ -141,37 +154,37 @@
             font-size: 14px;
             transition: border-color 0.2s, box-shadow 0.2s;
         }
-        
+
         .form-group input:focus,
         .form-group textarea:focus,
         .form-group select:focus {
             outline: none;
             border-color: var(--primary-color);
-            box-shadow: 0 0 0 2px rgba(0,123,255,.25);
+            box-shadow: 0 0 0 2px rgba(0, 123, 255, .25);
         }
-        
+
         .form-group input.error,
         .form-group select.error {
             border-color: #dc3545;
-            box-shadow: 0 0 0 2px rgba(220,53,69,.25);
+            box-shadow: 0 0 0 2px rgba(220, 53, 69, .25);
         }
-        
+
         .field-error {
             color: #dc3545;
             font-size: 0.875rem;
             margin-top: 5px;
             display: none;
         }
-        
+
         .field-error.show {
             display: block;
         }
-        
+
         .loading-container {
             text-align: center;
             padding: 60px 20px;
         }
-        
+
         .loading-spinner {
             border: 4px solid #f3f3f3;
             border-top: 4px solid var(--primary-color);
@@ -181,29 +194,40 @@
             animation: spin 1s linear infinite;
             margin: 0 auto 20px;
         }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+
+        .user-admin {
+            display: flex;
+            justify-content: center;
+            margin-top: 15px;
         }
-        
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
         .error-container {
             text-align: center;
             padding: 40px 20px;
             color: #721c24;
         }
-        
+
         .error-container i {
             font-size: 3rem;
             color: #dc3545;
             margin-bottom: 20px;
         }
-        
+
         .error-container h3 {
             margin-bottom: 10px;
             color: #721c24;
         }
-        
+
         .error-actions {
             display: flex;
             gap: 10px;
@@ -211,13 +235,13 @@
             margin-top: 20px;
             flex-wrap: wrap;
         }
-        
+
         .password-reset-container {
             display: flex;
             /* flex-direction: column; */
             gap: 10px;
         }
-        
+
         .reset-warning {
             background-color: #fff3cd;
             border: 1px solid #ffeaa7;
@@ -229,11 +253,11 @@
             align-items: center;
             gap: 8px;
         }
-        
+
         .reset-warning i {
             color: #f39c12;
         }
-        
+
         .form-actions {
             display: flex;
             gap: 10px;
@@ -241,37 +265,56 @@
             padding-top: 20px;
             border-top: 1px solid #eee;
         }
-        
+
         .text-danger {
             color: #dc3545;
         }
-        
+
         .btn-small {
             padding: 5px 10px;
             font-size: 12px;
         }
-        
+
         .btn:disabled {
             opacity: 0.6;
             cursor: not-allowed;
         }
-        
+
+        /* Checkbox styling */
+        .form-group label input[type="checkbox"] {
+            margin-right: 8px;
+            transform: scale(1.2);
+            cursor: pointer;
+        }
+
+        .form-group label {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+
         @media (max-width: 768px) {
             .form-grid {
                 grid-template-columns: 1fr;
             }
-            
+
             .form-group.full-width {
                 grid-column: span 1;
             }
-            
+
             .form-actions {
                 justify-content: center;
             }
-            
+
             .error-actions {
                 flex-direction: column;
                 align-items: center;
+            }
+
+            .user-admin {
+                display: block;
+                margin-top: 0;
             }
         }
     </style>
@@ -290,8 +333,54 @@
             firstname: { required: true, minLength: 2, maxLength: 100, pattern: /^[A-Za-z\s\-']+$/ },
             lastname: { required: true, minLength: 2, maxLength: 100, pattern: /^[A-Za-z\s\-']+$/ },
             email: { required: true, maxLength: 255, pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/ },
-            admin: { required: true }, 
+            role: { required: false },
         };
+
+        // Load role options from API
+        async function loadRoleOptions(selectedRoleId = null) {
+            try {
+                const roleSelect = document.getElementById('user-role');
+
+                // Clear existing options except the first one
+                roleSelect.innerHTML = '<option value="">Selecteer een rol...</option>';
+
+                const response = await fetch(`/api/role?token=${token}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                const roles = await response.json();
+
+                // Add role options
+                console.log('Loading roles:', roles, 'Selected role ID:', selectedRoleId);
+                roles.forEach(role => {
+                    const option = document.createElement('option');
+                    option.value = role.id;
+                    option.textContent = role.naam || role.name; // Try both field names
+
+                    // Select the role if it matches the selectedRoleId
+                    // Handle both string and number comparisons, and check for 0 or empty values
+                    if (selectedRoleId && selectedRoleId !== '' && selectedRoleId !== '0' && selectedRoleId !== 0) {
+                        if (parseInt(selectedRoleId) === parseInt(role.id)) {
+                            option.selected = true;
+                            console.log('Selected role:', role.naam || role.name, 'with ID:', role.id);
+                        }
+                    }
+
+                    roleSelect.appendChild(option);
+                });
+
+            } catch (error) {
+                console.error('Error loading roles:', error);
+                // Keep default option if API fails
+            }
+        }
 
         // Helper functions
         function escapeHtml(text) {
@@ -321,7 +410,7 @@
             passwordResetRequested = !passwordResetRequested;
             const btn = document.getElementById('reset-password-btn');
             const status = document.getElementById('reset-status');
-            
+
             if (passwordResetRequested) {
                 btn.innerHTML = '<i class="fas fa-undo"></i> Annuleren Reset';
                 btn.className = 'btn btn-danger btn-small';
@@ -347,7 +436,7 @@
         function showFieldError(fieldId, message) {
             const field = document.getElementById(fieldId);
             const errorElement = document.getElementById(fieldId.replace('user-', '') + '-error');
-            
+
             if (field) field.classList.add('error');
             if (errorElement) {
                 errorElement.textContent = message;
@@ -358,7 +447,7 @@
         function validateField(fieldId, value) {
             const fieldName = fieldId.replace('user-', '');
             const rules = validationRules[fieldName];
-            
+
             if (!rules) return true;
 
             // Required validation
@@ -370,7 +459,7 @@
             // String validations
             if (typeof value === 'string' && value.trim() !== '') {
                 const trimmedValue = value.trim();
-                
+
                 if (rules.minLength && trimmedValue.length < rules.minLength) {
                     showFieldError(fieldId, `Minimaal ${rules.minLength} karakters vereist`);
                     return false;
@@ -397,14 +486,15 @@
                 firstname: 'Voornaam',
                 lastname: 'Achternaam',
                 email: 'E-mailadres',
-                admin: 'Rol'
+                admin: 'Administrator rol',
+                role: 'Rol profiel'
             };
             return labels[fieldName] || fieldName;
         }
 
         function validateForm() {
             clearAllErrors();
-            
+
             const formData = getFormData();
             let isValid = true;
 
@@ -421,13 +511,25 @@
         }
 
         function getFormData() {
-            return {
+            const roleElement = document.getElementById('user-role');
+            const roleValue = roleElement.value;
+
+            console.log('Role dropdown element:', roleElement);
+            console.log('Role dropdown value:', roleValue);
+            console.log('Role dropdown selected index:', roleElement.selectedIndex);
+            console.log('Role dropdown selected option:', roleElement.options[roleElement.selectedIndex]);
+
+            const formData = {
                 firstname: document.getElementById('user-firstname').value.trim(),
                 lastname: document.getElementById('user-lastname').value.trim(),
                 email: document.getElementById('user-email').value.trim(),
-                admin: document.getElementById('user-admin').value,
+                admin: document.getElementById('user-admin').checked ? '1' : '0',
+                role: roleValue,
                 reset: passwordResetRequested
             };
+
+            console.log('Complete form data being sent:', formData);
+            return formData;
         }
 
         // Error handling
@@ -451,9 +553,9 @@
         }
 
         // Main functions
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const userId = getUserIdFromUrl();
-            
+
             if (userId) {
                 isEditMode = true;
                 document.getElementById('page-title').textContent = 'Gebruiker Bewerken';
@@ -470,14 +572,14 @@
 
             // Add real-time validation
             document.querySelectorAll('#user-form input, #user-form select').forEach(field => {
-                field.addEventListener('blur', function() {
+                field.addEventListener('blur', function () {
                     const fieldName = this.id.replace('user-', '');
                     if (validationRules[fieldName]) {
                         validateField(this.id, this.value);
                     }
                 });
-                
-                field.addEventListener('input', function() {
+
+                field.addEventListener('input', function () {
                     // Clear error when user starts typing
                     this.classList.remove('error');
                     const errorElement = document.getElementById(this.id.replace('user-', '') + '-error');
@@ -489,6 +591,11 @@
 
             // Handle form submission
             document.getElementById('user-form').addEventListener('submit', handleSubmit);
+
+            // Load roles for new user creation
+            if (!isEditMode) {
+                loadRoleOptions();
+            }
         });
 
         async function loadUser(id) {
@@ -504,7 +611,7 @@
                         'Content-Type': 'application/json'
                     }
                 });
-                
+
                 if (!response.ok) {
                     if (response.status === 401) {
                         showError('U bent niet geautoriseerd. Log opnieuw in.');
@@ -519,43 +626,47 @@
                 }
 
                 const user = await response.json();
-                
+
                 if (!user || (Array.isArray(user) && user.length === 0)) {
                     showError('Gebruiker niet gevonden.');
                     return;
                 }
-                
+
                 // Handle both single object and array responses
-                const userData = Array.isArray(user) ? 
+                const userData = Array.isArray(user) ?
                     user.find(usr => usr.id == id) : user;
-                
+
                 if (userData) {
                     currentUser = userData;
                     populateForm(userData);
                 } else {
                     showError('Gebruiker niet gevonden.');
                 }
-                
+
             } catch (error) {
                 console.error('Error loading user:', error);
-                const errorMessage = retryCount < MAX_RETRIES ? 
-                    'Fout bij laden van gebruiker. Probeer het opnieuw.' : 
+                const errorMessage = retryCount < MAX_RETRIES ?
+                    'Fout bij laden van gebruiker. Probeer het opnieuw.' :
                     'Kan gebruiker niet laden na meerdere pogingen.';
                 showError(errorMessage);
             }
         }
 
-        function populateForm(user) {
+        async function populateForm(user) {
             try {
                 document.getElementById('user-firstname').value = user.firstname || '';
                 document.getElementById('user-lastname').value = user.lastname || '';
                 document.getElementById('user-email').value = user.email || '';
-                document.getElementById('user-admin').value = user.role === 1 ? '1' : '2';
-                
+                document.getElementById('user-admin').checked = (user.isAdmin === 1 || user.isAdmin === true);
+
+                // Load roles and select the user's current role
+                console.log('User data:', user, 'User role:', user.role);
+                await loadRoleOptions(user.role);
+
                 // Show form and hide loading
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('user-form').style.display = 'block';
-                
+
             } catch (error) {
                 console.error('Error populating form:', error);
                 showError('Fout bij het vullen van het formulier.');
@@ -564,7 +675,7 @@
 
         async function handleSubmit(e) {
             e.preventDefault();
-            
+
             if (!validateForm()) {
                 // Scroll to first error
                 const firstError = document.querySelector('.field-error.show');
@@ -575,7 +686,7 @@
             }
 
             const formData = getFormData();
-            
+
             // Confirm password reset if requested
             if (passwordResetRequested && isEditMode) {
                 if (!confirm('Weet je zeker dat je het wachtwoord van deze gebruiker wilt resetten? De gebruiker krijgt automatisch een nieuwe inloglink toegestuurd per email.')) {
@@ -592,10 +703,13 @@
             // Build request payload
             const requestData = {
                 email: formData.email,
-                role: parseInt(formData.admin),
+                admin: formData.admin, // Keep as string since backend expects '1' or '0'
                 firstname: formData.firstname,
-                lastname: formData.lastname
+                lastname: formData.lastname,
+                role: formData.role // Add the role field!
             };
+
+            console.log('Request data being sent to API:', requestData);
 
             if (isEditMode && currentUser) {
                 requestData.id = currentUser.id;
@@ -618,7 +732,7 @@
 
                 if (!response.ok) {
                     const errorText = await response.text();
-                    
+
                     if (errorText.includes('Email is already in use')) {
                         showFieldError('user-email', 'Dit e-mailadres is al in gebruik');
                         return;
@@ -627,7 +741,7 @@
                         setTimeout(() => window.location.href = '/login', 2000);
                         return;
                     }
-                    
+
                     throw new Error(errorText || `HTTP ${response.status}`);
                 }
 
@@ -636,24 +750,24 @@
                 } else {
                     const result = await response.json();
                 }
-                
+
                 // Show success message
                 let successMessage = isEditMode ? 'Gebruiker succesvol bijgewerkt!' : 'Gebruiker succesvol toegevoegd!';
                 if (passwordResetRequested && isEditMode) {
                     successMessage += '\n\nDe gebruiker ontvangt een nieuwe inloglink per email.';
                 }
-                
+
                 alert(successMessage);
-                
+
                 // Redirect after short delay
                 setTimeout(() => {
                     window.location.href = '/beheerder/gebruikers';
                 }, 500);
-                
+
             } catch (error) {
                 console.error('Error saving user:', error);
                 let errorMessage = 'Er is een fout opgetreden bij het opslaan.';
-                
+
                 // Parse the actual server error message
                 if (error.message.includes('required fields') || error.message.includes('missing')) {
                     errorMessage = 'Niet alle verplichte velden zijn correct ingevuld: ' + error.message;
@@ -667,7 +781,7 @@
                     // Use the actual error message from the server
                     errorMessage = error.message;
                 }
-                
+
                 alert(errorMessage);
             } finally {
                 submitBtn.disabled = false;
@@ -682,13 +796,13 @@
                     console.warn("Could not check for duplicate emails, server responded with:", response.status);
                     return false; // Allow submission, let server handle validation
                 }
-                
+
                 const users = await response.json();
                 if (!Array.isArray(users)) {
                     console.warn("Unexpected response format when checking for duplicate emails");
                     return false;
                 }
-                
+
                 return users.some(u => {
                     if (isEditMode && currentUser) {
                         return u.id !== currentUser.id && u.email.toLowerCase() === email.toLowerCase();
@@ -703,4 +817,5 @@
         }
     </script>
 </body>
+
 </html>
