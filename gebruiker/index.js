@@ -57,8 +57,16 @@ function renderActivities() {
         const beginDate = new Date(activity.begin);
         const endDate = new Date(activity.eind);
 
+        let afbeelding;
+        if (activity.afbeeldingen[0] != null) {
+            afbeelding = '<img src="' + activity.afbeeldingen[0].afbeeldingUrl + '" alt="Afbeelding van activiteit" class="afbeeldingImg">';
+        }else{
+            afbeelding = '<img src="https://covadis.nl/wp-content/themes/id/resource/image/header/1.svg" alt="Afbeelding" class="afbeeldingImg">';
+        }
+
         eventElement.innerHTML = `
                     <div class="event-info">
+                        ${afbeelding}
                         <h2 class="event-title">${escapeHtml(activity.naam)}</h2>
                         <h3 class="location">${escapeHtml(activity.locatie)}</h3>
                         <p class="date">Begin: ${beginDate.toLocaleString('nl-NL')}</p>
@@ -66,7 +74,7 @@ function renderActivities() {
                         ${activity.omschrijving ? `<p class="description">${escapeHtml(activity.omschrijving)}</p>` : ''}
                     </div>
                     <div class="icons">
-                        <a href="activiteit.html?id=${activity.id}" class="btn">Info</a>
+                        <a href="activiteit/${activity.id}" class="btn">Info</a>
                     </div>
                 `;
 

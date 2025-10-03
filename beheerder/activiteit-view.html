@@ -57,13 +57,15 @@
                 </div>
                 <div id="activity-content" style="display: none;">
                     <div class="activity-header">
-                        <div class="activity-image-container">
+
+                        <div id="activityImage"></div>
+                        <!-- <div class="activity-image-container">
                             <img id="activity-image" alt="Activiteit afbeelding" onerror="this.style.display='none'; document.getElementById('image-placeholder').style.display='block'">
                             <div id="image-placeholder" class="image-placeholder" style="display: none;">
                                 <i class="fas fa-image"></i>
                                 <p>Geen afbeelding beschikbaar</p>
                             </div>
-                        </div>
+                        </div> -->
                         <div class="activity-summary">
                             <h3 id="activity-naam-title"></h3>
                             <div class="activity-meta">
@@ -239,7 +241,7 @@
             flex: 1;
             display: flex;
             flex-direction: column;
-            justify-content: center;
+            justify-content: start;
         }
         
         .activity-summary h3 {
@@ -548,17 +550,46 @@
                 document.getElementById('activity-kost-meta').innerHTML = `€${activity.kost || '0.00'}`;
                 document.getElementById('activity-deelnemers-meta').innerHTML = `${activity.min || 0} - ${activity.max || 0} personen`;
                 
-                // Image
-                const imageElement = document.getElementById('activity-image');
-                const placeholderElement = document.getElementById('image-placeholder');
-                if (activity.afbeelding) {
-                    imageElement.src = activity.afbeelding;
-                    imageElement.style.display = 'block';
-                    placeholderElement.style.display = 'none';
+                // Image carousel
+                let afbeeldingen;
+                if (activity.afbeeldingen[0] == null) {
+                    afbeeldingen = '<img src="https://covadis.nl/wp-content/themes/id/resource/image/header/1.svg" alt="Afbeelding van activiteit" class="single-image">';
+                } else if (activity.afbeeldingen.length == 1) {
+                    afbeeldingen = '<img src="' + activity.afbeeldingen[0].afbeeldingUrl + '" alt="Afbeelding van activiteit" class="single-image">';
                 } else {
-                    imageElement.style.display = 'none';
-                    placeholderElement.style.display = 'flex';
+                    // Create carousel for multiple images
+                    afbeeldingen = `
+                        <div class="carousel-container">
+                            <div class="carousel-wrapper" style="width: ${activity.afbeeldingen.length * 100}%;">`;
+
+                    for (let i = 0; i < activity.afbeeldingen.length; i++) {
+                        afbeeldingen += `
+                            <div class="carousel-slide" style="flex: 0 0 ${100 / activity.afbeeldingen.length}%;">
+                                <img src="${activity.afbeeldingen[i].afbeeldingUrl}" alt="Afbeelding ${i + 1} van activiteit" class="carousel-image">
+                            </div>`;
+                    }
+
+                    afbeeldingen += `
+                            </div>
+                            <button class="carousel-btn prev" onclick="moveCarousel(-1)">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <button class="carousel-btn next" onclick="moveCarousel(1)">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                            <div class="carousel-indicators">`;
+
+                    for (let i = 0; i < activity.afbeeldingen.length; i++) {
+                        afbeeldingen += `
+                            <button class="indicator ${i === 0 ? 'active' : ''}" onclick="goToSlide(${i})"></button>`;
+                    }
+
+                    afbeeldingen += `
+                            </div>
+                        </div>`;
                 }
+
+                document.querySelector('#activityImage').innerHTML = afbeeldingen;
                 
                 // Details sections
                 document.getElementById('activity-naam').innerHTML = activityName;
@@ -615,6 +646,158 @@
                 showError('Fout bij het weergeven van de activiteit gegevens.');
             }
         }
+
+        // Carousel functionality
+        let currentSlide = 0;
+        let totalSlides = 0;
+
+        function moveCarousel(direction) {
+            const carousel = document.querySelector('.carousel-wrapper');
+            if (!carousel) return;
+
+            totalSlides = document.querySelectorAll('.carousel-slide').length;
+            currentSlide += direction;
+
+            // Loop around if needed
+            if (currentSlide >= totalSlides) {
+                currentSlide = 0;
+            } else if (currentSlide < 0) {
+                currentSlide = totalSlides - 1;
+            }
+
+            // Move the carousel
+            const translateX = -(currentSlide * (100 / totalSlides));
+            carousel.style.transform = `translateX(${translateX}%)`;
+
+            // Update indicators
+            updateIndicators();
+        }
+
+        function goToSlide(slideIndex) {
+            currentSlide = slideIndex;
+            const carousel = document.querySelector('.carousel-wrapper');
+            if (!carousel) return;
+
+            totalSlides = document.querySelectorAll('.carousel-slide').length;
+            const translateX = -(currentSlide * (100 / totalSlides));
+            carousel.style.transform = `translateX(${translateX}%)`;
+
+            updateIndicators();
+        }
+
+        function updateIndicators() {
+            const indicators = document.querySelectorAll('.indicator');
+            indicators.forEach((indicator, index) => {
+                if (index === currentSlide) {
+                    indicator.classList.add('active');
+                    indicator.style.background = 'white';
+                } else {
+                    indicator.classList.remove('active');
+                    indicator.style.background = 'transparent';
+                }
+            });
+        }
     </script>
+
+    <style>
+        /* Activity Image Styles */
+        #activityImage {
+            color: black;
+            margin-bottom: 20px;
+        }
+
+        /* Single Image Styles */
+        .single-image {
+            max-width: 100%;
+            height: 300px;
+            border-radius: 8px;
+            object-fit: cover;
+            display: block;
+        }
+
+        /* Carousel Container */
+        .carousel-container {
+            position: relative;
+            max-width: 100%;
+            overflow: hidden;
+            border-radius: 8px;
+        }
+
+        /* Carousel Wrapper */
+        .carousel-wrapper {
+            display: flex;
+            transition: transform 0.3s ease;
+        }
+
+        /* Individual Carousel Slide */
+        .carousel-slide {
+            position: relative;
+        }
+
+        /* Carousel Images */
+        .carousel-image {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            display: block;
+        }
+
+        /* Carousel Navigation Buttons */
+        .carousel-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            z-index: 10;
+            transition: background 0.3s ease;
+        }
+
+        .carousel-btn:hover {
+            background: rgba(0, 0, 0, 0.7);
+        }
+
+        .carousel-btn.prev {
+            left: 10px;
+        }
+
+        .carousel-btn.next {
+            right: 10px;
+        }
+
+        /* Carousel Indicators */
+        .carousel-indicators {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+            z-index: 10;
+        }
+
+        .indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 2px solid white;
+            background: transparent;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .indicator.active {
+            background: white;
+        }
+
+        .indicator:hover {
+            background: rgba(255, 255, 255, 0.7);
+        }
+    </style>
 </body>
 </html>

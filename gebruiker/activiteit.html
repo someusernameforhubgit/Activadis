@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="nl">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,10 +8,12 @@
     <link rel="stylesheet" href="../css/style.css">
     <link rel="stylesheet" href="../css/mainsite.css">
     <link rel="stylesheet" href="../css/header.css">
+    <link rel="stylesheet" href="../css/nogmeerstyling.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="../login.js"></script>
     <script src="../activiteit.js" type="module" defer></script>
 </head>
+
 <body>
     <!-- Header with Navigation -->
     <header>
@@ -81,6 +84,9 @@
                     <div class="card-header">
                         <h2><i class="fas fa-info-circle"></i> Activiteit</h2>
                     </div>
+                    <div id="activityImage">
+
+                    </div>
                     <div class="card-content">
                         <div class="detail-grid">
                             <div class="detail-item">
@@ -92,7 +98,7 @@
                                     <span id="startDateTime"></span>
                                 </div>
                             </div>
-                            
+
                             <div class="detail-item">
                                 <div class="detail-icon">
                                     <i class="fas fa-calendar-check"></i>
@@ -102,7 +108,7 @@
                                     <span id="endDateTime"></span>
                                 </div>
                             </div>
-                            
+
                             <div class="detail-item">
                                 <div class="detail-icon">
                                     <i class="fas fa-users"></i>
@@ -112,7 +118,7 @@
                                     <span id="participants"></span>
                                 </div>
                             </div>
-                            
+
                             <div class="detail-item">
                                 <div class="detail-icon">
                                     <i class="fas fa-utensils"></i>
@@ -123,7 +129,7 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div class="description-section">
                             <h3>Omschrijving</h3>
                             <p id="activityDescription"></p>
@@ -147,7 +153,7 @@
                                 <p><strong>Aantal inschrijvingen:</strong> <span id="registrationCount"></span></p>
                             </div>
                         </div>
-                        
+
                         <div class="registration-actions">
                             <button id="registerBtn" class="btn btn-primary btn-large">
                                 <i class="fas fa-user-plus"></i>
@@ -158,9 +164,10 @@
                                 Uitschrijven voor activiteit
                             </button>
                         </div>
-                        
+
                         <div class="registration-note">
-                            <p><i class="fas fa-info-circle"></i> Je moet ingelogd zijn om je in te schrijven voor een activiteit.</p>
+                            <p><i class="fas fa-info-circle"></i> Je moet ingelogd zijn om je in te schrijven voor een
+                                activiteit.</p>
                         </div>
                     </div>
                 </div>
@@ -168,4 +175,5 @@
         </div>
     </main>
 </body>
+
 </html>
