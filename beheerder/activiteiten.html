@@ -33,14 +33,14 @@
             <h1>Navigatie</h1>
             <ul>
                 <li><a href="/beheerder/">Dashboard</a></li>
-                <li><a href="/beheerder/gebruikers.html">Gebruikers</a></li>
-                <li><a href="/beheerder/activiteiten.html" class="active">Activiteiten</a></li>
+                <li><a href="/beheerder/gebruikers">Gebruikers</a></li>
+                <li><a href="/beheerder/activiteiten" class="active">Activiteiten</a></li>
             </ul>
         </aside>
         <main id="mainContent">
             <div class="heading split-row">
                 <h2>Activiteiten Beheer</h2>
-                <button class="btn btn-primary" onclick="window.location.href='/beheerder/activiteit-edit.html'">
+                <button class="btn btn-primary" onclick="window.location.href='/beheerder/activiteiten/new'">
                     <i class="fas fa-plus"></i> Nieuwe Activiteit Toevoegen
                 </button>
             </div>
@@ -119,7 +119,7 @@
                 const row = document.createElement('tr');
                 row.style.cursor = 'pointer';
                 row.onclick = function() {
-                    window.location.href = `/beheerder/activiteit-view.html?id=${act.id}`;
+                    window.location.href = `/beheerder/activiteiten/${act.id}`;
                 };
                 
                 row.innerHTML = `
@@ -132,7 +132,7 @@
                         '<span style="color: #6c757d;"><i class="fas fa-check"></i> Afgelopen</span>'}</td>
                     <td onclick="event.stopPropagation()">
                         <div class="justify-right" style="display: flex; gap: 5px; flex-wrap: wrap;">
-                            <button class="btn btn-primary btn-small" onclick="window.location.href='/beheerder/activiteit-edit.html?id=${act.id}'">
+                            <button class="btn btn-primary btn-small" onclick="window.location.href='/beheerder/activiteiten/${act.id}/edit'">
                                 <i class="fas fa-edit"></i>
                             </button>
                             <button class="btn btn-danger btn-small" onclick="deleteActiviteit(${act.id})">

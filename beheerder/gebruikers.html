@@ -33,14 +33,14 @@
             <h1>Navigatie</h1>
             <ul>
                 <li><a href="/beheerder/">Dashboard</a></li>
-                <li><a href="/beheerder/gebruikers.html" class="active">Gebruikers</a></li>
-                <li><a href="/beheerder/activiteiten.html">Activiteiten</a></li>
+                <li><a href="/beheerder/gebruikers" class="active">Gebruikers</a></li>
+                <li><a href="/beheerder/activiteiten">Activiteiten</a></li>
             </ul>
         </aside>
         <main id="mainContent">
             <div class="heading split-row">
                 <h2>Gebruikers Beheer</h2>
-                <button class="btn btn-primary" onclick="window.location.href='/beheerder/gebruiker-edit.html'">
+                <button class="btn btn-primary" onclick="window.location.href='/beheerder/gebruikers/new'">
                     <i class="fas fa-plus"></i> Nieuwe Gebruiker Toevoegen
                 </button>
             </div>
@@ -115,7 +115,7 @@
                 const row = document.createElement('tr');
                 row.style.cursor = 'pointer';
                 row.onclick = function() {
-                    window.location.href = `/beheerder/gebruiker-view.html?id=${user.id}`;
+                    window.location.href = `/beheerder/gebruikers/${user.id}`;
                 };
                 
                 row.innerHTML = `
@@ -123,7 +123,7 @@
                     <td>${user.role === 1 ? 'Admin' : 'Gebruiker'}</td>
                     <td onclick="event.stopPropagation()">
                         <div class="justify-right" style="display: flex; gap: 5px; flex-wrap: wrap;">
-                            <button class="btn btn-primary btn-small" onclick="window.location.href='/beheerder/gebruiker-edit.html?id=${user.id}'">
+                            <button class="btn btn-primary btn-small" onclick="window.location.href='/beheerder/gebruikers/${user.id}/edit'">
                                 <i class="fas fa-edit"></i>
                             </button>
                             <button class="btn btn-danger btn-small" onclick="deleteUser(${user.id})">
