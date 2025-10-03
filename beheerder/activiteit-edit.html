@@ -83,8 +83,8 @@
                             <div class="field-error" id="eind-error"></div>
                         </div>
                         <div class="form-group">
-                            <label for="activity-kost">Kosten (€) *</label>
-                            <input type="number" id="activity-kost" step="0.01" min="0" max="9999.99" required placeholder="0.00">
+                            <label for="activity-kost">Kosten (€)</label>
+                            <input type="number" id="activity-kost" step="0.01" min="0" max="9999.99" placeholder="0 (laat leeg voor gratis)">
                             <div class="field-error" id="kost-error"></div>
                         </div>
                         <div class="form-group">
@@ -313,6 +313,7 @@
         let isEditMode = false;
         let retryCount = 0;
         const MAX_RETRIES = 3;
+        let newActivityImages = []; // Store images for new activities
 
         // Validation rules
         const validationRules = {
@@ -321,7 +322,7 @@
             omschrijving: { required: true, minLength: 10, maxLength: 2000 },
             begin: { required: true },
             eind: { required: true },
-            kost: { required: true, min: 0, max: 9999.99 },
+            kost: { required: false, min: 0, max: 9999.99 },
             max: { required: true, min: 1, max: 1000 },
             min: { required: true, min: 1, max: 1000 },
             // afbeelding: { required: false, pattern: /^https?:\/\/.+\.(jpg|jpeg|png|gif|webp)(\?.*)?$/i }
@@ -476,6 +477,7 @@
         }
 
         function getFormData() {
+            const kostValue = document.getElementById('activity-kost').value.trim();
             return {
                 naam: document.getElementById('activity-naam').value.trim(),
                 locatie: document.getElementById('activity-locatie').value.trim(),
@@ -483,7 +485,7 @@
                 omschrijving: document.getElementById('activity-omschrijving').value.trim(),
                 begin: document.getElementById('activity-begin').value,
                 eind: document.getElementById('activity-eind').value,
-                kost: parseFloat(document.getElementById('activity-kost').value),
+                kost: kostValue === '' ? 0 : parseFloat(kostValue) || 0,
                 max: parseInt(document.getElementById('activity-max').value),
                 min: parseInt(document.getElementById('activity-min').value),
                 // afbeelding: document.getElementById('activity-afbeelding').value.trim()
@@ -529,12 +531,20 @@
                 // Set default values for new activity
                 const now = new Date();
                 const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
-                const dayAfter = new Date(now.getTime() + 48 * 60 * 60 * 1000);
+                const threeLater = new Date(tomorrow.getTime() + 3 * 60 * 60 * 1000); // 3 hours later
+                
+                // Set minimum date/time to current time for both fields
+                const minDateTime = now.toISOString().slice(0, 16);
+                document.getElementById('activity-begin').min = minDateTime;
+                document.getElementById('activity-eind').min = minDateTime;
                 
                 document.getElementById('activity-begin').value = tomorrow.toISOString().slice(0, 16);
-                document.getElementById('activity-eind').value = dayAfter.toISOString().slice(0, 16);
+                document.getElementById('activity-eind').value = threeLater.toISOString().slice(0, 16);
+                
+                // Initialize image display for new activity
+                displayNewActivityImages();
             }
-
+ 
             // Add real-time validation
             document.querySelectorAll('#activity-form input, #activity-form textarea').forEach(field => {
                 field.addEventListener('blur', function() {
@@ -560,6 +570,59 @@
 
             // Handle form submission
             document.getElementById('activity-form').addEventListener('submit', handleSubmit);
+            
+            // Add date validation to prevent manual entry of past dates
+            const beginDateInput = document.getElementById('activity-begin');
+            const endDateInput = document.getElementById('activity-eind');
+            
+            function validateDateInput(input, fieldId) {
+                const inputDate = new Date(input.value);
+                const now = new Date();
+                
+                if (input.value && inputDate < now && !isEditMode) {
+                    input.value = now.toISOString().slice(0, 16);
+                    showFieldError(fieldId, 'Datum kan niet in het verleden liggen');
+                    setTimeout(() => {
+                        const errorElement = document.getElementById(fieldId.replace('activity-', '') + '-error');
+                        if (errorElement) {
+                            errorElement.classList.remove('show');
+                        }
+                    }, 3000);
+                }
+            }
+            
+            beginDateInput.addEventListener('change', function() {
+                validateDateInput(this, 'activity-begin');
+                // Update minimum end time when begin time changes
+                const beginTime = this.value;
+                if (beginTime) {
+                    endDateInput.min = beginTime;
+                    
+                    // If end time is before begin time, update it to match begin time
+                    if (endDateInput.value && endDateInput.value <= beginTime) {
+                        endDateInput.value = beginTime;
+                    }
+                }
+            });
+            
+            endDateInput.addEventListener('change', function() {
+                validateDateInput(this, 'activity-eind');
+                // Also check that end time is after begin time
+                const beginTime = beginDateInput.value;
+                const endTime = this.value;
+                
+                if (beginTime && endTime && new Date(endTime) <= new Date(beginTime)) {
+                    // Set end time to exactly the same as begin time
+                    this.value = beginTime;
+                    showFieldError('activity-eind', 'Eindtijd aangepast naar begintijd');
+                    setTimeout(() => {
+                        const errorElement = document.getElementById('eind-error');
+                        if (errorElement) {
+                            errorElement.classList.remove('show');
+                        }
+                    }, 3000);
+                }
+            });
         });
 
         async function loadActivity(id) {
@@ -625,18 +688,30 @@
                 document.getElementById('activity-eten').checked = Boolean(activity.eten);
                 document.getElementById('activity-omschrijving').value = activity.omschrijving || '';
                 
-                // Handle date formatting safely
+                // Handle date formatting safely - preserve local time, avoid timezone conversion
                 if (activity.begin) {
                     const beginDate = new Date(activity.begin);
                     if (!isNaN(beginDate.getTime())) {
-                        document.getElementById('activity-begin').value = beginDate.toISOString().slice(0, 16);
+                        // Format date as YYYY-MM-DDTHH:MM without timezone conversion
+                        const year = beginDate.getFullYear();
+                        const month = String(beginDate.getMonth() + 1).padStart(2, '0');
+                        const day = String(beginDate.getDate()).padStart(2, '0');
+                        const hours = String(beginDate.getHours()).padStart(2, '0');
+                        const minutes = String(beginDate.getMinutes()).padStart(2, '0');
+                        document.getElementById('activity-begin').value = `${year}-${month}-${day}T${hours}:${minutes}`;
                     }
                 }
                 
                 if (activity.eind) {
                     const eindDate = new Date(activity.eind);
                     if (!isNaN(eindDate.getTime())) {
-                        document.getElementById('activity-eind').value = eindDate.toISOString().slice(0, 16);
+                        // Format date as YYYY-MM-DDTHH:MM without timezone conversion
+                        const year = eindDate.getFullYear();
+                        const month = String(eindDate.getMonth() + 1).padStart(2, '0');
+                        const day = String(eindDate.getDate()).padStart(2, '0');
+                        const hours = String(eindDate.getHours()).padStart(2, '0');
+                        const minutes = String(eindDate.getMinutes()).padStart(2, '0');
+                        document.getElementById('activity-eind').value = `${year}-${month}-${day}T${hours}:${minutes}`;
                     }
                 }
                 
@@ -648,7 +723,8 @@
                 if(activity.afbeeldingen[0] == null){
                     document.getElementById('activity-afbeeldingen').innerHTML = '<p>Geen afbeelding toegevoegd.</p>';
                 }else{
-                    // document.getElementById('activity-afbeeldingen').innerHTML = 'dfgds';
+                    document.getElementById('activity-afbeeldingen').innerHTML = "";
+
                     activity.afbeeldingen.forEach(afbeelding => {
                         document.getElementById('activity-afbeeldingen').innerHTML += `
                             <div class="image-item">
@@ -711,21 +787,60 @@
 
                 if (isEditMode) {
                     // No response expected for PUT request
+                    // Show success message
+                    alert('Activiteit succesvol bijgewerkt!');
+                    
+                    // Redirect after short delay to allow user to see success
+                    setTimeout(() => {
+                        window.location.href = '/beheerder/activiteiten.html';
+                    }, 500);
                 } else {
                     const result = await response.json();
-                }
-                
-                // Show success message
-                const successMessage = isEditMode ? 
-                    'Activiteit succesvol bijgewerkt!' : 
-                    'Activiteit succesvol toegevoegd!';
+                    console.log('Activity creation response:', result);
+                    const newActivityId = result; // The result IS the insertId directly
                     
-                alert(successMessage);
-                
-                // Redirect after short delay to allow user to see success
-                setTimeout(() => {
-                    window.location.href = '/beheerder/activiteiten.html';
-                }, 500);
+                    console.log('New activity created with ID:', newActivityId);
+                    
+                    // Now add all images to the new activity
+                    if (newActivityImages.length > 0) {
+                        console.log('Adding images to new activity:', newActivityImages);
+                        
+                        for (const imageData of newActivityImages) {
+                            try {
+                                console.log('Saving image to database:', imageData.url, 'for activity ID:', newActivityId);
+                                
+                                const imageResponse = await fetch(`/api/afbeelding?token=${token}`, {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json'
+                                    },
+                                    body: JSON.stringify({
+                                        activiteitId: newActivityId,
+                                        afbeeldingUrl: imageData.url
+                                    })
+                                });
+                                
+                                if (!imageResponse.ok) {
+                                    const errorText = await imageResponse.text();
+                                    console.error('Failed to add image:', imageData.url, 'Status:', imageResponse.status, 'Error:', errorText);
+                                } else {
+                                    const imageResult = await imageResponse.json();
+                                    console.log('Image successfully saved to database:', imageResult);
+                                }
+                            } catch (imageError) {
+                                console.error('Error adding image:', imageError, 'URL:', imageData.url);
+                            }
+                        }
+                    }
+                    
+                    // Show success message
+                    alert('Activiteit succesvol toegevoegd!');
+                    
+                    // Redirect after short delay to allow user to see success
+                    setTimeout(() => {
+                        window.location.href = '/beheerder/activiteiten.html';
+                    }, 500);
+                }
                 
             } catch (error) {
                 console.error('Error saving activity:', error);
@@ -791,12 +906,8 @@
                     imageElement.remove();
                 }
                 
-                // Optional: Show success message
-                alert('Afbeelding succesvol verwijderd!');
-                
             } catch (error) {
                 console.error('Error deleting image:', error);
-                alert('Er is een fout opgetreden bij het verwijderen van de afbeelding.');
             }
         }
 
@@ -824,61 +935,109 @@
                 return;
             }
             
-            // Get activity ID - either from current activity or from URL if editing
-            let activiteitId;
             if (isEditMode && currentActivity) {
-                activiteitId = currentActivity.id;
-            } else {
-                // For new activities, we need to save the activity first
-                alert('Sla eerst de activiteit op voordat je afbeeldingen toevoegt.');
-                return;
-            }
-            
-            try {
-                const response = await fetch(`/api/afbeelding?token=${token}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        activiteitId: activiteitId,
-                        afbeeldingUrl: afbeeldingUrl
-                    })
-                });
+                // For editing existing activities, add directly to database
+                const activiteitId = currentActivity.id;
                 
-                if (!response.ok) {
-                    if (response.status === 401) {
-                        alert('U bent niet geautoriseerd. Log opnieuw in.');
-                        setTimeout(() => window.location.href = '/login', 2000);
-                        return;
-                    } else {
-                        throw new Error(`HTTP ${response.status}`);
+                try {
+                    const response = await fetch(`/api/afbeelding?token=${token}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            activiteitId: activiteitId,
+                            afbeeldingUrl: afbeeldingUrl
+                        })
+                    });
+                    
+                    if (!response.ok) {
+                        if (response.status === 401) {
+                            alert('U bent niet geautoriseerd. Log opnieuw in.');
+                            setTimeout(() => window.location.href = '/login', 2000);
+                            return;
+                        } else {
+                            throw new Error(`HTTP ${response.status}`);
+                        }
                     }
+                    
+                    const result = await response.json();
+                    console.log('Image successfully added:', result);
+                    
+                    // Clear the input field
+                    afbeeldingUrlInput.value = '';
+                    
+                    // Add the new image to the UI
+                    const imageContainer = document.getElementById('activity-afbeeldingen');
+                    
+                    // Clear any 'geen afbeelding' text if it exists
+                    const noImageText = imageContainer.querySelector('p');
+                    if (noImageText && noImageText.textContent.includes('Geen afbeelding')) {
+                        imageContainer.innerHTML = '';
+                    }
+                    
+                    const newImageDiv = document.createElement('div');
+                    newImageDiv.className = 'image-item';
+                    newImageDiv.innerHTML = `
+                        <img src="${afbeeldingUrl}" alt="activiteit afbeelding" class="image-picture" onerror="this.style.display='none';">
+                        <p>${afbeeldingUrl}</p>
+                        <button type="button" onClick="removeImage(event, '${result}')">X</button>
+                    `;
+                    imageContainer.appendChild(newImageDiv);
+                    
+                } catch (error) {
+                    console.error('Error adding image:', error);
+                    alert('Er is een fout opgetreden bij het toevoegen van de afbeelding.');
                 }
+            } else {
+                // For new activities, store in array and display
+                const imageData = {
+                    url: afbeeldingUrl,
+                    tempId: Date.now() + Math.random() // Temporary ID for removal
+                };
                 
-                const result = await response.json();
-                console.log('Image successfully added:', result);
+                newActivityImages.push(imageData);
                 
                 // Clear the input field
                 afbeeldingUrlInput.value = '';
                 
-                // Add the new image to the UI
-                const imageContainer = document.getElementById('activity-afbeeldingen');
+                // Update the display
+                displayNewActivityImages();
+                
+                console.log('Image added to new activity array:', newActivityImages);
+            }
+        }
+
+        function displayNewActivityImages() {
+            const imageContainer = document.getElementById('activity-afbeeldingen');
+            
+            if (newActivityImages.length === 0) {
+                imageContainer.innerHTML = '<p>Geen afbeeldingen toegevoegd.</p>';
+                return;
+            }
+            
+            imageContainer.innerHTML = '';
+            newActivityImages.forEach(imageData => {
                 const newImageDiv = document.createElement('div');
                 newImageDiv.className = 'image-item';
                 newImageDiv.innerHTML = `
-                    <img src="${afbeeldingUrl}" alt="activiteit afbeelding" class="image-picture" onerror="this.style.display='none';">
-                    <p>${afbeeldingUrl}</p>
-                    <button type="button" onClick="removeImage(event, '${result.insertId || result.id}')">X</button>
+                    <img src="${imageData.url}" alt="activiteit afbeelding" class="image-picture" onerror="this.style.display='none';">
+                    <p>${imageData.url}</p>
+                    <button type="button" onClick="removeNewActivityImage('${imageData.tempId}')">X</button>
                 `;
                 imageContainer.appendChild(newImageDiv);
-                
-                alert('Afbeelding succesvol toegevoegd!');
-                
-            } catch (error) {
-                console.error('Error adding image:', error);
-                alert('Er is een fout opgetreden bij het toevoegen van de afbeelding.');
-            }
+            });
+        }
+
+        // Make this function globally accessible
+        window.removeNewActivityImage = function(tempId) {
+            // Remove from array
+            newActivityImages = newActivityImages.filter(img => img.tempId != tempId);
+            
+            // Update display
+            displayNewActivityImages();
+            
+            console.log('Image removed from new activity array:', newActivityImages);
         }
     </script>
 </body>
