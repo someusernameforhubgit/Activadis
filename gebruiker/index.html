@@ -128,6 +128,16 @@
                 margin: 1.5rem 0 0.75rem 0;
             }
         }
+
+        .afbeeldingImg {
+            width: 100%;
+            min-height: 400px;
+            height: auto;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 0.75rem;
+        }
+
     </style>
     <script src="./script.js"></script>
 </head>
@@ -237,9 +247,9 @@
                 const endDate = new Date(activity.eind);
 
                 if (activity.afbeeldingen[0] != null) {
-                    afbeelding = '<img src="' + activity.afbeeldingen[0].afbeeldingUrl + '" alt="Afbeelding van activiteit">';
+                    afbeelding = '<img src="' + activity.afbeeldingen[0].afbeeldingUrl + '" alt="Afbeelding van activiteit" class="afbeeldingImg">';
                 }else{
-                    afbeelding = '<img src="https://covadis.nl/wp-content/themes/id/resource/image/header/1.svg" alt="Afbeelding">';
+                    afbeelding = '<img src="https://covadis.nl/wp-content/themes/id/resource/image/header/1.svg" alt="Afbeelding" class="afbeeldingImg">';
                 }
 
                 eventElement.innerHTML = `

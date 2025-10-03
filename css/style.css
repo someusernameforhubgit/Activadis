@@ -987,6 +987,7 @@ ul {
     font-weight: 700;
     margin-bottom: 20px;
     color: var(--font-primary-color);
+    text-align: center;
 }
 
 .activity-meta {
