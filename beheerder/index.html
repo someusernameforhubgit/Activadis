@@ -239,7 +239,7 @@
                 
                 row.innerHTML = `
                     <td>${user.email}</td>
-                    <td>${user.role === 1 ? 'Admin' : 'Gebruiker'}</td>
+                    <td>${(user.isAdmin === 1 || user.isAdmin === true) ? 'Admin' : 'Gebruiker'}</td>
                     <td onclick="event.stopPropagation()">
                         <div class="justify-right" style="display: flex; gap: 5px; flex-wrap: wrap;">
                             <button class="btn btn-primary btn-small" onclick="window.location.href='/beheerder/gebruikers/${user.id}/edit'">

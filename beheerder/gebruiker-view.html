@@ -1,33 +1,36 @@
 <!doctype html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta name="viewport"
+        content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="/css/header.css">
     <script src="/beheerder/verifyAdmin.js"></script>
     <title>Activadis - Gebruiker Details</title>
 </head>
+
 <body>
-<header>
-    <div class="container">
-        <div class="left">
-            <p><b><span class="accent">Acti</span>vadis</b>: Gebruiker Details</p>
-            <nav>
-                <div class="nav-left">
-                    <a href="/"><i class="fas fa-home"></i>Home</a>
-                    <a href="/beheerder">Beheerder</a>
-                </div>
-                <div>
-                    <a class="login" href="/login"><i class="fas fa-sign-in-alt"></i>Login</a>
-                    <p class="logout name"></p>
-                    <a class="logout" onclick="logout()">Logout</a>
-                </div>
-            </nav>
+    <header>
+        <div class="container">
+            <div class="left">
+                <p><b><span class="accent">Acti</span>vadis</b>: Gebruiker Details</p>
+                <nav>
+                    <div class="nav-left">
+                        <a href="/"><i class="fas fa-home"></i>Home</a>
+                        <a href="/beheerder">Beheerder</a>
+                    </div>
+                    <div>
+                        <a class="login" href="/login"><i class="fas fa-sign-in-alt"></i>Login</a>
+                        <p class="logout name"></p>
+                        <a class="logout" onclick="logout()">Logout</a>
+                    </div>
+                </nav>
+            </div>
         </div>
-    </div>
-</header>
+    </header>
     <section id="mainContainer">
         <aside id="sidebar">
             <h1>Navigatie</h1>
@@ -63,12 +66,13 @@
                         <div class="user-summary">
                             <h3 id="user-name-title"></h3>
                             <div class="user-meta">
-                                <span class="meta-item"><i class="fas fa-envelope"></i> <span id="user-email-meta"></span></span>
+                                <span class="meta-item"><i class="fas fa-envelope"></i> <span
+                                        id="user-email-meta"></span></span>
                                 <span class="meta-item" id="user-role-meta"></span>
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="user-details-grid">
                         <div class="details-section">
                             <h4>Persoonlijke gegevens</h4>
@@ -85,7 +89,7 @@
                                 <div class="value" id="user-lastname"></div>
                             </div>
                         </div>
-                        
+
                         <div class="details-section">
                             <h4>Account informatie</h4>
                             <div class="view-item">
@@ -116,14 +120,14 @@
                 </div>
             </div>
         </main>
-        </section>
+    </section>
 
     <style>
         .loading-container {
             text-align: center;
             padding: 60px 20px;
         }
-        
+
         .loading-spinner {
             border: 4px solid #f3f3f3;
             border-top: 4px solid var(--primary-color);
@@ -133,29 +137,34 @@
             animation: spin 1s linear infinite;
             margin: 0 auto 20px;
         }
-        
+
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
-        
+
         .error-container {
             text-align: center;
             padding: 40px 20px;
             color: #721c24;
         }
-        
+
         .error-container i {
             font-size: 3rem;
             color: #dc3545;
             margin-bottom: 20px;
         }
-        
+
         .error-container h3 {
             margin-bottom: 10px;
             color: #721c24;
         }
-        
+
         .error-actions {
             display: flex;
             gap: 10px;
@@ -163,7 +172,7 @@
             margin-top: 20px;
             flex-wrap: wrap;
         }
-        
+
         .user-header {
             display: flex;
             gap: 30px;
@@ -171,7 +180,7 @@
             padding-bottom: 20px;
             border-bottom: 2px solid #eee;
         }
-        
+
         .user-avatar {
             flex: 0 0 120px;
             height: 120px;
@@ -182,31 +191,31 @@
             border-radius: 50%;
             border: 3px solid #dee2e6;
         }
-        
+
         .user-avatar i {
             font-size: 4rem;
             color: #6c757d;
         }
-        
+
         .user-summary {
             flex: 1;
             display: flex;
             flex-direction: column;
             justify-content: center;
         }
-        
+
         .user-summary h3 {
             margin: 0 0 15px 0;
             color: #333;
             font-size: 1.8rem;
         }
-        
+
         .user-meta {
             display: flex;
             flex-direction: column;
             gap: 8px;
         }
-        
+
         .meta-item {
             display: flex;
             align-items: center;
@@ -214,25 +223,25 @@
             font-size: 1rem;
             color: #555;
         }
-        
+
         .meta-item i {
             width: 24px;
             color: var(--primary-color);
         }
-        
+
         .user-details-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 30px;
         }
-        
+
         .details-section {
             background: #f8f9fa;
             padding: 20px;
             border-radius: 8px;
             border: 1px solid #dee2e6;
         }
-        
+
         .details-section h4 {
             margin: 0 0 20px 0;
             color: #333;
@@ -240,29 +249,29 @@
             padding-bottom: 10px;
             border-bottom: 1px solid #dee2e6;
         }
-        
+
         .view-item {
             display: flex;
             flex-direction: column;
             margin-bottom: 15px;
         }
-        
+
         .view-item:last-child {
             margin-bottom: 0;
         }
-        
+
         .view-item label {
             font-weight: bold;
             color: #555;
             margin-bottom: 5px;
             font-size: 0.9rem;
         }
-        
+
         .view-item .value {
             color: #333;
             font-size: 1rem;
         }
-        
+
         .value.badge {
             display: inline-block;
             padding: 4px 12px;
@@ -271,18 +280,18 @@
             font-weight: bold;
             width: fit-content;
         }
-        
+
         .badge {
             background-color: rgba(128, 128, 128, 0.1);
         }
-        
+
         @media (max-width: 1024px) {
             .user-details-grid {
                 grid-template-columns: 1fr;
                 gap: 20px;
             }
         }
-        
+
         @media (max-width: 768px) {
             .user-header {
                 flex-direction: column;
@@ -290,15 +299,15 @@
                 text-align: center;
                 gap: 20px;
             }
-            
+
             .user-avatar {
                 flex: none;
             }
-            
+
             .user-meta {
                 align-items: center;
             }
-            
+
             .error-actions {
                 flex-direction: column;
                 align-items: center;
@@ -363,7 +372,7 @@
             document.getElementById('error-message').style.display = 'block';
         }
 
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const userId = getUserIdFromUrl();
             if (userId) {
                 loadUser(userId);
@@ -385,7 +394,7 @@
                         'Content-Type': 'application/json'
                     }
                 });
-                
+
                 if (!response.ok) {
                     if (response.status === 401) {
                         showError('U bent niet geautoriseerd. Log opnieuw in.');
@@ -400,86 +409,103 @@
                 }
 
                 const user = await response.json();
-                
+
                 if (!user || (Array.isArray(user) && user.length === 0)) {
                     showError('Gebruiker niet gevonden.');
                     return;
                 }
-                
+
                 // Handle both single object and array responses
-                const userData = Array.isArray(user) ? 
+                const userData = Array.isArray(user) ?
                     user.find(usr => usr.id == id) : user;
-                
+
                 if (userData) {
                     currentUser = userData;
                     displayUser(userData);
                 } else {
                     showError('Gebruiker niet gevonden.');
                 }
-                
+
             } catch (error) {
                 console.error('Error loading user:', error);
-                const errorMessage = retryCount < MAX_RETRIES ? 
-                    'Fout bij laden van gebruiker. Probeer het opnieuw.' : 
+                const errorMessage = retryCount < MAX_RETRIES ?
+                    'Fout bij laden van gebruiker. Probeer het opnieuw.' :
                     'Kan gebruiker niet laden na meerdere pogingen.';
                 showError(errorMessage);
             }
         }
 
-        function displayUser(user) {
+        async function displayUser(user) {
             try {
                 // Validate user data
                 if (!user.email) {
                     throw new Error('Invalid user data: missing email');
                 }
-                
+
                 // Create display names
                 const firstName = escapeHtml(user.firstname) || '';
                 const lastName = escapeHtml(user.lastname) || '';
                 const fullName = `${firstName} ${lastName}`.trim();
                 const displayName = fullName || user.email;
-                
+
                 // Update page title
                 document.getElementById('page-title').textContent = `Gebruiker: ${displayName}`;
                 document.title = `Activadis - ${displayName}`;
-                
+
                 // Header section
                 document.getElementById('user-name-title').textContent = displayName;
                 document.getElementById('user-email-meta').textContent = user.email;
-                
+
                 // Role meta with icon
                 const roleMetaElement = document.getElementById('user-role-meta');
-                if (user.role === 1) {
-                    roleMetaElement.innerHTML = '<i class="fas fa-crown"></i> Administrator';
-                } else {
-                    roleMetaElement.innerHTML = '<i class="fas fa-user"></i> Gebruiker';
+                console.log('User data:', user);
+
+                let roleName = 'Geen rol';
+
+                if (user.role && user.role !== 0 && user.role !== '0') {
+                    try {
+                        const response = await fetch(`/api/role?id=${user.role}&token=${token}`, {
+                            method: 'GET',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            }
+                        });
+
+                        if (response.ok) {
+                            const roleData = await response.json();
+                            console.log('Role data:', roleData);
+                            roleName = roleData.name;
+
+                            const roleElement = document.getElementById('user-role');
+                            roleElement.textContent = roleData.name;
+                        } else {
+                            console.error('Failed to fetch role data:', response.status);
+                        }
+                    } catch (error) {
+                        console.error('Error fetching role:', error);
+                    }
                 }
-                
+
+                roleMetaElement.innerHTML = '<i class="fas fa-user"></i> ' + roleName;
+
                 // Details sections
                 document.getElementById('user-fullname').textContent = fullName || 'Niet ingesteld';
                 document.getElementById('user-firstname').textContent = firstName || 'Niet ingesteld';
                 document.getElementById('user-lastname').textContent = lastName || 'Niet ingesteld';
                 document.getElementById('user-email').textContent = user.email;
-                
-                // Role badge
-                const roleElement = document.getElementById('user-role');
-                if (user.role === 1) {
-                    roleElement.textContent = 'Administrator';
-                    roleElement.className = 'value admin';
-                } else {
-                    roleElement.textContent = 'Gebruiker';
-                    roleElement.className = 'value user';
-                }
-                
+
                 // Status (always active for now)
                 const statusElement = document.getElementById('user-status');
-                statusElement.textContent = 'Actief';
-                statusElement.className = 'value active';
-                
+                if (user.isAdmin == 1) {
+                    statusElement.textContent = 'Administrator';
+                } else {
+                    statusElement.textContent = 'Geen administrator';
+                }
+
                 // Show content and hide loading
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('user-content').style.display = 'block';
-                
+
             } catch (error) {
                 console.error('Error displaying user:', error);
                 showError('Fout bij het weergeven van de gebruiker gegevens.');
@@ -487,4 +513,5 @@
         }
     </script>
 </body>
+
 </html>

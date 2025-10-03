@@ -58,7 +58,7 @@ async function submitForm(e) {
                         firstname: gebruikerData.firstname,
                         lastname: gebruikerData.lastname,
                         password: password,
-                        role: gebruikerData.role
+                        isAdmin: gebruikerData.isAdmin
                     })
                 });
                 if (response.status === 400) {

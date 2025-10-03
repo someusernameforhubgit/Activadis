@@ -9,7 +9,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         const user = await fetch("/api/gebruiker?id=" + data.id + "&token=" + token);
         if (!user.ok) return window.location.href = "/login";
         const userData = await user.json();
-        if (!userData || userData.role !== 1) return window.location.href = "/";
+        if (!userData || (userData.isAdmin !== 1 && userData.isAdmin !== true)) return window.location.href = "/";
         const loginEl = document.querySelector(".login");
         if (loginEl) loginEl.style.display = "none";
         document.querySelectorAll(".logout").forEach(e => e.style.display = "block");
