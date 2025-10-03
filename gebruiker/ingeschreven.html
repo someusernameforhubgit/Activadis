@@ -30,7 +30,7 @@
         <main class="activity-sections">
             <div class="filters">
                 <a href="/aankomend"><i class="fas fa-calendar-alt"></i>Aankomende Activiteiten</a>
-                <a href="/ingeschreven"><i class="fas fa-user-check"></i>Ingeschreven Activiteiten</a>
+                <a href="/ingeschreven" class="active"><i class="fas fa-user-check"></i>Ingeschreven Activiteiten</a>
             </div>
         <section class="activity-section">
             <div id="enrolledActivities" class="events"></div>
@@ -60,8 +60,13 @@
         }
 
         function updateActivitySections() {
+            const now = new Date();
             const enrolledIds = new Set(userEnrollments.map(e => e.activiteit));
-            const enrolledActivities = allActivities.filter(a => enrolledIds.has(a.id));
+            // Keep only activities the user is enrolled in AND whose end time is in the future (ongoing or upcoming)
+            const enrolledActivities = allActivities
+                .filter(a => enrolledIds.has(a.id))
+                .filter(a => new Date(a.eind) >= now)
+                .sort((a,b) => new Date(a.begin) - new Date(b.begin));
             renderActivities('enrolledActivities', enrolledActivities, true);
         }
 
