@@ -30,6 +30,14 @@
     font-weight: 600;
 }
 
+img.placeholder {
+    position: relative;
+    padding: 10%;
+    object-fit: contain;
+    /* filter: grayscale(1); */
+    filter: grayscale(70%);
+}
+
 body {
     font-family: 'Poppins', sans-serif;
     height: 100vh;

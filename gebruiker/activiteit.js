@@ -42,7 +42,7 @@ window.moveCarousel = (direction) => {
     }
 
     // Move the carousel
-    const translateX = -(currentSlide * (100 / totalSlides));
+    const translateX = -(currentSlide * 100);
     carousel.style.transform = `translateX(${translateX}%)`;
 
     // Update indicators
@@ -55,7 +55,7 @@ function goToSlide(slideIndex) {
     if (!carousel) return;
 
     totalSlides = document.querySelectorAll('.carousel-slide').length;
-    const translateX = -(currentSlide * (100 / totalSlides));
+    const translateX = -(currentSlide * 100);
     carousel.style.transform = `translateX(${translateX}%)`;
 
     updateIndicators();
@@ -130,18 +130,18 @@ async function populateActivityData(data) {
 
     let afbeeldingen;
     if (data.afbeeldingen[0] == null) {
-        afbeeldingen = '<img src="https://covadis.nl/wp-content/themes/id/resource/image/header/1.svg" alt="Afbeelding van activiteit" class="single-image">';
+        afbeeldingen = '<img src="https://covadis.nl/wp-content/themes/id/resource/image/header/1.svg" alt="Afbeelding van activiteit" class="single-image placeholder">';
     } else if (data.afbeeldingen.length == 1) {
         afbeeldingen = '<img src="' + data.afbeeldingen[0].afbeeldingUrl + '" alt="Afbeelding van activiteit" class="single-image">';
     } else {
         // Create carousel for multiple images
         afbeeldingen = `
                     <div class="carousel-container">
-                        <div class="carousel-wrapper" style="width: ${data.afbeeldingen.length * 100}%;">`;
+                        <div class="carousel-wrapper">`;
 
         for (let i = 0; i < data.afbeeldingen.length; i++) {
             afbeeldingen += `
-                        <div class="carousel-slide" style="flex: 0 0 ${100 / data.afbeeldingen.length}%;">
+                        <div class="carousel-slide">
                             <img src="${data.afbeeldingen[i].afbeeldingUrl}" alt="Afbeelding ${i + 1} van activiteit" class="carousel-image">
                         </div>`;
         }

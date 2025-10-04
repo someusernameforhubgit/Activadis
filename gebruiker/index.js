@@ -61,7 +61,7 @@ function renderActivities() {
         if (activity.afbeeldingen[0] != null) {
             afbeelding = '<img src="' + activity.afbeeldingen[0].afbeeldingUrl + '" alt="Afbeelding van activiteit" class="afbeeldingImg">';
         }else{
-            afbeelding = '<img src="https://covadis.nl/wp-content/themes/id/resource/image/header/1.svg" alt="Afbeelding" class="afbeeldingImg">';
+            afbeelding = '<img src="https://covadis.nl/wp-content/themes/id/resource/image/header/1.svg" alt="Afbeelding" class="afbeeldingImg placeholder">';
         }
 
         eventElement.innerHTML = `

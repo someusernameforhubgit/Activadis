@@ -220,7 +220,8 @@
         .activity-image-container img {
             width: 100%;
             height: 100%;
-            object-fit: cover;
+            object-fit: contain;
+            background: rgba(0, 0, 0, 0.05);
         }
         
         .image-placeholder {
@@ -553,7 +554,7 @@
                 // Image carousel
                 let afbeeldingen;
                 if (activity.afbeeldingen[0] == null) {
-                    afbeeldingen = '<img src="https://covadis.nl/wp-content/themes/id/resource/image/header/1.svg" alt="Afbeelding van activiteit" class="single-image">';
+                    afbeeldingen = '<img src="https://covadis.nl/wp-content/themes/id/resource/image/header/1.svg" alt="Afbeelding van activiteit" class="single-image placeholder">';
                 } else if (activity.afbeeldingen.length == 1) {
                     afbeeldingen = '<img src="' + activity.afbeeldingen[0].afbeeldingUrl + '" alt="Afbeelding van activiteit" class="single-image">';
                 } else {
@@ -700,6 +701,10 @@
     </script>
 
     <style>
+        :root {
+            --image-width: 400px;
+        }
+
         /* Activity Image Styles */
         #activityImage {
             color: black;
@@ -708,17 +713,21 @@
 
         /* Single Image Styles */
         .single-image {
-            max-width: 100%;
-            height: 300px;
+            max-width: var(--image-width);
+            /* height: 300px; */
+            aspect-ratio: 16/9;
             border-radius: 8px;
-            object-fit: cover;
+            object-fit: contain;
+            background: rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(0, 0, 0, 0.1);
             display: block;
         }
-
+        
         /* Carousel Container */
         .carousel-container {
             position: relative;
-            max-width: 100%;
+            max-width: var(--image-width);
+            border: 1px solid rgba(0, 0, 0, 0.1);
             overflow: hidden;
             border-radius: 8px;
         }
@@ -736,9 +745,11 @@
 
         /* Carousel Images */
         .carousel-image {
-            width: 100%;
-            height: 300px;
-            object-fit: cover;
+            width: var(--image-width);
+            /* height: 300px; */
+            aspect-ratio: 16/9;
+            object-fit: contain;
+            background: rgba(0, 0, 0, 0.05);
             display: block;
         }
 
