@@ -38,6 +38,11 @@ img.placeholder {
     filter: grayscale(70%);
 }
 
+a {
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
 body {
     font-family: 'Poppins', sans-serif;
     height: 100vh;

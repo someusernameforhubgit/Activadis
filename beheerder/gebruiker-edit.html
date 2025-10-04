@@ -8,29 +8,22 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="/css/header.css">
+    <script>
+        window.headerConfig = {
+            title: { subtitle: "Gebruiker Bewerken" },
+            navLeft: [
+                { href: "/", icon: "fas fa-home", label: "Home" },
+                { href: "/beheerder", label: "Beheerder" }
+            ]
+        };
+    </script>
+    <script src="/util/header.js"></script>
     <script src="/beheerder/verifyAdmin.js"></script>
     <title>Activadis - Gebruiker Bewerken</title>
 </head>
 
 <body>
-    <header>
-        <div class="container">
-            <div class="left">
-                <p><b><span class="accent">Acti</span>vadis</b>: Gebruiker Bewerken</p>
-                <nav>
-                    <div class="nav-left">
-                        <a href="/"><i class="fas fa-home"></i>Home</a>
-                        <a href="/beheerder">Beheerder</a>
-                    </div>
-                    <div>
-                        <a class="login" href="/login"><i class="fas fa-sign-in-alt"></i>Login</a>
-                        <p class="logout name"></p>
-                        <a class="logout" onclick="logout()">Logout</a>
-                    </div>
-                </nav>
-            </div>
-        </div>
-    </header>
+    <header></header>
     <section id="mainContainer">
         <aside id="sidebar">
             <h1>Navigatie</h1>
@@ -198,7 +191,11 @@
         .user-admin {
             display: flex;
             justify-content: center;
-            margin-top: 15px;
+            margin-top: 25px;
+
+            label {
+                margin-bottom: 0 !important;
+            }
         }
 
         @keyframes spin {

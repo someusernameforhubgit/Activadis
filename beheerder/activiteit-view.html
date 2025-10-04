@@ -6,28 +6,21 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="/css/header.css">
+    <script>
+        window.headerConfig = {
+            title: { subtitle: "Activiteit Details" },
+            navLeft: [
+                { href: "/", icon: "fas fa-home", label: "Home" },
+                { href: "/beheerder", label: "Beheerder" }
+            ]
+        };
+    </script>
+    <script src="/util/header.js"></script>
     <script src="/beheerder/verifyAdmin.js"></script>
     <title>Activadis - Activiteit Details</title>
 </head>
 <body>
-<header>
-    <div class="container">
-        <div class="left">
-            <p><b><span class="accent">Acti</span>vadis</b>: Activiteit Details</p>
-            <nav>
-                <div class="nav-left">
-                    <a href="/"><i class="fas fa-home"></i>Home</a>
-                    <a href="/beheerder">Beheerder</a>
-                </div>
-                <div>
-                    <a class="login" href="/login"><i class="fas fa-sign-in-alt"></i>Login</a>
-                    <p class="logout name"></p>
-                    <a class="logout" onclick="logout()">Logout</a>
-                </div>
-            </nav>
-        </div>
-    </div>
-</header>
+<header></header>
     <section id="mainContainer">
         <aside id="sidebar">
             <h1>Navigatie</h1>
@@ -135,6 +128,33 @@
                                 <label>Bereik:</label>
                                 <div class="value" id="activity-deelnemers"></div>
                             </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Participants Section -->
+                    <div class="participants-section">
+                        <h3><i class="fas fa-users"></i> Ingeschreven deelnemers</h3>
+                        <div id="participants-loading" class="participants-loading">
+                            <div class="loading-spinner-small"></div>
+                            <p>Deelnemers laden...</p>
+                        </div>
+                        <div id="participants-content" style="display: none;">
+                            <div class="participants-summary">
+                                <span class="participant-count">
+                                    <strong id="total-participants">0</strong> van <strong id="max-participants">0</strong> plaatsen bezet
+                                </span>
+                            </div>
+                            <div id="participants-list" class="participants-list">
+                                <!-- Participants will be loaded here -->
+                            </div>
+                            <div id="no-participants" class="no-participants" style="display: none;">
+                                <i class="fas fa-user-slash"></i>
+                                <p>Nog geen deelnemers ingeschreven</p>
+                            </div>
+                        </div>
+                        <div id="participants-error" class="participants-error" style="display: none;">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <p>Kon deelnemers niet laden</p>
                         </div>
                     </div>
                 </div>
@@ -530,6 +550,73 @@
             }
         }
 
+        async function loadParticipants(activityId) {
+            const participantsLoading = document.getElementById('participants-loading');
+            const participantsContent = document.getElementById('participants-content');
+            const participantsError = document.getElementById('participants-error');
+            const participantsList = document.getElementById('participants-list');
+            const noParticipants = document.getElementById('no-participants');
+
+            try {
+                // Fetch registrations for this activity
+                const response = await fetch(`/api/inschrijving?activiteit=${activityId}&includeDetails=true&token=${token}`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                const registrations = await response.json();
+                
+                // Hide loading, show content
+                participantsLoading.style.display = 'none';
+                participantsContent.style.display = 'block';
+                
+                // Update count
+                document.getElementById('total-participants').textContent = registrations.length;
+                
+                if (registrations.length === 0) {
+                    noParticipants.style.display = 'block';
+                    participantsList.style.display = 'none';
+                    return;
+                }
+                
+                noParticipants.style.display = 'none';
+                participantsList.style.display = 'grid';
+                
+                const participantCards = registrations.map(registration => {
+                    const participantName = registration.participantName || 'Onbekende deelnemer';
+                    const participantEmail = registration.participantEmail || 'Geen e-mail beschikbaar';
+                    const participantInitials = registration.participantInitials || '?';
+                    const participantType = registration.participantType === 'external' ? 'external' : 'internal';
+
+                    return {
+                        name: participantName,
+                        email: participantEmail,
+                        initials: participantInitials,
+                        type: participantType
+                    };
+                });
+
+                participantsList.innerHTML = participantCards.map(participant => `
+                    <div class="participant-item">
+                        <div class="participant-avatar">${escapeHtml(participant.initials)}</div>
+                        <div class="participant-info">
+                            <div class="participant-name">${escapeHtml(participant.name)}</div>
+                            <div class="participant-email">${escapeHtml(participant.email)}</div>
+                        </div>
+                        <span class="participant-type ${participant.type}">
+                            ${participant.type === 'internal' ? 'Intern' : 'Extern'}
+                        </span>
+                    </div>
+                `).join('');
+                
+            } catch (error) {
+                console.error('Error loading participants:', error);
+                participantsLoading.style.display = 'none';
+                participantsError.style.display = 'block';
+            }
+        }
+
         function displayActivity(activity) {
             try {
                 const beginDate = new Date(activity.begin);
@@ -638,9 +725,15 @@
                 document.getElementById('activity-max').innerHTML = `${activity.max || 0} personen`;
                 document.getElementById('activity-deelnemers').innerHTML = `${activity.min || 0} - ${activity.max || 0} personen`;
                 
+                // Update max participants in summary
+                document.getElementById('max-participants').textContent = activity.max || 0;
+                
                 // Show content and hide loading
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('activity-content').style.display = 'block';
+                
+                // Load participants
+                loadParticipants(activity.id);
                 
             } catch (error) {
                 console.error('Error displaying activity:', error);
@@ -713,7 +806,7 @@
 
         /* Single Image Styles */
         .single-image {
-            max-width: var(--image-width);
+            width: var(--image-width);
             /* height: 300px; */
             aspect-ratio: 16/9;
             border-radius: 8px;
@@ -808,6 +901,144 @@
 
         .indicator:hover {
             background: rgba(255, 255, 255, 0.7);
+        }
+
+        /* Participants Section Styles */
+        .participants-section {
+            margin-top: 30px;
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+        }
+
+        .participants-section h3 {
+            margin: 0 0 20px 0;
+            color: #333;
+            font-size: 1.3rem;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #dee2e6;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .participants-loading {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .loading-spinner-small {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--primary-color);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        .participants-summary {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            border: 1px solid #dee2e6;
+        }
+
+        .participant-count {
+            color: #555;
+            font-size: 1rem;
+        }
+
+        .participants-list {
+            display: grid;
+            gap: 10px;
+        }
+
+        .participant-item {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #dee2e6;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: box-shadow 0.2s;
+        }
+
+        .participant-item:hover {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .participant-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+
+        .participant-info {
+            flex: 1;
+        }
+
+        .participant-name {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 3px;
+        }
+
+        .participant-email {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .participant-type {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+
+        .participant-type.internal {
+            background-color: rgba(40, 167, 69, 0.1);
+            color: #28a745;
+        }
+
+        .participant-type.external {
+            background-color: rgba(23, 162, 184, 0.1);
+            color: #17a2b8;
+        }
+
+        .no-participants {
+            text-align: center;
+            padding: 40px 20px;
+            color: #6c757d;
+        }
+
+        .no-participants i {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+
+        .participants-error {
+            text-align: center;
+            padding: 30px;
+            color: #dc3545;
+        }
+
+        .participants-error i {
+            font-size: 2rem;
+            margin-bottom: 10px;
         }
     </style>
 </body>

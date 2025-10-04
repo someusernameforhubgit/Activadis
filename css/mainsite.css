@@ -63,12 +63,12 @@
     gap: 8px;
 }
 
-.event .date::before {
+/* .event .date::before {
     content: '\f133';
     font-family: 'Font Awesome 6 Free';
     font-weight: 900;
     color: var(--primary-color);
-}
+} */
 
 .event .description {
     color: #777;
