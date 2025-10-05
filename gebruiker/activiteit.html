@@ -10,29 +10,22 @@
     <link rel="stylesheet" href="../css/header.css">
     <link rel="stylesheet" href="../css/nogmeerstyling.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        window.headerConfig = {
+            title: { subtitle: "Activiteit" },
+            navLeft: [
+                { href: "/", icon: "fas fa-home", label: "Home" }
+            ]
+        };
+    </script>
+    <script src="/util/header.js"></script>
     <script src="../login.js"></script>
     <script src="../activiteit.js" type="module" defer></script>
 </head>
 
 <body>
     <!-- Header with Navigation -->
-    <header>
-        <div class="container">
-            <div class="left">
-                <p><b><span class="accent">Acti</span>vadis</b>: Activiteit</p>
-                <nav>
-                    <div class="nav-left">
-                        <a href="/"><i class="fas fa-home"></i>Home</a>
-                    </div>
-                    <div>
-                        <a class="login" href="/login"><i class="fas fa-sign-in-alt"></i>Login</a>
-                        <p class="logout name"></p>
-                        <a class="logout" onclick="logout()">Logout</a>
-                    </div>
-                </nav>
-            </div>
-        </div>
-    </header>
+    <header></header>
 
     <!-- Loading State -->
     <div id="loadingState" class="loading-container">
@@ -168,6 +161,31 @@
                         <div class="registration-note">
                             <p><i class="fas fa-info-circle"></i> Je moet ingelogd zijn om je in te schrijven voor een
                                 activiteit.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Participants Card (conditionally shown) -->
+                <div class="participants-card" id="participantsCard" style="display: none;">
+                    <div class="card-header">
+                        <h2><i class="fas fa-users"></i> Deelnemers</h2>
+                    </div>
+                    <div class="card-content">
+                        <div id="participants-loading" class="participants-loading">
+                            <div class="loading-spinner"></div>
+                            <p>Deelnemers laden...</p>
+                        </div>
+                        <div id="participants-content" style="display: none;">
+                            <div class="participants-summary">
+                                <p><strong id="total-participants">0</strong> deelnemers ingeschreven</p>
+                            </div>
+                            <div id="participants-list" class="participants-list">
+                                <!-- Participants will be loaded here -->
+                            </div>
+                        </div>
+                        <div id="no-participants" class="no-participants" style="display: none;">
+                            <i class="fas fa-user-slash"></i>
+                            <p>Nog geen deelnemers ingeschreven</p>
                         </div>
                     </div>
                 </div>

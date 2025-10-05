@@ -25,7 +25,7 @@ export default function ActiviteitAPI(app, database) {
     app.post(url, async (req, res) => {
         if (!(await verifyAdmin(req.query.token))) return res.status(401).send("Unauthorized");
         
-        const requiredFields = ['naam', 'locatie', 'omschrijving', 'begin', 'eind', 'kost', 'max', 'min'];
+    const requiredFields = ['naam', 'locatie', 'omschrijving', 'begin', 'eind', 'kost', 'max', 'min'];
         
         // Check required fields (excluding eten since it can be 0/false)
         const missingFields = requiredFields.filter(field => {
@@ -41,8 +41,21 @@ export default function ActiviteitAPI(app, database) {
         if (missingFields.length === 0) {
             try {
                 const activiteit = await database.query(
-                    "INSERT INTO activiteit (naam, locatie, eten, omschrijving, begin, eind, kost, max, min, afbeelding, hidden) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", 
-                    [req.body.naam, req.body.locatie, req.body.eten, req.body.omschrijving, req.body.begin, req.body.eind, req.body.kost, req.body.max, req.body.min, req.body.afbeelding, req.body.hidden ? 1 : 0]
+                    "INSERT INTO activiteit (naam, locatie, eten, omschrijving, begin, eind, kost, max, min, afbeelding, hidden, showParticipants) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", 
+                    [
+                        req.body.naam,
+                        req.body.locatie,
+                        req.body.eten,
+                        req.body.omschrijving,
+                        req.body.begin,
+                        req.body.eind,
+                        req.body.kost,
+                        req.body.max,
+                        req.body.min,
+                        req.body.afbeelding,
+                        req.body.hidden ? 1 : 0,
+                        req.body.showParticipants ? 1 : 0
+                    ]
                 );
                 res.send(activiteit);
             } catch (error) {
@@ -73,12 +86,29 @@ export default function ActiviteitAPI(app, database) {
         if (req.body.hidden === undefined || req.body.hidden === null) {
             missingFields.push('hidden');
         }
+        if (req.body.showParticipants === undefined || req.body.showParticipants === null) {
+            missingFields.push('showParticipants');
+        }
         
         if (missingFields.length === 0) {
             try {
                 const activiteit = await database.query(
-                    "UPDATE activiteit SET naam = ?, locatie = ?, eten = ?, omschrijving = ?, begin = ?, eind = ?, kost = ?, max = ?, min = ?, afbeelding = ?, hidden = ? WHERE id = ?", 
-                    [req.body.naam, req.body.locatie, req.body.eten, req.body.omschrijving, req.body.begin, req.body.eind, req.body.kost, req.body.max, req.body.min, req.body.afbeelding, req.body.hidden ? 1 : 0, req.body.id]
+                    "UPDATE activiteit SET naam = ?, locatie = ?, eten = ?, omschrijving = ?, begin = ?, eind = ?, kost = ?, max = ?, min = ?, afbeelding = ?, hidden = ?, showParticipants = ? WHERE id = ?", 
+                    [
+                        req.body.naam,
+                        req.body.locatie,
+                        req.body.eten,
+                        req.body.omschrijving,
+                        req.body.begin,
+                        req.body.eind,
+                        req.body.kost,
+                        req.body.max,
+                        req.body.min,
+                        req.body.afbeelding,
+                        req.body.hidden ? 1 : 0,
+                        req.body.showParticipants ? 1 : 0,
+                        req.body.id
+                    ]
                 );
                 res.send(activiteit);
             } catch (error) {
