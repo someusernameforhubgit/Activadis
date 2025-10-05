@@ -8,29 +8,23 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="/css/header.css">
+    <script>
+        window.headerConfig = {
+            title: { subtitle: "Gebruiker Details" },
+            navLeft: [
+                { href: "/", icon: "fas fa-home", label: "Home" },
+                { href: "/beheerder", label: "Beheerder" }
+            ]
+        };
+    </script>
+    <script src="/util/header.js"></script>
+    <script src="/util/avatar.js"></script>
     <script src="/beheerder/verifyAdmin.js"></script>
     <title>Activadis - Gebruiker Details</title>
 </head>
 
 <body>
-    <header>
-        <div class="container">
-            <div class="left">
-                <p><b><span class="accent">Acti</span>vadis</b>: Gebruiker Details</p>
-                <nav>
-                    <div class="nav-left">
-                        <a href="/"><i class="fas fa-home"></i>Home</a>
-                        <a href="/beheerder">Beheerder</a>
-                    </div>
-                    <div>
-                        <a class="login" href="/login"><i class="fas fa-sign-in-alt"></i>Login</a>
-                        <p class="logout name"></p>
-                        <a class="logout" onclick="logout()">Logout</a>
-                    </div>
-                </nav>
-            </div>
-        </div>
-    </header>
+    <header></header>
     <section id="mainContainer">
         <aside id="sidebar">
             <h1>Navigatie</h1>
@@ -60,8 +54,8 @@
                 </div>
                 <div id="user-content" style="display: none;">
                     <div class="user-header">
-                        <div class="user-avatar">
-                            <i class="fas fa-user-circle"></i>
+                        <div class="user-avatar xlarge" id="user-avatar">
+                            ?
                         </div>
                         <div class="user-summary">
                             <h3 id="user-name-title"></h3>
@@ -173,61 +167,7 @@
             flex-wrap: wrap;
         }
 
-        .user-header {
-            display: flex;
-            gap: 30px;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 2px solid #eee;
-        }
-
-        .user-avatar {
-            flex: 0 0 120px;
-            height: 120px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #f8f9fa;
-            border-radius: 50%;
-            border: 3px solid #dee2e6;
-        }
-
-        .user-avatar i {
-            font-size: 4rem;
-            color: #6c757d;
-        }
-
-        .user-summary {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-
-        .user-summary h3 {
-            margin: 0 0 15px 0;
-            color: #333;
-            font-size: 1.8rem;
-        }
-
-        .user-meta {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .meta-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 1rem;
-            color: #555;
-        }
-
-        .meta-item i {
-            width: 24px;
-            color: var(--primary-color);
-        }
+        /* Avatar styles now handled by global CSS */
 
         .user-details-grid {
             display: grid;
@@ -293,20 +233,7 @@
         }
 
         @media (max-width: 768px) {
-            .user-header {
-                flex-direction: column;
-                align-items: center;
-                text-align: center;
-                gap: 20px;
-            }
-
-            .user-avatar {
-                flex: none;
-            }
-
-            .user-meta {
-                align-items: center;
-            }
+            /* Avatar responsive styles now handled by global CSS */
 
             .error-actions {
                 flex-direction: column;
@@ -501,6 +428,10 @@
                 } else {
                     statusElement.textContent = 'Geen administrator';
                 }
+
+                // Update avatar with user initials
+                const avatarElement = document.getElementById('user-avatar');
+                updateAvatarElement(avatarElement, user);
 
                 // Show content and hide loading
                 document.getElementById('loading').style.display = 'none';

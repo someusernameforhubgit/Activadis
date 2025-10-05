@@ -16,8 +16,90 @@ export default function InschrijvingAPI(app, database) {
             const inschrijvingen = await database.query("SELECT * FROM inschrijving WHERE gebruiker = ?", [req.query.gebruiker]);
             res.send(inschrijvingen);
         } else if (req.query.activiteit) {
-            const inschrijvingen = await database.query("SELECT * FROM inschrijving WHERE activiteit = ?", [req.query.activiteit]);
-            res.send(inschrijvingen);
+            const includeDetails = req.query.includeDetails === 'true';
+            const registrations = await database.query(
+                `SELECT i.*, 
+                        g.firstname AS internalFirstname,
+                        g.lastname AS internalLastname,
+                        g.email AS internalEmail,
+                        e.voornaam AS externalFirstname,
+                        e.achternaam AS externalLastname,
+                        e.email AS externalEmail
+                 FROM inschrijving i
+                 LEFT JOIN gebruiker g ON g.id = i.gebruiker
+                 LEFT JOIN externen e ON e.id = i.externe
+                 WHERE i.activiteit = ?`,
+                [req.query.activiteit]
+            );
+
+            let verifiedUser = null;
+            let isAdmin = false;
+            if (req.query.token) {
+                verifiedUser = await verifyToken(req.query.token);
+                isAdmin = await verifyAdmin(req.query.token);
+            }
+
+            let showParticipantsSetting = 0;
+            if (includeDetails && !isAdmin && verifiedUser) {
+                const setting = await database.query(
+                    "SELECT showParticipants FROM activiteit WHERE id = ?",
+                    [req.query.activiteit]
+                );
+                if (setting && setting.length > 0) {
+                    showParticipantsSetting = Number(setting[0].showParticipants) === 1 ? 1 : 0;
+                }
+            }
+
+            const allowDetails = Boolean(
+                includeDetails && (
+                    isAdmin ||
+                    (verifiedUser && verifiedUser.id && showParticipantsSetting === 1)
+                )
+            );
+            const allowEmails = isAdmin;
+
+            const sanitized = registrations.map((reg) => {
+                const participantType = reg.gebruiker ? 'internal' : 'external';
+                const canShowName = allowDetails && (participantType === 'internal' || isAdmin);
+
+                let displayName = null;
+                let initials = null;
+                let email = null;
+
+                if (participantType === 'internal' && reg.internalFirstname && reg.internalLastname && canShowName) {
+                    displayName = `${reg.internalFirstname} ${reg.internalLastname}`.trim();
+                    initials = `${reg.internalFirstname.charAt(0)}${reg.internalLastname.charAt(0)}`.toUpperCase();
+                    if (allowEmails && reg.internalEmail) {
+                        email = reg.internalEmail;
+                    }
+                } else if (participantType === 'external' && canShowName && reg.externalFirstname && reg.externalLastname) {
+                    displayName = `${reg.externalFirstname} ${reg.externalLastname}`.trim();
+                    initials = `${reg.externalFirstname.charAt(0)}${reg.externalLastname.charAt(0)}`.toUpperCase();
+                    if (allowEmails && reg.externalEmail) {
+                        email = reg.externalEmail;
+                    }
+                }
+
+                const {
+                    internalFirstname,
+                    internalLastname,
+                    internalEmail,
+                    externalFirstname,
+                    externalLastname,
+                    externalEmail,
+                    ...rest
+                } = reg;
+
+                return {
+                    ...rest,
+                    participantType,
+                    participantName: displayName,
+                    participantInitials: initials,
+                    participantEmail: email
+                };
+            });
+
+            res.send(sanitized);
         } else {
             if (!(await verifyAdmin(req.query.token))) return res.status(401).send("Unauthorized");
             const inschrijvingen = await database.query("SELECT * FROM inschrijving");

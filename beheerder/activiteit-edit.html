@@ -6,28 +6,21 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="/css/header.css">
+    <script>
+        window.headerConfig = {
+            title: { subtitle: "Activiteit Bewerken" },
+            navLeft: [
+                { href: "/", icon: "fas fa-home", label: "Home" },
+                { href: "/beheerder", label: "Beheerder" }
+            ]
+        };
+    </script>
+    <script src="/util/header.js"></script>
     <script src="/beheerder/verifyAdmin.js"></script>
     <title>Activadis - Activiteit Bewerken</title>
 </head>
 <body>
-<header>
-    <div class="container">
-        <div class="left">
-            <p><b><span class="accent">Acti</span>vadis</b>: Activiteit Bewerken</p>
-            <nav>
-                <div class="nav-left">
-                    <a href="/"><i class="fas fa-home"></i>Home</a>
-                    <a href="/beheerder">Beheerder</a>
-                </div>
-                <div>
-                    <a class="login" href="/login"><i class="fas fa-sign-in-alt"></i>Login</a>
-                    <p class="logout name"></p>
-                    <a class="logout" onclick="logout()">Logout</a>
-                </div>
-            </nav>
-        </div>
-    </div>
-</header>
+<header></header>
     <section id="mainContainer">
         <aside id="sidebar">
             <h1>Navigatie</h1>
@@ -65,6 +58,13 @@
                         <div class="form-group checkbox">
                             <label for="activity-eten">Inclusief Eten</label>
                             <input type="checkbox" id="activity-eten">
+                        </div>
+                        <div class="form-group checkbox">
+                            <label for="activity-showParticipants">Toon deelnemers op hoofdsite</label>
+                            <div class="row">
+                                <input type="checkbox" id="activity-showParticipants">
+                                <small class="field-help">Wanneer ingeschakeld zien ingelogde gebruikers de deelnemerslijst.</small>
+                            </div>
                         </div>
                         <div class="form-group full-width">
                             <label for="activity-omschrijving">Omschrijving *</label>
@@ -489,6 +489,7 @@
                 naam: document.getElementById('activity-naam').value.trim(),
                 locatie: document.getElementById('activity-locatie').value.trim(),
                 eten: document.getElementById('activity-eten').checked ? 1 : 0,
+                showParticipants: document.getElementById('activity-showParticipants').checked ? 1 : 0,
                 omschrijving: document.getElementById('activity-omschrijving').value.trim(),
                 begin: document.getElementById('activity-begin').value,
                 eind: document.getElementById('activity-eind').value,
@@ -693,6 +694,7 @@
                 document.getElementById('activity-naam').value = activity.naam || '';
                 document.getElementById('activity-locatie').value = activity.locatie || '';
                 document.getElementById('activity-eten').checked = Boolean(activity.eten);
+                document.getElementById('activity-showParticipants').checked = Boolean(Number(activity.showParticipants));
                 document.getElementById('activity-omschrijving').value = activity.omschrijving || '';
                 
                 // Handle date formatting safely - preserve local time, avoid timezone conversion
@@ -771,6 +773,9 @@
             if (isEditMode && currentActivity) {
                 formData.id = currentActivity.id;
                 formData.hidden = currentActivity.hidden || 0; // Preserve hidden status
+                if (typeof currentActivity.showParticipants !== 'undefined') {
+                    formData.showParticipants = document.getElementById('activity-showParticipants').checked ? 1 : 0;
+                }
             }
 
             const submitBtn = document.getElementById('submit-btn');

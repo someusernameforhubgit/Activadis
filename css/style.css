@@ -30,6 +30,19 @@
     font-weight: 600;
 }
 
+img.placeholder {
+    position: relative;
+    padding: 10%;
+    object-fit: contain;
+    /* filter: grayscale(1); */
+    filter: grayscale(70%);
+}
+
+a {
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
 body {
     font-family: 'Poppins', sans-serif;
     height: 100vh;
@@ -1391,4 +1404,113 @@ ul {
 
 .btnNewActivity{
     margin-top: 20px;
+}
+
+/* User Avatar System - Reusable Classes */
+.user-avatar {
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    flex-shrink: 0;
+    transition: all 0.3s ease;
+}
+
+.user-avatar:hover {
+    transform: scale(1.05);
+}
+
+/* Size variations */
+.user-avatar.small {
+    width: 32px;
+    height: 32px;
+    font-size: 0.75rem;
+}
+
+.user-avatar.medium {
+    width: 45px;
+    height: 45px;
+    font-size: 1rem;
+}
+
+.user-avatar.large {
+    width: 80px;
+    height: 80px;
+    font-size: 1.8rem;
+}
+
+.user-avatar.xlarge {
+    width: 120px;
+    height: 120px;
+    font-size: 2.5rem;
+}
+
+/* Avatar in table contexts */
+.user-avatar.table-avatar {
+    width: 28px;
+    height: 28px;
+    font-size: 0.7rem;
+    margin-right: 8px;
+}
+
+/* User header styling for detail/edit pages */
+.user-header {
+    display: flex;
+    gap: 30px;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #eee;
+}
+
+.user-summary {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.user-summary h3 {
+    margin: 0 0 15px 0;
+    color: #333;
+    font-size: 1.5rem;
+}
+
+.user-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1rem;
+    color: #555;
+}
+
+.meta-item i {
+    width: 20px;
+    color: var(--primary-color);
+}
+
+/* Responsive avatar adjustments */
+@media (max-width: 768px) {
+    .user-header {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 20px;
+    }
+
+    .user-avatar {
+        flex: none;
+    }
+
+    .user-meta {
+        align-items: center;
+    }
 }

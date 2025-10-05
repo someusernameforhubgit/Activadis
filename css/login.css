@@ -62,7 +62,7 @@ form {
 
     > div {
         width: 100%;
-        margin-bottom: 20px;
+        /* margin-bottom: 20px; */
 
         > * {
             width: 100%;
@@ -104,12 +104,21 @@ label {
     font-size: 14px;
 }
 
+a {
+    margin-top: 10px;
+    font-size: 13px;
+}
+
 h2 {
     padding-bottom: 30px;
-    color: var(--primary-color);
+    color: var(--font-secondary-color);
     font-weight: 700;
     font-size: 2em;
     text-align: center;
+
+    span.accent {
+        color: var(--primary-color);
+    }
 }
 
 #login {

@@ -12,30 +12,26 @@
     <link rel="stylesheet" href="../css/mainsite.css">
     <link rel="stylesheet" href="../css/activity.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        window.headerConfig = {
+            navLeft: [
+                { href: "/", icon: "fas fa-home", label: "Home", active: true }
+            ]
+        };
+    </script>
+    <script src="/util/header.js"></script>
     <script src="login.js"></script>
     <script src="index.js"></script>
     <script src="test.js" type="module"></script>
 </head>
 
 <body>
-    <header>
-        <div class="container">
-            <div class="left">
-                <p><b><span class="accent">Acti</span>vadis</b></p>
-                <nav>
-                    <div class="nav-left">
-                        <a href="/" class="active"><i class="fas fa-home"></i>Home</a>
-                    </div>
-                    <div>
-                        <a class="login" href="/login"><i class="fas fa-sign-in-alt"></i>Login</a>
-                        <p class="logout name"></p>
-                        <a class="logout" onclick="logout()">Logout</a>
-                    </div>
-                </nav>
-            </div>
-        </div>
-    </header>
+    <header></header>
     <main class="activity-sections">
+        <div class="heading">
+            <h1 id="sectionTitle">Activiteiten</h1>
+            <p id="sectionDescription">Bekijk hier alle aankomende activiteiten waar je je voor kunt inschrijven.</p>
+        </div>
         <div class="filters">
             <button onClick="initializePage()" class="selected"><i class="fas fa-calendar-alt"></i>Aankomende Activiteiten</button>
             <button onClick="initializePage('beschikbaar')"><i class="fas fa-search-plus"></i>Beschikbare Activiteiten</button>

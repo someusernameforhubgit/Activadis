@@ -27,6 +27,7 @@ const loadingState = document.getElementById('loadingState');
 const errorState = document.getElementById('errorState');
 const mainContent = document.getElementById('mainContent');
 const errorMessage = document.getElementById('errorMessage');
+const noParticipantsDefault = document.getElementById('no-participants')?.innerHTML || '';
 
 // Carousel functionality
 let currentSlide = 0;
@@ -47,7 +48,7 @@ window.moveCarousel = (direction) => {
     }
 
     // Move the carousel
-    const translateX = -(currentSlide * (100 / totalSlides));
+    const translateX = -(currentSlide * 100);
     carousel.style.transform = `translateX(${translateX}%)`;
 
     // Update indicators
@@ -60,7 +61,7 @@ function goToSlide(slideIndex) {
     if (!carousel) return;
 
     totalSlides = document.querySelectorAll('.carousel-slide').length;
-    const translateX = -(currentSlide * (100 / totalSlides));
+    const translateX = -(currentSlide * 100);
     carousel.style.transform = `translateX(${translateX}%)`;
 
     updateIndicators();
@@ -112,6 +113,94 @@ function calculateAvailableSpots(min, max, current = 0) {
     return Math.max(0, max - current);
 }
 
+// Function to load and display participants (if enabled)
+async function loadMainsiteParticipants(activityId, { allowParticipants, isLoggedIn }) {
+    const participantsCard = document.getElementById('participantsCard');
+    if (!participantsCard) return;
+
+    if (!allowParticipants) {
+        participantsCard.style.display = 'none';
+        return;
+    }
+
+    participantsCard.style.display = 'block';
+
+    const participantsLoading = document.getElementById('participants-loading');
+    const participantsContent = document.getElementById('participants-content');
+    const participantsList = document.getElementById('participants-list');
+    const noParticipants = document.getElementById('no-participants');
+
+    if (noParticipants) {
+        noParticipants.innerHTML = noParticipantsDefault;
+        noParticipants.style.display = 'none';
+    }
+    if (participantsList) {
+        participantsList.innerHTML = '';
+    }
+    participantsContent.style.display = 'none';
+    participantsLoading.style.display = 'block';
+
+    try {
+        const activeJwt = sessionStorage.getItem('JWT') || jwt;
+        const includeDetails = isLoggedIn && activeJwt ? 'true' : 'false';
+        const tokenParam = isLoggedIn && activeJwt ? `&token=${activeJwt}` : '';
+        const response = await fetch(`/api/inschrijving?activiteit=${activityId}&includeDetails=${includeDetails}${tokenParam}`);
+
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+
+        const registrations = await response.json();
+        const totalCount = Array.isArray(registrations) ? registrations.length : 0;
+
+        participantsLoading.style.display = 'none';
+        document.getElementById('total-participants').textContent = totalCount;
+
+        if (totalCount === 0) {
+            if (noParticipants) {
+                noParticipants.style.display = 'block';
+            }
+            return;
+        }
+
+        if (!isLoggedIn || !activeJwt) {
+            if (noParticipants) {
+                noParticipants.style.display = 'block';
+                noParticipants.innerHTML = '<i class="fas fa-user-lock"></i><p>Log in om deelnemers te bekijken.</p>';
+            }
+            return;
+        }
+
+        const internalParticipants = registrations.filter(
+            (reg) => reg.participantType === 'internal' && reg.participantName
+        );
+
+        if (internalParticipants.length === 0) {
+            if (noParticipants) {
+                noParticipants.style.display = 'block';
+                noParticipants.innerHTML = '<i class="fas fa-user-slash"></i><p>Geen zichtbare deelnemers.</p>';
+            }
+            return;
+        }
+
+        participantsContent.style.display = 'block';
+        participantsList.innerHTML = internalParticipants.map(participant => `
+            <div class="participant-item">
+                <div class="participant-avatar">${participant.participantInitials}</div>
+                <div class="participant-name">${participant.participantName}</div>
+            </div>
+        `).join('');
+
+    } catch (error) {
+        console.error('Error loading participants:', error);
+        participantsLoading.style.display = 'none';
+        if (noParticipants) {
+            noParticipants.style.display = 'block';
+            noParticipants.innerHTML = '<i class="fas fa-exclamation-circle"></i><p>Kon deelnemers niet laden</p>';
+        }
+    }
+}
+
 // Function to populate activity data
 async function populateActivityData(data) {
     // Header information
@@ -135,18 +224,18 @@ async function populateActivityData(data) {
 
     let afbeeldingen;
     if (data.afbeeldingen[0] == null) {
-        afbeeldingen = '<img src="https://covadis.nl/wp-content/themes/id/resource/image/header/1.svg" alt="Afbeelding van activiteit" class="single-image">';
+        afbeeldingen = '<img src="https://covadis.nl/wp-content/themes/id/resource/image/header/1.svg" alt="Afbeelding van activiteit" class="single-image placeholder">';
     } else if (data.afbeeldingen.length == 1) {
         afbeeldingen = '<img src="' + data.afbeeldingen[0].afbeeldingUrl + '" alt="Afbeelding van activiteit" class="single-image">';
     } else {
         // Create carousel for multiple images
         afbeeldingen = `
                     <div class="carousel-container">
-                        <div class="carousel-wrapper" style="width: ${data.afbeeldingen.length * 100}%;">`;
+                        <div class="carousel-wrapper">`;
 
         for (let i = 0; i < data.afbeeldingen.length; i++) {
             afbeeldingen += `
-                        <div class="carousel-slide" style="flex: 0 0 ${100 / data.afbeeldingen.length}%;">
+                        <div class="carousel-slide">
                             <img src="${data.afbeeldingen[i].afbeeldingUrl}" alt="Afbeelding ${i + 1} van activiteit" class="carousel-image">
                         </div>`;
         }
@@ -189,6 +278,12 @@ async function populateActivityData(data) {
         document.getElementById('registerBtn').disabled = true;
         document.getElementById('registerBtn').innerHTML = '<i class="fas fa-ban"></i> Vol';
     }
+
+    // Load participants if enabled
+    await loadMainsiteParticipants(data.id, {
+        allowParticipants: Number(data.showParticipants) === 1,
+        isLoggedIn: Boolean(sessionStorage.getItem('JWT'))
+    });
 }
 
 // Function to handle registration
