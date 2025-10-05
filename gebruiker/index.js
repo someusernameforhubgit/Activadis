@@ -75,6 +75,7 @@ function renderActivities() {
                     </div>
                     <div class="icons">
                         <a href="activiteit/${activity.id}" class="btn">Info</a>
+                        ${userEnrollments.some(e => e.activiteit === activity.id) ? `<p class="enrolled"><i class="fas fa-check-circle"></i>Ingeschreven</p>` : ``}
                     </div>
                 `;
 

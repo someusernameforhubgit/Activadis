@@ -87,7 +87,31 @@
         </div>
     </section>
 
-    <script>
+    <script type="module">
+        import {
+            Notification,
+            NotifType
+        } from "../../util/notif.js"
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const edit = urlParams.get('edit');
+        const success = urlParams.get('success');
+
+        if (success) {
+            const message = edit === 'true'
+                ? "Gebruiker succesvol bijgewerkt."
+                : "Gebruiker succesvol toegevoegd.";
+
+            const notification = new Notification(message, NotifType.SUCCESS);
+            notification.show();
+
+            // Remove query parameters without page refresh
+            if (window.history.replaceState) {
+                const cleanUrl = window.location.pathname;
+                window.history.replaceState({}, document.title, cleanUrl);
+            }
+        }
+
         const token = sessionStorage.getItem("JWT");
         const API_URL = '/api/gebruiker';
 
@@ -99,7 +123,7 @@
             try {
                 const response = await fetch(API_URL + '?token=' + token);
                 const users = await response.json();
-                
+
                 displayUsers(users);
                 updateStats(users);
             } catch (error) {
@@ -117,7 +141,7 @@
                 row.onclick = function() {
                     window.location.href = `/beheerder/gebruikers/${user.id}`;
                 };
-                
+
                 row.innerHTML = `
                     <td>${user.email}</td>
                     <td>${(user.isAdmin === 1 || user.isAdmin === true) ? '<i class="fas fa-check" style="color: green; text-align: center; width:100%;"></i>' : '<i class="fas fa-times" style="color: red; text-align: center; width:100%;"></i>'}</td>
@@ -146,7 +170,7 @@
             document.getElementById('regular-count').textContent = regularCount;
         }
 
-        async function deleteUser(id) {
+        window.deleteUser = async (id) => {
             if (confirm('Weet je zeker dat je deze gebruiker wilt verwijderen?')) {
                 try {
                     const response = await fetch(`${API_URL}?id=${id}&token=${token}`, {
@@ -154,14 +178,16 @@
                     });
 
                     if (response.ok) {
-                        alert('Gebruiker verwijderd!');
-                        loadUsers();
+                        const notification = new Notification("Gebruiker verwijderd.", NotifType.SUCCESS);
+                        notification.show();
+                        await loadUsers();
                     } else {
-                        alert('Error deleting user');
+                        const notification = new Notification("Error deleting user.", NotifType.ERROR);
+                        notification.show();
                     }
                 } catch (error) {
-                    console.error('Error deleting user:', error);
-                    alert('Error deleting user');
+                    const notification = new Notification("Error deleting user.", NotifType.ERROR);
+                    notification.show();
                 }
             }
         }

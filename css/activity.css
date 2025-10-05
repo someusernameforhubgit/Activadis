@@ -63,6 +63,15 @@
     flex-direction: column;
     justify-content: space-between;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+    .enrolled {
+        align-self: flex-end;
+        color: #27ae60;
+
+        i {
+            padding-right: 5px;
+        }
+    }
 }
 
 .event:hover {

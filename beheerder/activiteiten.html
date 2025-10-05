@@ -68,7 +68,31 @@
         </div> -->
     </section>
 
-    <script>
+    <script type="module">
+        import {
+            Notification,
+            NotifType
+        } from "../../util/notif.js";
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const edit = urlParams.get('edit');
+        const success = urlParams.get('success');
+
+        if (success) {
+            const message = edit === 'true' 
+                ? "Activiteit succesvol bijgewerkt." 
+                : "Activiteit succesvol toegevoegd.";
+            
+            const notification = new Notification(message, NotifType.SUCCESS);
+            notification.show();
+            
+            // Remove query parameters without page refresh
+            if (window.history.replaceState) {
+                const cleanUrl = window.location.pathname;
+                window.history.replaceState({}, document.title, cleanUrl);
+            }
+        }
+
         const token = sessionStorage.getItem("JWT");
         const API_URL = '/api/activiteit';
 
@@ -158,7 +182,7 @@
             document.getElementById('past-count').textContent = pastCount;
         }
 
-        async function deleteActiviteit(id) {
+        window.deleteActiviteit = async (id) => {
             if (confirm('Weet je zeker dat je deze activiteit wilt verwijderen?')) {
                 try {
                     const response = await fetch(`${API_URL}?id=${id}&token=${token}`, {
@@ -166,14 +190,16 @@
                     });
 
                     if (response.ok) {
-                        alert('Activiteit verwijderd!');
+                        const notification = new Notification("Activiteit verwijderd.", NotifType.SUCCESS);
+                        notification.show();
                         loadActiviteiten();
                     } else {
-                        alert('Error deleting activiteit');
+                        const notification = new Notification("Error deleting activiteit.", NotifType.ERROR);
+                        notification.show();
                     }
                 } catch (error) {
-                    console.error('Error deleting activiteit:', error);
-                    alert('Error deleting activiteit');
+                    const notification = new Notification("Error deleting activiteit.", NotifType.ERROR);
+                    notification.show();
                 }
             }
         }

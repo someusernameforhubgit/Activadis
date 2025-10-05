@@ -120,7 +120,12 @@
         </main>
     </section>
 
-    <script>
+    <script type="module">
+        import {
+            Notification,
+            NotifType,
+        } from "../../util/notif.js";
+
         const token = sessionStorage.getItem("JWT");
 
         // API Base URLs
@@ -255,7 +260,7 @@
             });
         }
 
-        async function deleteActiviteit(id) {
+        window.deleteActiviteit = async (id) => {
             if (confirm('Weet je zeker dat je deze activiteit wilt verwijderen?')) {
                 try {
                     const response = await fetch(`${API.activiteit}?id=${id}&token=${token}`, {
@@ -263,19 +268,22 @@
                     });
 
                     if (response.ok) {
-                        alert('Activiteit verwijderd!');
+                        const notification = new Notification("Activiteit verwijderd.", NotifType.SUCCESS);
+                        notification.show();
                         loadDashboard(); // Refresh data
                     } else {
-                        alert('Error deleting activiteit');
+                        const notification = new Notification("Error deleting activiteit.", NotifType.ERROR);
+                        notification.show();
                     }
                 } catch (error) {
                     console.error('Error deleting activiteit:', error);
-                    alert('Error deleting activiteit');
+                    const notification = new Notification("Error deleting activiteit.", NotifType.ERROR);
+                    notification.show();
                 }
             }
         }
 
-        async function deleteGebruiker(id) {
+        window.deleteGebruiker = async (id) => {
             if (confirm('Weet je zeker dat je deze gebruiker wilt verwijderen?')) {
                 try {
                     const response = await fetch(`${API.gebruiker}?id=${id}&token=${token}`, {
@@ -283,14 +291,17 @@
                     });
 
                     if (response.ok) {
-                        alert('Gebruiker verwijderd!');
+                        const notification = new Notification("Gebruiker verwijderd.", NotifType.SUCCESS);
+                        notification.show();
                         loadDashboard(); // Refresh data
                     } else {
-                        alert('Error deleting gebruiker');
+                        const notification = new Notification("Error deleting gebruiker.", NotifType.ERROR);
+                        notification.show();
                     }
                 } catch (error) {
                     console.error('Error deleting gebruiker:', error);
-                    alert('Error deleting gebruiker');
+                    const notification = new Notification("Error deleting gebruiker.", NotifType.ERROR);
+                    notification.show();
                 }
             }
         }
