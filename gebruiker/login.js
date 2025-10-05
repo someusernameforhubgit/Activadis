@@ -19,7 +19,9 @@ document.addEventListener("DOMContentLoaded", async () => {
             }
         }
     } else {
-        document.querySelector(".filters").style.display = "none";
+        if (document.querySelector(".filters")) {
+            document.querySelector(".filters").style.display = "none";
+        }
     }
 });
 

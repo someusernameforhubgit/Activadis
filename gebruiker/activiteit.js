@@ -8,6 +8,11 @@ import {
     CloseButtonComponent
 } from '../util/modal.js';
 
+import {
+    Notification,
+    NotifPlacement
+} from "../util/notif.js";
+
 // Get activity ID from URL parameters
 const urlParams = new URLSearchParams(window.location.search);
 let activityId = urlParams.get('id');
@@ -266,11 +271,13 @@ async function submitRegistration(modal) {
         }
 
         modal.close();
-        const newModal = new Modal([
-            new TitleComponent("Ga naar uw mail voor de volgende stap."),
-            new CloseButtonComponent(),
-        ], "success-modal");
-        newModal.show();
+        // const newModal = new Modal([
+        //     new TitleComponent("Ga naar uw mail voor de volgende stap."),
+        //     new CloseButtonComponent(),
+        // ], "success-modal");
+        // newModal.show();
+        const notification = new Notification(NotifPlacement.TOP_RIGHT, "Check uw email", 5, "error");
+        notification.show();
     } else {
         modal.error("Zorg dat alle velden zijn ingevult.");
     }
