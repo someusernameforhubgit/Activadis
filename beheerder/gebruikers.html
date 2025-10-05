@@ -16,6 +16,7 @@
         };
     </script>
     <script src="/util/header.js"></script>
+    <script src="/util/avatar.js"></script>
     <script src="/beheerder/verifyAdmin.js"></script>
     <title>Activadis - Gebruikers Beheer</title>
 </head>
@@ -43,7 +44,8 @@
                 <table class="data-table">
                     <thead>
                         <tr>
-                            <th>Email</th>
+                            <th style="width: 50px;"></th>
+                            <th>Gebruiker</th>
                             <th style="text-align: center;">Admin</th>
                             <th class="justify-right">Acties</th>
                         </tr>
@@ -111,9 +113,19 @@
                     window.location.href = `/beheerder/gebruikers/${user.id}`;
                 };
                 
+                const avatarHTML = createAvatarHTML(user, 'table-avatar');
+                const displayName = getUserDisplayName(user);
+                const isDisplayingName = displayName !== user.email;
+                
                 row.innerHTML = `
-                    <td>${user.email}</td>
-                    <td>${(user.isAdmin === 1 || user.isAdmin === true) ? '<i class="fas fa-check" style="color: green; text-align: center; width:100%;"></i>' : '<i class="fas fa-times" style="color: red; text-align: center; width:100%;"></i>'}</td>
+                    <td style="padding-right: 0;">${avatarHTML}</td>
+                    <td>
+                        <div style="display: flex; flex-direction: column;">
+                            <span style="font-weight: 500;">${displayName}</span>
+                            ${isDisplayingName ? `<small style="color: #666; font-size: 0.85rem;">${user.email}</small>` : ''}
+                        </div>
+                    </td>
+                    <td style="text-align: center;">${(user.isAdmin === 1 || user.isAdmin === true) ? '<i class="fas fa-check" style="color: green;"></i>' : '<i class="fas fa-times" style="color: red;"></i>'}</td>
                     <td onclick="event.stopPropagation()">
                         <div class="justify-right" style="display: flex; gap: 5px; flex-wrap: wrap;">
                             <button class="btn btn-primary btn-small" onclick="window.location.href='/beheerder/gebruikers/${user.id}/edit'">

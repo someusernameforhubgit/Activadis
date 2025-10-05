@@ -66,12 +66,16 @@ function renderActivities() {
 
         eventElement.innerHTML = `
                     <div class="event-info">
-                        ${afbeelding}
-                        <h2 class="event-title">${escapeHtml(activity.naam)}</h2>
-                        <h3 class="location">${escapeHtml(activity.locatie)}</h3>
-                        <p class="date">Begin: ${beginDate.toLocaleString('nl-NL')}</p>
-                        <p class="date">Einde: ${endDate.toLocaleString('nl-NL')}</p>
-                        ${activity.omschrijving ? `<p class="description">${escapeHtml(activity.omschrijving)}</p>` : ''}
+                        <div class="image-container">
+                            ${afbeelding}
+                        </div>
+                        <div class="event-details">
+                            <h2 class="event-title">${escapeHtml(activity.naam)}</h2>
+                            <h3 class="location">${escapeHtml(activity.locatie)}</h3>
+                            <p class="date">Begin: ${beginDate.toLocaleString('nl-NL')}</p>
+                            <p class="date">Einde: ${endDate.toLocaleString('nl-NL')}</p>
+                            ${activity.omschrijving ? `<p class="description">${escapeHtml(activity.omschrijving)}</p>` : ''}
+                        </div>
                     </div>
                     <div class="icons">
                         <a href="activiteit/${activity.id}" class="btn">Info</a>

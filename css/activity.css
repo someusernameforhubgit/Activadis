@@ -1,10 +1,14 @@
 .activity-sections {
     display: flex;
     flex-direction: column;
-    gap: 2rem;
     padding: 2rem 1rem;
     max-width: 1200px;
     margin: 0 auto;
+
+    .heading {
+        text-align: center;
+        padding-bottom: 1.5rem;
+    }
 }
 
 .activity-section h1 {
@@ -35,7 +39,6 @@
 .activity-sections {
     display: flex;
     flex-direction: column;
-    gap: 2rem;
     padding: 2rem 1rem;
     max-width: 1200px;
     margin: 0 auto;
@@ -58,20 +61,23 @@
 .event {
     background: #f9f9f9;
     border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border 0.2s ease;
+}
+
+.event-details {
     padding: 1.25rem;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .event:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.event-info {
-    margin-bottom: 1rem;
 }
 
 .event-title {
@@ -154,6 +160,6 @@
     height: 250px;
     object-fit: cover;
     background: rgba(0, 0, 0, 0.05);
-    border-radius: 8px;
-    margin-bottom: 0.75rem;
+    /* border-radius: 8px; */
+    /* margin-bottom: 0.75rem; */
 }
