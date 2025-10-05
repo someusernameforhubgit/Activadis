@@ -8,6 +8,11 @@ import {
     CloseButtonComponent
 } from '../util/modal.js';
 
+import {
+    Notification,
+    NotifType
+} from "/util/notif.js";
+
 // Get activity ID from URL parameters
 const urlParams = new URLSearchParams(window.location.search);
 let activityId = urlParams.get('id');
@@ -301,11 +306,8 @@ async function handleRegistration() {
                 })
             });
             loadPage();
-            const modal = new Modal([
-                new TitleComponent("Je bent ingeschreven"),
-                new CloseButtonComponent()
-            ], "ingeschreven-modal");
-            modal.show();
+            const notification = new Notification("Je bent ingeschreven", NotifType.SUCCESS);
+            notification.show();
         }
     } else {
         const modal = new Modal([
@@ -361,11 +363,8 @@ async function submitRegistration(modal) {
         }
 
         modal.close();
-        const newModal = new Modal([
-            new TitleComponent("Ga naar uw mail voor de volgende stap."),
-            new CloseButtonComponent(),
-        ], "success-modal");
-        newModal.show();
+        const notification = new Notification("Check uw inbox om uw inschrijving te voltooien.");
+        notification.show();
     } else {
         modal.error("Zorg dat alle velden zijn ingevult.");
     }
@@ -389,11 +388,8 @@ async function handleDeRegistration() {
                     activiteit: activityId,
                 })
             });
-            const modal = new Modal([
-                new TitleComponent("Je bent uitgeschreven"),
-                new CloseButtonComponent()
-            ], "ingeschreven-modal");
-            modal.show();
+            const notification = new Notification("Je bent uitgeschreven.", NotifType.SUCCESS);
+            notification.show();
         }
         loadPage();
     } else {
@@ -435,11 +431,8 @@ async function submitDeRegistration(modal) {
         }
 
         modal.close();
-        const newModal = new Modal([
-            new TitleComponent("Ga naar uw mail voor de volgende stap."),
-            new CloseButtonComponent(),
-        ], "success-modal");
-        newModal.show();
+        const notification = new Notification("Check uw inbox om uw uitschrijving te voltooien.");
+        notification.show();
     } else {
         modal.error("Vul je email in.");
     }
@@ -497,6 +490,12 @@ async function loadPage() {
 
     const token = urlParams.get('token');
     if (token) {
+        // Remove token from URL without page refresh
+        if (window.history.replaceState) {
+            const cleanUrl = window.location.pathname + window.location.search.replace(/[&?]token=[^&]+/g, '').replace(/^&/, '?');
+            window.history.replaceState({}, document.title, cleanUrl);
+        }
+
         const res = await fetch("../api/inschrijving", {
             method: "POST",
             headers: {
@@ -509,11 +508,8 @@ async function loadPage() {
         });
 
         if (res.ok) {
-            const modal = new Modal([
-                new TitleComponent("Je bent ingeschreven"),
-                new CloseButtonComponent()
-            ], "ingeschreven-modal");
-            modal.show();
+            const notification = new Notification("Je bent ingeschreven.", NotifType.SUCCESS);
+            notification.show();
         } else {
             const res = await fetch("../api/inschrijving", {
                 method: "DELETE",
@@ -527,11 +523,8 @@ async function loadPage() {
             });
 
             if (res.ok) {
-                const modal = new Modal([
-                    new TitleComponent("Je bent uitgeschreven"),
-                    new CloseButtonComponent()
-                ], "ingeschreven-modal");
-                modal.show();
+                const notification = new Notification("Je bent uitgeschreven.", NotifType.SUCCESS);
+                notification.show();
             }
         }
     }
