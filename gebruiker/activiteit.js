@@ -478,6 +478,8 @@ async function loadPage() {
             }
             populateActivityData(data);
             showContent();
+            // Load benodigdheden after activity data is loaded
+            loadBenodigdheden(activityId);
         })
         .catch(error => {
             console.error('Error fetching activity:', error);
@@ -528,6 +530,70 @@ async function loadPage() {
             }
         }
     }
+}
+
+// Function to load benodigdheden
+async function loadBenodigdheden(activityId) {
+    const loadingElement = document.getElementById('benodigdheden-loading');
+    const contentElement = document.getElementById('benodigdheden-content');
+    const listElement = document.getElementById('benodigdheden-list');
+    const noItemsElement = document.getElementById('no-benodigdheden');
+
+    try {
+        // Show loading state
+        loadingElement.style.display = 'block';
+        contentElement.style.display = 'none';
+        noItemsElement.style.display = 'none';
+        
+        // Fetch benodigdheden from API
+        const response = await fetch(`/api/benodigdheid?activiteit=${activityId}`);
+        if (!response.ok) {
+            throw new Error('Kon benodigdheden niet laden');
+        }
+        
+        const benodigdheden = await response.json();
+        
+        // Clear previous content
+        listElement.innerHTML = '';
+        
+        if (benodigdheden && benodigdheden.length > 0) {
+            // Add each benodigheid to the list
+            benodigdheden.forEach(item => {
+                const itemElement = document.createElement('div');
+                itemElement.className = 'benodigdheid-item';
+                itemElement.innerHTML = `
+                    <div class="benodigdheid-content">
+                        <span class="benodigdheid-naam">${escapeHtml(item.naam)}</span>
+                        <span class="benodigdheid-aantal">${item.aantal}x</span>
+                    </div>
+                `;
+                listElement.appendChild(itemElement);
+            });
+            noItemsElement.style.display = 'none';
+        } else {
+            noItemsElement.style.display = 'flex';
+        }
+        
+        // Show content
+        contentElement.style.display = 'block';
+    } catch (error) {
+        console.error('Error loading benodigdheden:', error);
+        // Show error state
+        noItemsElement.style.display = 'flex';
+        noItemsElement.innerHTML = `
+            <i class="fas fa-exclamation-triangle"></i>
+            <p>Kon benodigdheden niet laden</p>
+        `;
+    } finally {
+        loadingElement.style.display = 'none';
+    }
+}
+
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
 }
 
 // Event listeners

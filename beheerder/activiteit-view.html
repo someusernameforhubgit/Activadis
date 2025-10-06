@@ -129,6 +129,20 @@
                                 <div class="value" id="activity-deelnemers"></div>
                             </div>
                         </div>
+                        
+                        <!-- Benodigdheden Section -->
+                        <div class="details-section">
+                            <h4>Benodigdheden</h4>
+                            <div id="benodigdheden-list" class="benodigdheden-list">
+                                <!-- Benodigdheden will be loaded here -->
+                                <div class="loading-spinner-small"></div>
+                                <p>Benodigdheden laden...</p>
+                            </div>
+                            <div id="no-benodigdheden" class="no-benodigdheden" style="display: none;">
+                                <i class="fas fa-clipboard-list"></i>
+                                <p>Geen benodigdheden toegevoegd</p>
+                            </div>
+                        </div>
                     </div>
                     
                     <!-- Participants Section -->
@@ -391,6 +405,7 @@
     <script>
         const token = sessionStorage.getItem("JWT");
         const API_URL = '/api/activiteit';
+        const BENODIGDHEID_URL = '/api/benodigdheid'; // Add benodigdheid API URL
         let currentActivity = null;
         let retryCount = 0;
         const MAX_RETRIES = 3;
@@ -734,10 +749,51 @@
                 
                 // Load participants
                 loadParticipants(activity.id);
-                
+                loadBenodigdheden(activity.id); // Load benodigdheden after loading activity
             } catch (error) {
                 console.error('Error displaying activity:', error);
                 showError('Fout bij het weergeven van de activiteit gegevens.');
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+        
+        // Load benodigdheden for activity
+        async function loadBenodigdheden(activityId) {
+            try {
+                const response = await fetch(`${BENODIGDHEID_URL}?activiteit=${activityId}`);
+                if (!response.ok) {
+                    throw new Error('Kon benodigdheden niet laden');
+                }
+                const benodigdheden = await response.json();
+                displayBenodigdheden(benodigdheden);
+            } catch (error) {
+                console.error('Error loading benodigdheden:', error);
+                // Don't show error to user, just show empty state
+                document.getElementById('benodigdheden-list').innerHTML = '';
+                document.getElementById('no-benodigdheden').style.display = 'block';
+            }
+        }
+        
+        function displayBenodigdheden(benodigdheden) {
+            const container = document.getElementById('benodigdheden-list');
+            const noBenodigdheden = document.getElementById('no-benodigdheden');
+            
+            container.innerHTML = ''; // Clear loading state
+            
+            if (benodigdheden && benodigdheden.length > 0) {
+                benodigdheden.forEach(item => {
+                    const benodigdheidElement = document.createElement('div');
+                    benodigdheidElement.className = 'benodigdheid-item';
+                    benodigdheidElement.innerHTML = `
+                        <span class="benodigdheid-naam">${escapeHtml(item.naam)}</span>
+                        <span class="benodigdheid-aantal">${item.aantal}x</span>
+                    `;
+                    container.appendChild(benodigdheidElement);
+                });
+                noBenodigdheden.style.display = 'none';
+            } else {
+                noBenodigdheden.style.display = 'block';
             }
         }
 
@@ -796,6 +852,51 @@
     <style>
         :root {
             --image-width: 400px;
+        }
+        
+        /* Benodigdheden styles */
+        .benodigdheden-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        
+        .benodigdheid-item {
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            padding: 8px 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+        
+        .benodigdheid-naam {
+            font-weight: 500;
+            color: #333;
+        }
+        
+        .benodigdheid-aantal {
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 12px;
+            padding: 2px 8px;
+            font-size: 0.85em;
+            font-weight: 500;
+        }
+        
+        .no-benodigdheden {
+            text-align: center;
+            padding: 15px 0;
+            color: #6c757d;
+            font-size: 0.9em;
+        }
+        
+        .no-benodigdheden i {
+            font-size: 1.5em;
+            margin-bottom: 8px;
+            color: #adb5bd;
         }
 
         /* Activity Image Styles */
