@@ -306,7 +306,12 @@
         }
     </style>
 
-    <script>
+    <script type="module">
+        import {
+            Notification,
+            NotifType,
+        } from "/util/notif.js";
+
         const token = sessionStorage.getItem("JWT");
         const API_URL = '/api/activiteit';
         let currentActivity = null;
@@ -344,7 +349,7 @@
             return id ? parseInt(id) : null;
         }
 
-        function goBack() {
+        window.goBack = async () => {
             if (document.referrer && document.referrer.includes('/beheerder/')) {
                 window.history.back();
             } else {
@@ -496,7 +501,7 @@
         }
 
         // Loading and error handling
-        function retryLoad() {
+        window.retryLoad = async () => {
             const activityId = getActivityIdFromUrl();
             if (activityId && retryCount < MAX_RETRIES) {
                 retryCount++;
@@ -793,14 +798,7 @@
                 }
 
                 if (isEditMode) {
-                    // No response expected for PUT request
-                    // Show success message
-                    alert('Activiteit succesvol bijgewerkt!');
-
-                    // Redirect after short delay to allow user to see success
-                    setTimeout(() => {
-                        window.location.href = '/beheerder/activiteiten';
-                    }, 500);
+                    window.location.href = '/beheerder/activiteiten?edit=true&success=true';
                 } else {
                     const result = await response.json();
                     console.log('Activity creation response:', result);
@@ -840,13 +838,7 @@
                         }
                     }
 
-                    // Show success message
-                    alert('Activiteit succesvol toegevoegd!');
-                    
-                    // Redirect after short delay to allow user to see success
-                    setTimeout(() => {
-                        window.location.href = '/beheerder/activiteiten';
-                    }, 500);
+                    window.location.href = '/beheerder/activiteiten?edit=false&success=true';
                 }
                 
             } catch (error) {
@@ -870,7 +862,8 @@
                     errorMessage = error.message;
                 }
                 
-                alert(errorMessage);
+                const notification = new Notification(errorMessage, NotifType.ERROR);
+                notification.show();
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.textContent = originalText;
@@ -897,7 +890,8 @@
 
                 if (!response.ok) {
                     if (response.status === 401) {
-                        alert('U bent niet geautoriseerd. Log opnieuw in.');
+                        const notification = new Notification("U bent niet geautoriseerd. Log opnieuw in.", NotifType.ERROR, 2);
+                        notification.show();
                         setTimeout(() => window.location.href = '/login', 2000);
                         return;
                     } else {
@@ -918,7 +912,7 @@
             }
         }
 
-        async function addImage(event) {
+        window.addImage = async (event) => {
             if (event) {
                 event.preventDefault();
             }
@@ -930,7 +924,8 @@
 
             // Validate input
             if (!afbeeldingUrl) {
-                alert('Voer een afbeelding URL in.');
+                const notification = new Notification("Voer een afbeelding URL in.", NotifType.ERROR);
+                notification.show();
                 return;
             }
 
@@ -938,7 +933,8 @@
             try {
                 new URL(afbeeldingUrl);
             } catch (error) {
-                alert('Voer een geldige URL in.');
+                const notification = new Notification("Voer een geldige URL in.", NotifType.ERROR);
+                notification.show();
                 return;
             }
 
@@ -960,7 +956,8 @@
 
                     if (!response.ok) {
                         if (response.status === 401) {
-                            alert('U bent niet geautoriseerd. Log opnieuw in.');
+                            const notification = new Notification("U bent niet geautoriseerd. Log opnieuw in.", NotifType.ERROR, 2);
+                            notification.show();
                             setTimeout(() => window.location.href = '/login', 2000);
                             return;
                         } else {
@@ -994,7 +991,8 @@
 
                 } catch (error) {
                     console.error('Error adding image:', error);
-                    alert('Er is een fout opgetreden bij het toevoegen van de afbeelding.');
+                    const notification = new Notification("Error adding image.", NotifType.ERROR);
+                    notification.show();
                 }
             } else {
                 // For new activities, store in array and display

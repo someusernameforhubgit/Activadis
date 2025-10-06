@@ -335,7 +335,12 @@
         }
     </style>
 
-    <script>
+    <script type="module">
+        import {
+            Notification,
+            NotifType
+        } from "/util/notif.js";
+
         const token = sessionStorage.getItem("JWT");
         const API_URL = '/api/gebruiker';
         let currentUser = null;
@@ -439,7 +444,7 @@
             return id ? parseInt(id) : null;
         }
 
-        function goBack() {
+        window.goBack = async () => {
             if (document.referrer && document.referrer.includes('/beheerder/')) {
                 window.history.back();
             } else {
@@ -447,7 +452,7 @@
             }
         }
 
-        function togglePasswordReset() {
+        window.togglePasswordReset = async () => {
             passwordResetRequested = !passwordResetRequested;
             const btn = document.getElementById('reset-password-btn');
             const status = document.getElementById('reset-status');
@@ -574,7 +579,7 @@
         }
 
         // Error handling
-        function retryLoad() {
+        window.retryLoad = async () => {
             const userId = getUserIdFromUrl();
             if (userId && retryCount < MAX_RETRIES) {
                 retryCount++;
@@ -788,7 +793,8 @@
                         showFieldError('user-email', 'Dit e-mailadres is al in gebruik');
                         return;
                     } else if (errorText.includes('Unauthorized')) {
-                        alert('U bent niet geautoriseerd. Log opnieuw in.');
+                        const notification = new Notification("U bent niet geautoriseerd. Log opnieuw in.", NotifType.ERROR, 2);
+                        notification.show();
                         setTimeout(() => window.location.href = '/login', 2000);
                         return;
                     }
@@ -808,12 +814,8 @@
                     successMessage += '\n\nDe gebruiker ontvangt een nieuwe inloglink per email.';
                 }
 
-                alert(successMessage);
-
                 // Redirect after short delay
-                setTimeout(() => {
-                    window.location.href = '/beheerder/gebruikers';
-                }, 500);
+                window.location.href = '/beheerder/gebruikers?success=true&edit=' + isEditMode;
 
             } catch (error) {
                 console.error('Error saving user:', error);
@@ -833,7 +835,8 @@
                     errorMessage = error.message;
                 }
 
-                alert(errorMessage);
+                const notification = new Notification(errorMessage, NotifType.ERROR);
+                notification.show();
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.textContent = originalText;

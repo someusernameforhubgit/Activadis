@@ -94,7 +94,12 @@
         </div>
     </section>
 
-    <script>
+    <script type="module">
+        import {
+            Notification,
+            NotifType,
+        } from "../../util/notif.js";
+
         const token = sessionStorage.getItem("JWT");
 
         const APIs = {
@@ -115,7 +120,7 @@
             addLog('Instellingen pagina geladen');
         }
 
-        async function testConnection() {
+        window.testConnection = async () => {
             const statusEl = document.getElementById('db-status');
             statusEl.textContent = 'Testing...';
             statusEl.className = 'status-checking';
@@ -139,7 +144,7 @@
             }
         }
 
-        async function testAllAPIs() {
+        window.testAllAPIs = async () => {
             const statusElements = {
                 activiteiten: 'activiteiten-status',
                 gebruikers: 'gebruikers-status',
@@ -186,7 +191,7 @@
             }
         }
 
-        async function clearAllData() {
+        window.clearAllData = async () => {
             const confirmation = prompt('Type "DELETE ALL" om alle data te wissen (dit kan niet ongedaan gemaakt worden):');
             
             if (confirmation === 'DELETE ALL') {
@@ -194,11 +199,12 @@
                 
                 if (doubleConfirm) {
                     try {
-                        // This would need additional API endpoints for bulk deletion
-                        alert('Let op: Bulk delete functionaliteit moet nog geïmplementeerd worden in de API');
+                        const notification = new Notification("Bulk delete poging - niet geïmplementeerd", NotifType.WARNING);
+                        notification.show();
                         addLog('Bulk delete poging - niet geïmplementeerd');
                     } catch (error) {
-                        alert('Error tijdens data wissen: ' + error.message);
+                        const notification = new Notification('Error tijdens data wissen: ' + error.message, NotifType.ERROR);
+                        notification.show();
                         addLog('Bulk delete error: ' + error.message);
                     }
                 }
@@ -207,7 +213,7 @@
             }
         }
 
-        async function exportData() {
+        window.exportData = async () => {
             try {
                 addLog('Data export gestart...');
                 
@@ -237,10 +243,12 @@
                 URL.revokeObjectURL(url);
 
                 addLog('Data export voltooid');
-                alert('Data export voltooid!');
+                const notification = new Notification('Data export voltooid!', NotifType.SUCCESS);
+                notification.show();
             } catch (error) {
                 addLog('Data export error: ' + error.message);
-                alert('Error tijdens export: ' + error.message);
+                const notification = new Notification('Error tijdens export: ' + error.message, NotifType.ERROR);
+                notification.show();
             }
         }
 

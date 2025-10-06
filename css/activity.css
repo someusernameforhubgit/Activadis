@@ -9,6 +9,11 @@
         text-align: center;
         padding-bottom: 1.5rem;
     }
+
+    .heading {
+        text-align: center;
+        padding-bottom: 1.5rem;
+    }
 }
 
 .activity-section h1 {
@@ -66,6 +71,15 @@
     justify-content: space-between;
     overflow: hidden;
     transition: transform 0.2s ease, box-shadow 0.2s ease, border 0.2s ease;
+
+    .enrolled {
+        align-self: flex-end;
+        color: #27ae60;
+
+        i {
+            padding-right: 5px;
+        }
+    }
 }
 
 .event-details {
