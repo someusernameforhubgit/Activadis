@@ -17,6 +17,17 @@
     </script>
     <script src="/util/header.js"></script>
     <script src="/util/avatar.js"></script>
+    <script>
+        window.headerConfig = {
+            title: { subtitle: "Gebruikers Beheer" },
+            navLeft: [
+                { href: "/", icon: "fas fa-home", label: "Home" },
+                { href: "/beheerder", label: "Beheerder", active: true }
+            ]
+        };
+    </script>
+    <script src="/util/header.js"></script>
+    <script src="/util/avatar.js"></script>
     <script src="/beheerder/verifyAdmin.js"></script>
     <title>Activadis - Gebruikers Beheer</title>
 </head>
@@ -136,10 +147,11 @@
                 row.onclick = function() {
                     window.location.href = `/beheerder/gebruikers/${user.id}`;
                 };
-const avatarHTML = createAvatarHTML(user, 'table-avatar');
+                
+                const avatarHTML = createAvatarHTML(user, 'table-avatar');
                 const displayName = getUserDisplayName(user);
                 const isDisplayingName = displayName !== user.email;
-
+                
                 row.innerHTML = `
                     <td style="padding-right: 0;">${avatarHTML}</td>
                     <td>
