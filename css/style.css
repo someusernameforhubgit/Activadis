@@ -201,6 +201,12 @@ ul {
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
     position: relative;
     animation: modalSlideIn 0.3s ease-out;
+
+    > .row {
+        > .column {
+            flex: 1;
+        }
+    }
 }
 
 @keyframes modalSlideIn {
