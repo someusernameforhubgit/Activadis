@@ -31,14 +31,6 @@ window.testNotifications = () => {
                 placement.type
             );
             notification.show();
-
-            // Add display class after a small delay to trigger animation
-            setTimeout(() => {
-                const notificationEl = document.querySelector('.notification:last-child');
-                if (notificationEl) {
-                    notificationEl.classList.add('display');
-                }
-            }, 100);
         }, index * 750); // 2 seconds between each notification
     });
 }
