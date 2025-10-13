@@ -97,11 +97,11 @@
                                 <div class="value email" id="user-email"></div>
                             </div>
                             <div class="view-item">
-                                <label>Rol:</label>
+                                <label>Functie titel:</label>
                                 <div class="value" id="user-role"></div>
                             </div>
                             <div class="view-item">
-                                <label>Status:</label>
+                                <label>Site beheerder:</label>
                                 <div class="value" id="user-status">Actief</div>
                             </div>
                         </div>
@@ -486,7 +486,7 @@
                     }
                 }
 
-                roleMetaElement.innerHTML = '<i class="fas fa-user"></i> ' + roleName;
+                // roleMetaElement.innerHTML = '<i class="fas fa-user"></i> ' + roleName;
 
                 // Details sections
                 document.getElementById('user-fullname').textContent = fullName || 'Niet ingesteld';
@@ -497,9 +497,9 @@
                 // Status (always active for now)
                 const statusElement = document.getElementById('user-status');
                 if (user.isAdmin == 1) {
-                    statusElement.textContent = 'Administrator';
+                    statusElement.textContent = 'Ja';
                 } else {
-                    statusElement.textContent = 'Geen administrator';
+                    statusElement.textContent = 'Nee';
                 }
 
                 // Show content and hide loading
