@@ -2,6 +2,7 @@ const jwt = sessionStorage.getItem("JWT");
 let userId = null;
 let userEnrollments = [];
 let activities = [];
+const MAX_DESCRIPTION_LENGTH = 160;
 
 document.addEventListener("DOMContentLoaded", async () => {
     initializePage();
@@ -74,7 +75,7 @@ function renderActivities() {
                             <h3 class="location">${escapeHtml(activity.locatie)}</h3>
                             <p class="date">Begin: ${beginDate.toLocaleString('nl-NL')}</p>
                             <p class="date">Einde: ${endDate.toLocaleString('nl-NL')}</p>
-                            ${activity.omschrijving ? `<p class="description">${escapeHtml(activity.omschrijving)}</p>` : ''}
+                            ${activity.omschrijving ? `<p class="description">${escapeHtml(truncateText(activity.omschrijving, MAX_DESCRIPTION_LENGTH))}</p>` : ''}
                         </div>
                     </div>
                     <div class="icons">
@@ -94,4 +95,9 @@ function escapeHtml(unsafe) {
         .replace(/>/g, "&gt;")
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#039;");
+}
+
+function truncateText(text, maxLength) {
+    if (text.length <= maxLength) return text;
+    return `${text.slice(0, maxLength - 1)}…`;
 }
