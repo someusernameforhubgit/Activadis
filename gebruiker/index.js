@@ -58,10 +58,17 @@ function renderActivities() {
         const beginDate = new Date(activity.begin);
         const endDate = new Date(activity.eind);
 
+        // Get the first image (sorted by order)
         let afbeelding;
         if (activity.afbeeldingen[0] != null) {
-            afbeelding = '<img src="' + activity.afbeeldingen[0].afbeeldingUrl + '" alt="Afbeelding van activiteit" class="afbeeldingImg">';
-        }else{
+            // Sort images and get the first one
+            const sortedImages = [...activity.afbeeldingen].sort((a, b) => {
+                const orderA = a.sortOrder !== null && a.sortOrder !== undefined ? a.sortOrder : 999;
+                const orderB = b.sortOrder !== null && b.sortOrder !== undefined ? b.sortOrder : 999;
+                return orderA - orderB;
+            });
+            afbeelding = '<img src="' + sortedImages[0].afbeeldingUrl + '" alt="Afbeelding van activiteit" class="afbeeldingImg">';
+        } else {
             afbeelding = '<img src="https://covadis.nl/wp-content/themes/id/resource/image/header/1.svg" alt="Afbeelding" class="afbeeldingImg placeholder">';
         }
 

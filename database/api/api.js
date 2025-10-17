@@ -6,6 +6,7 @@ import LoginAPI from "./login.js";
 import RoleAPI from "./role.js";
 import Database from "../database.js";
 import AfbeeldingAPI from "./afbeelding.js";
+import UploadImageAPI from "./upload-image.js";
 const database = await Database.init();
 
 function API(app) {
@@ -30,6 +31,7 @@ function startAPI(app) {
     LoginAPI(app, database);
     RoleAPI(app, database);
     AfbeeldingAPI(app, database);
+    UploadImageAPI(app, database);
 }
 
 export default startAPI;
