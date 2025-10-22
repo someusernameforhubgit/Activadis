@@ -142,7 +142,7 @@
                                 <span>Plaatsen beschikbaar</span>
                             </div>
                             <div class="registration-details">
-                                <!-- <p><strong>Kosten:</strong> <span id="registrationPrice"></span></p> -->
+                                <p><strong>Kosten:</strong> <span id="registrationPrice"></span></p>
                                 <p><strong>Aantal inschrijvingen:</strong> <span id="registrationCount"></span></p>
                             </div>
                         </div>
@@ -212,13 +212,13 @@
             </div>
         </div>
     </main>
-    
+
     <script>
         // Carousel functionality
         let currentSlide = 0;
         let totalSlides = 0;
 
-        window.moveCarousel = function(direction) {
+        window.moveCarousel = function (direction) {
             const carousel = document.querySelector('.carousel-wrapper');
             if (!carousel) return;
 
@@ -240,7 +240,7 @@
             updateIndicators();
         }
 
-        window.goToSlide = function(slideIndex) {
+        window.goToSlide = function (slideIndex) {
             currentSlide = slideIndex;
             const carousel = document.querySelector('.carousel-wrapper');
             if (!carousel) return;
@@ -263,7 +263,7 @@
             });
         }
     </script>
-    
+
     <style>
         /* Activity Image Styles */
         #activityImage {
@@ -282,12 +282,12 @@
             display: block;
             margin: 0 auto;
         }
-        
+
         .single-image.placeholder {
             object-fit: contain;
             padding: 20px;
         }
-        
+
         /* Carousel Container */
         .carousel-container {
             position: relative;
@@ -297,7 +297,7 @@
             border: 1px solid rgba(0, 0, 0, 0.1);
             overflow: hidden;
             border-radius: 8px;
-            background: #000;
+            /* background: #000; */
         }
 
         /* Carousel Wrapper */
@@ -317,7 +317,7 @@
             width: 100%;
             aspect-ratio: 16/9;
             object-fit: contain;
-            background: #000;
+            background-color: rgba(0, 0, 0, 0.05);
             display: block;
         }
 
@@ -398,20 +398,20 @@
                 width: 36px;
                 height: 36px;
             }
-            
+
             .carousel-btn.prev {
                 left: 10px;
             }
-            
+
             .carousel-btn.next {
                 right: 10px;
             }
-            
+
             .carousel-indicators {
                 bottom: 10px;
                 gap: 8px;
             }
-            
+
             .indicator {
                 width: 10px;
                 height: 10px;
