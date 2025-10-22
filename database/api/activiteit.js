@@ -124,8 +124,27 @@ export default function ActiviteitAPI(app, database) {
     app.delete(url, async (req, res) => {
         if (!(await verifyAdmin(req.query.token))) return res.status(401).send("Unauthorized");
         if (req.query.id) {
-            const activiteit = await database.query("DELETE FROM activiteit WHERE id = ?", [req.query.id]);
-            res.send(activiteit);
+            try {
+                const activityId = req.query.id;
+                
+                // Delete related records first to avoid foreign key constraint errors
+                // Delete benodigdheden
+                await database.query("DELETE FROM benodigdheid WHERE activiteit = ?", [activityId]);
+                
+                // Delete afbeeldingen
+                await database.query("DELETE FROM afbeeldingen WHERE activiteitId = ?", [activityId]);
+                
+                // Delete inschrijvingen
+                await database.query("DELETE FROM inschrijving WHERE activiteit = ?", [activityId]);
+                
+                // Finally, delete the activity itself
+                const activiteit = await database.query("DELETE FROM activiteit WHERE id = ?", [activityId]);
+                
+                res.send(activiteit);
+            } catch (error) {
+                console.error('Error deleting activity:', error);
+                res.status(500).send("Error deleting activity and related records");
+            }
         } else {
             res.status(400).send("No id provided");
         }
