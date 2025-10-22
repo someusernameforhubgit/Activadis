@@ -486,7 +486,7 @@ ul {
     gap: 20px;
 }
 
-#stats-container > div {
+#stats-container > a {
     background: var(--background-light-color);
     padding: 20px;
     border-radius: 8px;
@@ -497,7 +497,7 @@ ul {
     font-weight: 500;
 }
 
-#stats-container > div:hover {
+#stats-container > a:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
     border-color: var(--primary-color);
@@ -526,7 +526,7 @@ ul {
     color: var(--font-secondary-color);
     margin-bottom: 20px;
     font-weight: 600;
-    border-bottom: 2px solid var(--primary-color);
+    /* border-bottom: 2px solid var(--primary-color); */
     padding-bottom: 10px;
 }
 

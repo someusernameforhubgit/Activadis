@@ -41,7 +41,7 @@ export default function ActiviteitAPI(app, database) {
         if (missingFields.length === 0) {
             try {
                 const activiteit = await database.query(
-                    "INSERT INTO activiteit (naam, locatie, eten, omschrijving, begin, eind, kost, max, min, afbeelding, hidden, showParticipants) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                    "INSERT INTO activiteit (naam, locatie, eten, omschrijving, begin, eind, kost, max, min, afbeelding, hidden, showParticipants, lastEdited) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())",
                     [
                         req.body.naam,
                         req.body.locatie,
@@ -93,7 +93,7 @@ export default function ActiviteitAPI(app, database) {
         if (missingFields.length === 0) {
             try {
                 const activiteit = await database.query(
-                    "UPDATE activiteit SET naam = ?, locatie = ?, eten = ?, omschrijving = ?, begin = ?, eind = ?, kost = ?, max = ?, min = ?, afbeelding = ?, hidden = ?, showParticipants = ? WHERE id = ?", 
+                    "UPDATE activiteit SET naam = ?, locatie = ?, eten = ?, omschrijving = ?, begin = ?, eind = ?, kost = ?, max = ?, min = ?, afbeelding = ?, hidden = ?, showParticipants = ?, lastEdited = NOW() WHERE id = ?", 
                     [
                         req.body.naam,
                         req.body.locatie,

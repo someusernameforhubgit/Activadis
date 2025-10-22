@@ -39,6 +39,9 @@ async function initializePage(filter) {
         activities = activities.filter(activity => userEnrollments.some(e => e.activiteit === activity.id));
     }
 
+    // Sort activities by begin date (earliest first)
+    activities.sort((a, b) => new Date(a.begin) - new Date(b.begin));
+
     renderActivities()
 }
 
