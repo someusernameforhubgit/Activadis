@@ -173,7 +173,7 @@ class Modal {
 
     error(text) {
         if (this.modal) {
-            this.errorMsg.innerText = "Error: " + text;
+            this.errorMsg.innerHTML = text;
             this.errorMsg.classList.add("show");
         }
     }

@@ -5,12 +5,14 @@ import {
     InputFieldComponent,
     ColumnComponent,
     RowComponent,
-    CloseButtonComponent
+    CloseButtonComponent,
+    TextFieldComponent
 } from '../util/modal.js';
 
 import {
     Notification,
-    NotifType
+    NotifType,
+    NotifPlacement
 } from "/util/notif.js";
 
 // Get activity ID from URL parameters
@@ -166,7 +168,7 @@ async function loadMainsiteParticipants(activityId, { allowParticipants, isLogge
         if (!isLoggedIn || !activeJwt) {
             if (noParticipants) {
                 noParticipants.style.display = 'block';
-                noParticipants.innerHTML = '<i class="fas fa-user-lock"></i><p>Log in om deelnemers te bekijken.</p>';
+                noParticipants.innerHTML = '<i class="fas fa-user-lock"></i><p><a href="/login">log in</a> om deelnemers te bekijken.</p>';
             }
             return;
         }
@@ -322,19 +324,15 @@ async function handleRegistration() {
         const inschrijvingenData = await inschrijvingen.json();
         const inschrijving = inschrijvingenData.find(inschrijving => inschrijving.activiteit === parseInt(activityId));
         if (!inschrijving) {
-            await fetch("/api/inschrijving?gebruiker=" + jwtData.id + "&activiteit=" + activityId + "&token=" + jwt, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    gebruiker: jwtData.id,
-                    activiteit: activityId,
-                })
-            });
-            loadPage();
-            const notification = new Notification("Je bent ingeschreven", NotifType.SUCCESS);
-            notification.show();
+            const modal = new Modal([
+                new TitleComponent("Vul je gegevens in"),
+                new TextFieldComponent("opmerking", "Opmerking", "Vul een opmerking over uw inschrijving in als u dit wilt."),
+                new RowComponent([
+                    new ButtonComponent("Submit", submitRegistrationInternal),
+                    new CloseButtonComponent()
+                ])
+            ], "inschrijven-intern-modal");
+            modal.show();
         }
     } else {
         const modal = new Modal([
@@ -348,6 +346,7 @@ async function handleRegistration() {
                 ]),
             ]),
             new InputFieldComponent("email", "Email", "Vul je email in", true),
+            new TextFieldComponent("opmerking", "Opmerking", "Vul een opmerking over uw inschrijving in als u dit wilt."),
             new RowComponent([
                 new ButtonComponent("Submit", submitRegistration),
                 new CloseButtonComponent()
@@ -357,23 +356,48 @@ async function handleRegistration() {
     }
 }
 
+async function submitRegistrationInternal(modal) {
+    const res = await fetch("/api/verify?token=" + jwt);
+    const jwtData = await res.json();
+    const opmerking = document.getElementById("opmerking").value;
+    let data = {
+        gebruiker: jwtData.id,
+        activiteit: activityId,
+    };
+    if (opmerking) data.opmerking = opmerking || null;
+    await fetch("/api/inschrijving?gebruiker=" + jwtData.id + "&activiteit=" + activityId + "&token=" + jwt, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(data)
+    });
+    loadPage();
+    modal.close();
+    const notification = new Notification("Je bent ingeschreven", NotifType.SUCCESS);
+    notification.show();
+}
+
 async function submitRegistration(modal) {
     modal.hideError();
     const voornaam = document.getElementById("voornaam").value;
     const achternaam = document.getElementById("achternaam").value;
     const email = document.getElementById("email").value;
+    const opmerking = document.getElementById("opmerking").value;
     if (voornaam && achternaam && email) {
+        let data = {
+            voornaam,
+            achternaam,
+            email,
+            activiteit: activityId,
+        };
+        if (opmerking) data.opmerking = opmerking;
         const res = await fetch("../api/inschrijving", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({
-                voornaam,
-                achternaam,
-                email,
-                activiteit: activityId,
-            })
+            body: JSON.stringify(data)
         });
 
         if (res.status === 409) {
@@ -381,7 +405,7 @@ async function submitRegistration(modal) {
                 modal.error("U bent al ingeschreven voor deze activiteit.");
                 return;
             } else {
-                modal.error("Er bestaat een gebruiker met dit email adres, log in a.u.b.");
+                modal.error("Er bestaat een gebruiker met dit email adres, <a href='/login'>log in</a> a.u.b.");
                 return;
             }
         } else if (!res.ok) {
@@ -390,7 +414,7 @@ async function submitRegistration(modal) {
         }
 
         modal.close();
-        const notification = new Notification("Check uw inbox om uw inschrijving te voltooien.");
+        const notification = new Notification("Check uw inbox om uw inschrijving te voltooien.", NotifType.INFO, 7.5, NotifPlacement.TOP_MIDDLE);
         notification.show();
     } else {
         modal.error("Zorg dat alle velden zijn ingevult.");
@@ -447,7 +471,7 @@ async function submitDeRegistration(modal) {
         });
 
         if (res.status === 409) {
-            modal.error("Er bestaat een gebruiker met dit email adres, log in a.u.b.");
+            modal.error("Er bestaat een gebruiker met dit email adres, <a href='/login'>log in</a> a.u.b.");
             return;
         } else if (res.status === 404) {
             modal.error("U bent niet ingeschreven voor deze activiteit.");
@@ -458,7 +482,7 @@ async function submitDeRegistration(modal) {
         }
 
         modal.close();
-        const notification = new Notification("Check uw inbox om uw uitschrijving te voltooien.");
+        const notification = new Notification("Check uw inbox om uw uitschrijving te voltooien.", NotifType.INFO, 7.5, NotifPlacement.TOP_MIDDLE);
         notification.show();
     } else {
         modal.error("Vul je email in.");
