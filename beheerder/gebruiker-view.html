@@ -62,7 +62,6 @@
                             <div class="user-meta">
                                 <span class="meta-item"><i class="fas fa-envelope"></i> <span
                                         id="user-email-meta"></span></span>
-                                <span class="meta-item" id="user-role-meta"></span>
                             </div>
                         </div>
                     </div>
@@ -91,11 +90,11 @@
                                 <div class="value email" id="user-email"></div>
                             </div>
                             <div class="view-item">
-                                <label>Rol:</label>
+                                <label>Functie profiel:</label>
                                 <div class="value" id="user-role"></div>
                             </div>
                             <div class="view-item">
-                                <label>Status:</label>
+                                <label>Is beheerder:</label>
                                 <div class="value" id="user-status">Actief</div>
                             </div>
                         </div>
@@ -384,7 +383,6 @@
                 document.getElementById('user-email-meta').textContent = user.email;
 
                 // Role meta with icon
-                const roleMetaElement = document.getElementById('user-role-meta');
                 console.log('User data:', user);
 
                 let roleName = 'Geen rol';
@@ -413,8 +411,6 @@
                     }
                 }
 
-                roleMetaElement.innerHTML = '<i class="fas fa-user"></i> ' + roleName;
-
                 // Details sections
                 document.getElementById('user-fullname').textContent = fullName || 'Niet ingesteld';
                 document.getElementById('user-firstname').textContent = firstName || 'Niet ingesteld';
@@ -424,9 +420,9 @@
                 // Status (always active for now)
                 const statusElement = document.getElementById('user-status');
                 if (user.isAdmin == 1) {
-                    statusElement.textContent = 'Administrator';
+                    statusElement.textContent = 'Ja';
                 } else {
-                    statusElement.textContent = 'Geen administrator';
+                    statusElement.textContent = 'Nee';
                 }
 
                 // Update avatar with user initials

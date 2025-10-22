@@ -35,9 +35,9 @@
                 <h2>Dashboard</h2>
             </div>
             <div id="dashboard-stats">
-                <h3><i class="fas fa-chart-bar"></i> Insights</h3>
+                <h3><i class="fas fa-chart-bar"></i> Snel naar</h3>
                 <div id="stats-container">
-                    <div>
+                    <!-- <div>
                         <div><i class="fas fa-calendar-alt"></i> Activiteiten</div>
                         <span id="activiteiten-count">-</span>
                     </div>
@@ -52,18 +52,51 @@
                     <div>
                         <div><i class="fas fa-box"></i> Benodigdheden</div>
                         <span id="benodigdheden-count">-</span>
-                    </div>
+                    </div> -->
+
+                    <a href="activiteiten">
+                        <div>
+                            <div><i class="fas fa-calendar-alt"></i> Activiteiten</div>
+                        </div>
+                    </a>
+                    <a href="activiteiten/new">
+                        <div>
+                            <div><i class="fas fa-calendar-alt"></i><i class="fas fa-plus"></i> Nieuwe Activiteiten</div>
+                        </div>
+                    </a>
+                    <a href="gebruikers">
+                        <div>
+                            <div><i class="fas fa-users"></i> Gebruikers</div>
+                        </div>
+                    </a>
+                    <a href="gebruikers/new">
+                        <div>
+                            <div><i class="fas fa-user"></i><i class="fas fa-plus"></i> Nieuwe gebruikers</div>
+                        </div>
+                    </a>
                 </div>
             </div>
 
-            <div id="recent-activities" class="content-section">
-                <h3>Recente Activiteiten</h3>
-                <ul id="activiteiten-list"></ul>
+            <div id="recent-edited-activities" class="content-section">
+                <h3><i class="fas fa-clock"></i> Recent Bewerkte Activiteiten</h3>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Naam</th>
+                            <th>Locatie</th>
+                            <th>Datum</th>
+                            <th>Laatst Bewerkt</th>
+                            <th class="justify-right">Acties</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recent-edited-list">
+                    </tbody>
+                </table>
             </div>
 
-            <hr class="section-separator thick">
+            <!-- <hr class="section-separator thick"> -->
 
-            <div id="manage-section">
+            <!-- <div id="manage-section">
                 <div class="manage-block">
                     <div class="heading split-row">
                         <h3>Activiteiten</h3>
@@ -109,7 +142,7 @@
                         </tbody>
                     </table>
                 </div>
-            </div>
+            </div> -->
         </main>
     </section>
 
@@ -157,14 +190,27 @@
                     fetch(API.benodigdheid + "?token=" + token).then(res => res.json())
                 ]);
 
-                // Update counters
-                document.getElementById('activiteiten-count').textContent = activiteiten.length;
-                document.getElementById('gebruikers-count').textContent = gebruikers.length;
-                document.getElementById('inschrijvingen-count').textContent = inschrijvingen.length;
-                document.getElementById('benodigdheden-count').textContent = benodigdheden.length;
+                console.log('Loaded activities:', activiteiten);
 
-                // Display recent activities
-                displayRecentActiviteiten(activiteiten.slice(0, 5));
+                // Update counters - check if elements exist
+                const activiteitenCount = document.getElementById('activiteiten-count');
+                const gebruikersCount = document.getElementById('gebruikers-count');
+                const inschrijvingenCount = document.getElementById('inschrijvingen-count');
+                const benodigdhedenCount = document.getElementById('benodigdheden-count');
+                
+                if (activiteitenCount) activiteitenCount.textContent = activiteiten.length;
+                if (gebruikersCount) gebruikersCount.textContent = gebruikers.length;
+                if (inschrijvingenCount) inschrijvingenCount.textContent = inschrijvingen.length;
+                if (benodigdhedenCount) benodigdhedenCount.textContent = benodigdheden.length;
+
+                // Sort activities by lastEdited and display recently edited ones
+                const sortedByEdit = [...activiteiten].sort((a, b) => {
+                    const dateA = new Date(a.lastEdited || a.begin);
+                    const dateB = new Date(b.lastEdited || b.begin);
+                    return dateB - dateA;
+                });
+                console.log('Sorted activities:', sortedByEdit.slice(0, 3));
+                displayRecentEditedActiviteiten(sortedByEdit.slice(0, 3));
 
                 // Display all activities for management
                 displayAllActiviteiten(activiteiten);
@@ -177,17 +223,66 @@
             }
         }
 
-        function displayRecentActiviteiten(activiteiten) {
-            const list = document.getElementById('activiteiten-list');
-            list.innerHTML = '';
+        function displayRecentEditedActiviteiten(activiteiten) {
+            const tbody = document.getElementById('recent-edited-list');
+            if (!tbody) {
+                console.error('Element recent-edited-list not found!');
+                return;
+            }
+            
+            tbody.innerHTML = '';
+            console.log('Displaying activities:', activiteiten.length);
+
+            if (!activiteiten || activiteiten.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Geen activiteiten gevonden</td></tr>';
+                return;
+            }
 
             activiteiten.forEach(act => {
-                const li = document.createElement('li');
-                li.innerHTML = `
-                    <strong>${escapeHtml(act.naam)}</strong> - ${escapeHtml(act.locatie)}
-                    (${new Date(act.begin).toLocaleDateString()})
+                const row = document.createElement('tr');
+                row.style.cursor = 'pointer';
+                row.onclick = function() {
+                    window.location.href = `/beheerder/activiteiten/${act.id}`;
+                };
+                
+                const beginDate = new Date(act.begin);
+                const lastEditedDate = act.lastEdited ? new Date(act.lastEdited) : beginDate;
+                const now = new Date();
+                const timeDiff = now - lastEditedDate;
+                const minutesAgo = Math.floor(timeDiff / 60000);
+                const hoursAgo = Math.floor(minutesAgo / 60);
+                const daysAgo = Math.floor(hoursAgo / 24);
+                
+                let timeAgoText;
+                if (minutesAgo < 1) {
+                    timeAgoText = 'Zojuist';
+                } else if (minutesAgo < 60) {
+                    timeAgoText = `${minutesAgo} min geleden`;
+                } else if (hoursAgo < 24) {
+                    timeAgoText = `${hoursAgo} uur geleden`;
+                } else if (daysAgo < 7) {
+                    timeAgoText = `${daysAgo} dag${daysAgo > 1 ? 'en' : ''} geleden`;
+                } else {
+                    timeAgoText = lastEditedDate.toLocaleDateString('nl-NL');
+                }
+                
+                row.innerHTML = `
+                    <td><strong>${escapeHtml(act.naam)}</strong></td>
+                    <td>${escapeHtml(act.locatie)}</td>
+                    <td>${beginDate.toLocaleDateString('nl-NL')}</td>
+                    <td><em>${timeAgoText}</em></td>
+                    <td onclick="event.stopPropagation()">
+                        <div class="justify-right" style="display: flex; gap: 5px; flex-wrap: wrap;">
+                            <button class="btn btn-primary btn-small" onclick="window.location.href='/beheerder/activiteiten/${act.id}/edit'">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-danger btn-small" onclick="deleteActiviteit(${act.id})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
                 `;
-                list.appendChild(li);
+                tbody.appendChild(row);
             });
         }
 

@@ -219,24 +219,43 @@ async function populateActivityData(data) {
     // Description
     document.getElementById('activityDescription').textContent = data.omschrijving || 'Geen omschrijving beschikbaar.';
 
-    // Registration information
-    document.getElementById('registrationPrice').textContent = data.kost ? `€${data.kost}` : 'Gratis';
+    // Registration information (element might be commented out)
+    const registrationPriceElement = document.getElementById('registrationPrice');
+    if (registrationPriceElement) {
+        registrationPriceElement.textContent = data.kost ? `€${data.kost}` : 'Gratis';
+    }
+
+    // Sort images by sortOrder
+    const sortedImages = data.afbeeldingen && data.afbeeldingen[0] != null 
+        ? [...data.afbeeldingen].sort((a, b) => {
+            const orderA = a.sortOrder !== null && a.sortOrder !== undefined ? a.sortOrder : 999;
+            const orderB = b.sortOrder !== null && b.sortOrder !== undefined ? b.sortOrder : 999;
+            return orderA - orderB;
+        })
+        : [];
+
+    console.log('Activity data:', data);
+    console.log('Afbeeldingen:', data.afbeeldingen);
+    console.log('Sorted images:', sortedImages);
 
     let afbeeldingen;
     if (data.afbeeldingen[0] == null) {
+        console.log('No images - showing placeholder');
         afbeeldingen = '<img src="https://covadis.nl/wp-content/themes/id/resource/image/header/1.svg" alt="Afbeelding van activiteit" class="single-image placeholder">';
-    } else if (data.afbeeldingen.length == 1) {
-        afbeeldingen = '<img src="' + data.afbeeldingen[0].afbeeldingUrl + '" alt="Afbeelding van activiteit" class="single-image">';
+    } else if (sortedImages.length == 1) {
+        console.log('Single image');
+        afbeeldingen = '<img src="' + sortedImages[0].afbeeldingUrl + '" alt="Afbeelding van activiteit" class="single-image">';
     } else {
+        console.log('Multiple images - creating carousel');
         // Create carousel for multiple images
         afbeeldingen = `
                     <div class="carousel-container">
                         <div class="carousel-wrapper">`;
 
-        for (let i = 0; i < data.afbeeldingen.length; i++) {
+        for (let i = 0; i < sortedImages.length; i++) {
             afbeeldingen += `
                         <div class="carousel-slide">
-                            <img src="${data.afbeeldingen[i].afbeeldingUrl}" alt="Afbeelding ${i + 1} van activiteit" class="carousel-image">
+                            <img src="${sortedImages[i].afbeeldingUrl}" alt="Afbeelding ${i + 1} van activiteit" class="carousel-image">
                         </div>`;
         }
 
@@ -250,7 +269,7 @@ async function populateActivityData(data) {
                         </button>
                         <div class="carousel-indicators">`;
 
-        for (let i = 0; i < data.afbeeldingen.length; i++) {
+        for (let i = 0; i < sortedImages.length; i++) {
             afbeeldingen += `
                         <button class="indicator ${i === 0 ? 'active' : ''}" onclick="goToSlide(${i})"></button>`;
         }
@@ -260,7 +279,15 @@ async function populateActivityData(data) {
                     </div>`;
     }
 
-    document.querySelector('#activityImage').innerHTML = afbeeldingen;
+    console.log('Setting activityImage innerHTML');
+    const imageContainer = document.querySelector('#activityImage');
+    console.log('Image container element:', imageContainer);
+    if (imageContainer) {
+        imageContainer.innerHTML = afbeeldingen;
+        console.log('Image HTML set:', afbeeldingen.substring(0, 100));
+    } else {
+        console.error('activityImage element not found!');
+    }
 
     const inschrijvingen = await fetch("/api/inschrijving?activiteit=" + data.id);
     const inschrijvingenData = await inschrijvingen.json();
