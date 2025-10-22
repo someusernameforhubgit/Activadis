@@ -1436,6 +1436,11 @@ ul {
                 font-size: 1rem;
                 color: red;
 
+                a {
+                    color: red;
+                    text-decoration: underline;
+                }
+
                 &.show {
                     display: block;
                 }
@@ -1464,6 +1469,15 @@ ul {
         }
 
         input {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-family: inherit;
+            font-size: 14px;
+            width: 100%;
+        }
+
+        textarea {
             padding: 10px;
             border: 1px solid #ddd;
             border-radius: 5px;

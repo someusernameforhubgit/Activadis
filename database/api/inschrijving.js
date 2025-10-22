@@ -129,7 +129,7 @@ export default function InschrijvingAPI(app, database) {
             try {
                 const inschrijving = await database.query(
                     "INSERT INTO inschrijving (gebruiker, activiteit, notitie) VALUES (?, ?, ?)", 
-                    [req.body.gebruiker, req.body.activiteit, req.body.notitie || null]
+                    [req.body.gebruiker, req.body.activiteit, req.body.opmerking || null]
                 );
                 res.send(inschrijving);
                 const reset_link = `${process.env.PROTOCOL}://${process.env.HOSTNAME}/activiteit/${req.body.activiteit}`;
@@ -165,14 +165,25 @@ export default function InschrijvingAPI(app, database) {
                 [req.body.email]
             );
 
+            const activiteitNaam = (await database.query("SELECT naam FROM activiteit WHERE id = ?", [req.body.activiteit]))[0].naam;
+
             if (existingInschrijving.length > 0) {
-                res.status(409).send("You are already registered for this activity");
+                // res.status(409).send("You are already registered for this activity");
+                await mail(
+                    req.body.email,
+                    `Inschrijving voor ${activiteitNaam}`,
+                    `
+                    <h1>U heeft U proberen in te schrijven voor ${activiteitNaam}</h1><br>
+                    <p>Maar U was al voor deze activiteit ingeschreven.</p>
+                    <p>U hoeft verder geen actie to ondernemen.</p>
+                    `
+                );
+                res.send("Inschrijving aangebracht");
                 return;
             }
 
-            const token = await jwt.sign({email: req.body.email, voornaam: req.body.voornaam, achternaam: req.body.achternaam, activiteit: req.body.activiteit, edit: true}, process.env.JWT_SECRET, {expiresIn: "1h"})
+            const token = await jwt.sign({email: req.body.email, voornaam: req.body.voornaam, achternaam: req.body.achternaam, activiteit: req.body.activiteit, opmerking: req.body.opmerking || null, edit: true}, process.env.JWT_SECRET, {expiresIn: "1h"})
             const reset_link = `${process.env.PROTOCOL}://${process.env.HOSTNAME}/activiteit/${req.body.activiteit}?token=${token}`;
-            const activiteitNaam = (await database.query("SELECT naam FROM activiteit WHERE id = ?", [req.body.activiteit]))[0].naam;
 
             await mail(
                 req.body.email,
@@ -209,7 +220,7 @@ export default function InschrijvingAPI(app, database) {
 
                 const inschrijving = await database.query(
                     "INSERT INTO inschrijving (externe, activiteit, notitie) VALUES (?, ?, ?)",
-                    [externe, decodedToken.activiteit, null]
+                    [externe, decodedToken.activiteit, decodedToken.opmerking || null]
                 );
                 res.send(inschrijving);
             } catch (e) {
@@ -294,14 +305,25 @@ export default function InschrijvingAPI(app, database) {
                 [req.body.email]
             );
 
+            const activiteitNaam = (await database.query("SELECT naam FROM activiteit WHERE id = ?", [req.body.activiteit]))[0].naam;
+
             if (existingInschrijving.length === 0) {
-                res.status(404).send("You are not registered for this activity");
+                // res.status(404).send("You are not registered for this activity");
+                await mail(
+                    req.body.email,
+                    `Uitschrijving voor ${activiteitNaam}`,
+                    `
+                    <h1>U heeft U proberen uit te schrijven voor ${activiteitNaam}</h1><br>
+                    <p>Maar U was niet voor deze activiteit ingeschreven.</p>
+                    <p>U hoeft verder geen actie to ondernemen.</p>
+                    `
+                );
+                res.send("Uitschrijving aangebracht");
                 return;
             }
 
             const token = await jwt.sign({email: req.body.email, activiteit: req.body.activiteit, "delete": true}, process.env.JWT_SECRET, {expiresIn: "1h"})
             const reset_link = `${process.env.PROTOCOL}://${process.env.HOSTNAME}/activiteit/${req.body.activiteit}?token=${token}`;
-            const activiteitNaam = (await database.query("SELECT naam FROM activiteit WHERE id = ?", [req.body.activiteit]))[0].naam;
 
             await mail(
                 req.body.email,
