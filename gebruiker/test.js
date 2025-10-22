@@ -5,7 +5,6 @@ import {
 } from "../util/notif.js";
 
 window.testNotifications = () => {
-    // Array of all placement options with their names
     const placements = [
         { type: NotifPlacement.TOP_LEFT, name: "TOP_LEFT" },
         { type: NotifPlacement.TOP_MIDDLE, name: "TOP_MIDDLE" },
@@ -21,7 +20,6 @@ window.testNotifications = () => {
         { type: NotifPlacement.LEFT_TOP, name: "LEFT_TOP" }
     ];
 
-    // Show each notification with a small delay
     placements.forEach((placement, index) => {
         setTimeout(() => {
             const notification = new Notification(
@@ -31,11 +29,10 @@ window.testNotifications = () => {
                 placement.type
             );
             notification.show();
-        }, index * 750); // 2 seconds between each notification
+        }, index * 750);
     });
 }
 
-// Helper function to generate random colors
 function getRandomColor() {
     const types = [
         NotifType.INFO,
@@ -45,3 +42,23 @@ function getRandomColor() {
     ];
     return types[Math.floor(Math.random() * types.length)];
 }
+
+window.testNotificationStacking = () => {
+    const sides = Object.values(NotifPlacement);
+
+    sides.forEach((side, i) => {
+        setTimeout(() => {
+            const types = Object.values(NotifType);
+            
+            types.forEach((type, j) => {
+                setTimeout(() => {
+                    const notification = new Notification(type, type, 2, side);
+                    notification.show();
+                }, j * 100);
+            });
+        }, i * 500);
+    });
+};
+
+
+window.testNotificationStacking();
