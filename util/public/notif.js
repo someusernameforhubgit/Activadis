@@ -1,8 +1,11 @@
-const style = document.createElement("link");
-style.rel = "stylesheet";
-style.href = "/css/notification.css";
-
-document.head.appendChild(style);
+const existingNotifStylesheet = document.querySelector('link[data-notification-stylesheet]');
+if (!existingNotifStylesheet) {
+    const style = document.createElement("link");
+    style.rel = "stylesheet";
+    style.href = "/css/notification.css";
+    style.dataset.notificationStylesheet = "true";
+    document.head.appendChild(style);
+}
 
 class NotifPlacement {
     static TOP_LEFT = 0;
@@ -51,22 +54,86 @@ class NotifType {
     }
 }
 
-window.addEventListener('pageshow', function(event) {
-    if (event.persisted) {
-        document.querySelectorAll('.notification').forEach(notification => {
-            notification.remove();
-        });
-    }
-});
+const BOTTOM_ANCHOR_PLACEMENTS = new Set([
+    NotifPlacement.RIGHT_BOTTOM,
+    NotifPlacement.BOTTOM_RIGHT,
+    NotifPlacement.BOTTOM_MIDDLE,
+    NotifPlacement.BOTTOM_LEFT,
+    NotifPlacement.LEFT_BOTTOM
+]);
+
+const DEFAULT_TIMEOUT_SECONDS = 5;
 
 class Notification {
     static counter = 0;
+    static containers = new Map();
+    static root = null;
 
-    constructor(text, type = NotifType.INFO, timeout = 5, placement = NotifPlacement.BOTTOM_RIGHT) {
-        this.placement = NotifPlacement.isValid(placement) ? placement : 6;
-        this.text = text;
-        this.timeout = timeout;
-        this.color = this.getColorForType(type);
+    static ensureRoot() {
+        if (!Notification.root) {
+            const root = document.createElement("div");
+            root.classList.add("notification-layer");
+            root.setAttribute("role", "presentation");
+            const host = document.body || document.documentElement;
+            host.appendChild(root);
+            Notification.root = root;
+        }
+
+        return Notification.root;
+    }
+
+    static getContainer(placement) {
+        Notification.ensureRoot();
+        if (!Notification.containers.has(placement)) {
+            const container = document.createElement("div");
+            container.classList.add("notification-container");
+            container.classList.add(`placement-${placement}`);
+            container.dataset.placement = String(placement);
+            Notification.root.appendChild(container);
+            Notification.containers.set(placement, container);
+        }
+
+        return Notification.containers.get(placement);
+    }
+
+    static cleanupContainer(placement) {
+        const container = Notification.containers.get(placement);
+        if (container && container.childElementCount === 0) {
+            container.remove();
+            Notification.containers.delete(placement);
+        }
+
+        if (Notification.containers.size === 0 && Notification.root) {
+            Notification.root.remove();
+            Notification.root = null;
+        }
+    }
+
+    static clearAll() {
+        Notification.containers.forEach(container => {
+            container.remove();
+        });
+        Notification.containers.clear();
+
+        if (Notification.root) {
+            Notification.root.remove();
+            Notification.root = null;
+        }
+
+        Notification.counter = 0;
+    }
+
+    constructor(text, type = NotifType.INFO, timeout = DEFAULT_TIMEOUT_SECONDS, placement = NotifPlacement.BOTTOM_RIGHT) {
+        this.placement = NotifPlacement.isValid(placement) ? placement : NotifPlacement.BOTTOM_RIGHT;
+        this.type = NotifType.isValid(type) ? type : NotifType.INFO;
+        this.text = typeof text === "string" ? text : String(text ?? "");
+
+        const parsedTimeout = Number(timeout);
+        const normalizedTimeout = Number.isFinite(parsedTimeout) ? Math.max(0, parsedTimeout) : DEFAULT_TIMEOUT_SECONDS;
+
+        this.timeout = normalizedTimeout;
+        this.autoDismiss = normalizedTimeout > 0;
+        this.color = this.getColorForType(this.type);
     }
 
     getColorForType(type) {
@@ -80,7 +147,7 @@ class Notification {
             case NotifType.ERROR:
                 return "#F44336";
             default:
-                return "#2196F3"; // Default color if type is not recognized
+                return "#2196F3";
         }
     }
 
@@ -89,8 +156,19 @@ class Notification {
         notification.classList.add("notification");
         notification.classList.add(`notif-${Notification.counter++}`);
         notification.classList.add(`placement-${this.placement}`);
+        notification.dataset.type = this.type;
         notification.style.setProperty("--background-color-dynamic", `${this.color}`);
-        notification.style.setProperty("--delay", `${this.timeout}s`);
+        notification.setAttribute("role", "status");
+        notification.setAttribute("aria-live", this.type === NotifType.ERROR ? "assertive" : "polite");
+
+        if (this.autoDismiss) {
+            notification.style.setProperty("--delay", `${this.timeout}s`);
+        } else {
+            notification.classList.add("no-timeout");
+        }
+
+        const container = Notification.getContainer(this.placement);
+        const placement = this.placement;
 
         const col = document.createElement("div");
         col.classList.add("col");
@@ -100,42 +178,136 @@ class Notification {
 
         const closeBtn = document.createElement("button");
         closeBtn.classList.add("close-btn");
-        closeBtn.innerHTML = "<i class='fas fa-times'></i>";
-        closeBtn.addEventListener("click", () => {
-            notification.classList.remove("display");
-            setTimeout(() => {
-                notification.remove();
-            }, 300);
-        });
+        closeBtn.type = "button";
+        closeBtn.setAttribute("aria-label", "Sluit melding");
+        closeBtn.innerHTML = "<span aria-hidden=\"true\">&times;</span>";
 
         const textContainer = document.createElement("div");
         textContainer.classList.add("text-container");
-        textContainer.innerText = this.text;
+        textContainer.textContent = this.text;
 
         row.appendChild(textContainer);
         row.appendChild(closeBtn);
 
         const timeout = document.createElement("div");
         timeout.classList.add("timeout");
+        timeout.hidden = !this.autoDismiss;
 
         col.appendChild(row);
         col.appendChild(timeout);
 
         notification.appendChild(col);
-        document.body.appendChild(notification);
+        const shouldAppend = BOTTOM_ANCHOR_PLACEMENTS.has(placement);
 
-        setTimeout(() => {
-            notification.classList.add("display");
-        }, 100);
+        if (shouldAppend) {
+            container.appendChild(notification);
+        } else {
+            container.insertBefore(notification, container.firstChild || null);
+        }
 
-        setTimeout(() => {
-            if (notification) {
-                notification.classList.remove("display");
-                setTimeout(() => {
-                    notification.remove();
-                }, 300);
+        let isClosing = false;
+        let dismissTimerId = null;
+        let dismissStart = 0;
+        let remainingTime = this.autoDismiss ? this.timeout * 1000 : 0;
+
+        const clearTimer = () => {
+            if (dismissTimerId !== null) {
+                window.clearTimeout(dismissTimerId);
+                dismissTimerId = null;
             }
-        }, this.timeout * 1000);
+        };
+
+        const finalizeRemoval = () => {
+            if (!notification.isConnected) {
+                return;
+            }
+            notification.remove();
+            Notification.cleanupContainer(placement);
+        };
+
+        const removeNotification = () => {
+            if (isClosing) {
+                return;
+            }
+            isClosing = true;
+            clearTimer();
+            notification.classList.remove("display");
+
+            const handleTransitionEnd = (event) => {
+                if (event.target !== notification) {
+                    return;
+                }
+                notification.removeEventListener("transitionend", handleTransitionEnd);
+                finalizeRemoval();
+            };
+
+            notification.addEventListener("transitionend", handleTransitionEnd);
+
+            window.setTimeout(() => {
+                notification.removeEventListener("transitionend", handleTransitionEnd);
+                finalizeRemoval();
+            }, 400);
+        };
+
+        const scheduleTimer = () => {
+            if (!this.autoDismiss || isClosing) {
+                return;
+            }
+
+            if (remainingTime <= 0) {
+                removeNotification();
+                return;
+            }
+
+            dismissStart = performance.now();
+            dismissTimerId = window.setTimeout(() => {
+                removeNotification();
+            }, remainingTime);
+        };
+
+        const pauseTimer = () => {
+            if (!this.autoDismiss || dismissTimerId === null) {
+                return;
+            }
+            clearTimer();
+            const elapsed = performance.now() - dismissStart;
+            remainingTime = Math.max(0, remainingTime - elapsed);
+        };
+
+        const resumeTimer = () => {
+            if (!this.autoDismiss || isClosing) {
+                return;
+            }
+
+            if (remainingTime <= 0) {
+                removeNotification();
+                return;
+            }
+
+            scheduleTimer();
+        };
+
+        closeBtn.addEventListener("click", () => {
+            removeNotification();
+        });
+
+        notification.addEventListener("mouseenter", () => {
+            pauseTimer();
+        });
+
+        notification.addEventListener("mouseleave", () => {
+            resumeTimer();
+        });
+
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                notification.classList.add("display");
+            });
+        });
+
+        if (this.autoDismiss) {
+            scheduleTimer();
+        }
     }
 }
 
@@ -144,3 +316,9 @@ export {
     NotifPlacement,
     NotifType
 }
+
+window.addEventListener("pageshow", (event) => {
+    if (event.persisted) {
+        Notification.clearAll();
+    }
+});
