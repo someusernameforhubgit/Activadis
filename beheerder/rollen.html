@@ -1,0 +1,452 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/header.css">
+    <script>
+        window.headerConfig = {
+            title: { subtitle: "Activiteiten Beheer" },
+            navLeft: [
+                { href: "/", icon: "fas fa-home", label: "Home" },
+                { href: "/beheerder", label: "Beheerder", active: true }
+            ]
+        };
+    </script>
+    <script src="/util/header.js"></script>
+    <script src="/beheerder/verifyAdmin.js"></script>
+    <title>Activadis - Rollen Beheer</title>
+</head>
+<body>
+<header></header>
+    <section id="mainContainer">
+        <aside id="sidebar">
+            <h1>Navigatie</h1>
+            <ul>
+                <li><a href="/beheerder/">Dashboard</a></li>
+                <li><a href="/beheerder/gebruikers">Gebruikers</a></li>
+                <li><a href="/beheerder/activiteiten">Activiteiten</a></li>
+                <li><a href="/beheerder/rollen" class="active">Rollen</a></li>
+            </ul>
+        </aside>
+        <main id="mainContent">
+            <div class="heading split-row">
+                <h2>Rollen Beheer</h2>
+                <button class="btn btn-primary" onclick="newRol()">
+                    <i class="fas fa-plus"></i> Nieuwe Rol Toevoegen
+                </button>
+            </div>
+
+            <div id="functie-list" class="content-section">
+                <div class="heading split-row" style="align-items: center; margin-bottom: 20px;">
+                    <h3 style="margin: 0;">Alle Rollen</h3>
+                </div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th class="sortable" onclick="sortTable('naam')">
+                                Naam <i class="fas fa-sort sort-icon" id="sort-naam"></i>
+                            </th>
+                            <th class="justify-right">Acties</th>
+                        </tr>
+                    </thead>
+                    <tbody id="activiteiten-table-body">
+                    </tbody>
+                </table>
+            </div>
+            
+            <style>
+                .sortable {
+                    cursor: pointer;
+                    user-select: none;
+                    transition: background-color 0.2s;
+                    position: relative;
+                }
+                
+                .sortable:hover {
+                    background-color: rgba(0, 0, 0, 0.05);
+                }
+                
+                .sort-icon {
+                    margin-left: 5px;
+                    opacity: 0.3;
+                    font-size: 0.9em;
+                    transition: all 0.2s;
+                }
+                
+                .sort-icon.active {
+                    opacity: 1;
+                    color: #007bff;
+                    font-weight: bold;
+                    transform: scale(1.1);
+                }
+                
+                .search-container {
+                    position: relative;
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                }
+                
+                .search-container i {
+                    position: absolute;
+                    left: 12px;
+                    color: #666;
+                    pointer-events: none;
+                }
+                
+                #search-input {
+                    padding: 8px 12px 8px 35px;
+                    border: 1px solid #ddd;
+                    border-radius: 4px;
+                    font-size: 14px;
+                    width: 300px;
+                    transition: all 0.2s;
+                }
+                
+                #search-input:focus {
+                    outline: none;
+                    border-color: #faa21b;
+                    box-shadow: 0 0 0 3px rgba(250, 162, 27, 0.1);
+                }
+                
+                #search-results-count {
+                    font-size: 14px;
+                    color: #666;
+                    white-space: nowrap;
+                }
+            </style>
+        </main>
+        <!-- <div id="sideContent">
+
+        </div> -->
+    </section>
+
+    <script type="module">
+        import {
+            Notification,
+            NotifType
+        } from "../../util/notif.js";
+
+        import {
+            Modal,
+            TitleComponent,
+            ButtonComponent,
+            InputFieldComponent,
+            ColumnComponent,
+            RowComponent,
+            CloseButtonComponent,
+            HiddenComponent
+        } from '../util/modal.js';
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const edit = urlParams.get('edit');
+        const success = urlParams.get('success');
+
+        if (success) {
+            const message = edit === 'true' 
+                ? "Functie succesvol bijgewerkt."
+                : "Functie succesvol toegevoegd.";
+            
+            const notification = new Notification(message, NotifType.SUCCESS);
+            notification.show();
+            
+            // Remove query parameters without page refresh
+            if (window.history.replaceState) {
+                const cleanUrl = window.location.pathname;
+                window.history.replaceState({}, document.title, cleanUrl);
+            }
+        }
+
+        const token = sessionStorage.getItem("JWT");
+        const API_URL = '/api/role';
+        
+        let allActiviteiten = [];
+        let filteredActiviteiten = [];
+        let currentSort = { column: null, ascending: true };
+
+        // Helper functions for text handling
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function formatTextWithNewlines(text) {
+            if (!text) return '';
+            return escapeHtml(text).replace(/\n/g, '<br>');
+        }
+
+        function unescapeHtml(html) {
+            const div = document.createElement('div');
+            div.innerHTML = html;
+            return div.textContent || div.innerText || '';
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadActiviteiten();
+        });
+
+        async function loadActiviteiten() {
+            try {
+                const response = await fetch(API_URL + '?token=' + token);
+                allActiviteiten = await response.json();
+                filteredActiviteiten = allActiviteiten;
+                
+                displayActiviteiten(filteredActiviteiten);
+                // updateSearchCount();
+                // updateStats(allActiviteiten);
+            } catch (error) {
+                console.error('Error loading functies:', error);
+            }
+        }
+        
+        function updateSearchCount() {
+            const countElement = document.getElementById('search-results-count');
+            const searchTerm = document.getElementById('search-input').value.trim();
+            
+            if (searchTerm !== '') {
+                countElement.textContent = `${filteredActiviteiten.length} van ${allActiviteiten.length} activiteiten`;
+            } else {
+                countElement.textContent = '';
+            }
+        }
+        
+        window.sortTable = function(column) {
+            console.log('Sorting by:', column);
+            
+            // Three-state toggle: normal -> ascending -> descending -> normal
+            if (currentSort.column === column) {
+                if (currentSort.ascending) {
+                    currentSort.ascending = false; // Go to descending
+                } else {
+                    // Reset to normal (no sort)
+                    currentSort.column = null;
+                    currentSort.ascending = true;
+                    
+                    // Reset all icons
+                    document.querySelectorAll('.sort-icon').forEach(icon => {
+                        icon.className = 'fas fa-sort sort-icon';
+                    });
+                    
+                    // Display original order (but keep search filter)
+                    displayActiviteiten(filteredActiviteiten);
+                    console.log('Reset to original order');
+                    return;
+                }
+            } else {
+                currentSort.column = column;
+                currentSort.ascending = true;
+            }
+            
+            console.log('Sort direction:', currentSort.ascending ? 'ascending' : 'descending');
+            
+            // Reset all icons
+            document.querySelectorAll('.sort-icon').forEach(icon => {
+                icon.className = 'fas fa-sort sort-icon';
+            });
+            
+            // Update active icon
+            const activeIcon = document.getElementById(`sort-${column}`);
+            if (activeIcon) {
+                if (currentSort.ascending) {
+                    activeIcon.className = 'fas fa-sort-up sort-icon active';
+                } else {
+                    activeIcon.className = 'fas fa-sort-down sort-icon active';
+                }
+                console.log('Updated icon for', column, 'to', activeIcon.className);
+            } else {
+                console.error('Icon not found for', column);
+            }
+
+            console.log("column: " + column)
+            
+            // Sort the filtered activities (not all activities)
+            const sorted = [...filteredActiviteiten].sort((a, b) => {
+                let valueA, valueB;
+                
+                switch(column) {
+                    case 'naam':
+                        valueA = a.name.toLowerCase();
+                        valueB = b.name.toLowerCase();
+                        break;
+                    case 'locatie':
+                        valueA = a.locatie.toLowerCase();
+                        valueB = b.locatie.toLowerCase();
+                        break;
+                    case 'begin':
+                        valueA = new Date(a.begin);
+                        valueB = new Date(b.begin);
+                        break;
+                    case 'eind':
+                        valueA = new Date(a.eind);
+                        valueB = new Date(b.eind);
+                        break;
+                    case 'status':
+                        const now = new Date();
+                        valueA = new Date(a.eind) > now ? 1 : 0; // 1 = aankomend, 0 = afgelopen
+                        valueB = new Date(b.eind) > now ? 1 : 0;
+                        break;
+                }
+                
+                if (valueA < valueB) return currentSort.ascending ? -1 : 1;
+                if (valueA > valueB) return currentSort.ascending ? 1 : -1;
+                return 0;
+            });
+            
+            displayActiviteiten(sorted);
+        }
+
+        function displayActiviteiten(activiteiten) {
+            const tbody = document.getElementById('activiteiten-table-body');
+            tbody.innerHTML = '';
+
+            activiteiten.forEach(act => {
+                const row = document.createElement('tr');
+                row.style.cursor = 'pointer';
+                row.onclick = function() {
+                    editRollen(act.id);
+                };
+                
+                row.innerHTML = `
+                    <td><strong>${escapeHtml(act.name)}</strong></td>
+                    <td onclick="event.stopPropagation()">
+                        <div class="justify-right" style="display: flex; gap: 5px; flex-wrap: wrap;">
+                            <button class="btn btn-primary btn-small" onclick="editRollen(${act.id})">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-danger btn-small" onclick="deleteActiviteit(${act.id})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        window.editRollen = async (id) => {
+            // get role name from id
+            const res = await fetch(API_URL + "?id=" + id + "&token=" + token);
+            const data = await res.json();
+            const modal = new Modal([
+                new TitleComponent("Rol bijwerken"),
+                new HiddenComponent("id", id),
+                new InputFieldComponent("naam", "Naam", "Vul de naam van de rol in.", true),
+                new RowComponent([
+                    new ButtonComponent("Submit", submitEditRol),
+                    new CloseButtonComponent()
+                ])
+            ], "inschrijven-intern-modal");
+            modal.show();
+
+            document.getElementById("naam").value = data.name;
+        }
+
+        async function submitEditRol(modal) {
+            if (!document.getElementById("naam").value) {
+                modal.error("Vul een naam in.");
+                return;
+            }
+            const res = await fetch(API_URL + "?token=" + token, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    id: document.getElementById("id").value,
+                    name: document.getElementById("naam").value
+                })
+            });
+            modal.close();
+
+            const notification = new Notification("Rol bijgewerkt.", NotifType.SUCCESS);
+            notification.show();
+            loadActiviteiten();
+        }
+
+        function updateStats(activiteiten) {
+            const now = new Date();
+            const totalActivities = activiteiten.length;
+            const upcomingCount = activiteiten.filter(act => {
+                return new Date(act.eind) > now
+            }).length;
+            const pastCount = totalActivities - upcomingCount;
+
+            document.getElementById('total-activities').textContent = totalActivities;
+            document.getElementById('upcoming-count').textContent = upcomingCount;
+            document.getElementById('past-count').textContent = pastCount;
+        }
+
+        window.deleteActiviteit = async (id) => {
+            const modal = new Modal([
+                new TitleComponent("Weet je zeker dat je deze rol wilt verwijderen?"),
+                new RowComponent([
+                    new ButtonComponent("Verwijderen", async () => {
+                        try {
+                            const response = await fetch(`${API_URL}?id=${id}&token=${token}`, {
+                                method: 'DELETE'
+                            });
+
+                            if (response.ok) {
+                                const notification = new Notification("Rol verwijderd.", NotifType.SUCCESS);
+                                notification.show();
+                                loadActiviteiten();
+                            } else if (response.status === 400) {
+                                modal.error("Rol kan niet worden verwijderd, er zijn nog gebruikers met deze rol.");
+                                return;
+                            } else {
+                                const notification = new Notification("Error deleting rol.", NotifType.ERROR);
+                                notification.show();
+                            }
+
+                            modal.close();
+                        } catch (error) {
+                            const notification = new Notification("Error deleting rol.", NotifType.ERROR);
+                            notification.show();
+                        }
+                    }),
+                    new CloseButtonComponent()
+                ])
+            ], "delete-activiteit-modal");
+            modal.show();
+        }
+
+        window.newRol = () => {
+            const modal = new Modal([
+                new TitleComponent("Nieuwe Rol"),
+                new InputFieldComponent("naam", "Naam", "Vul de naam van de rol in.", true),
+                new RowComponent([
+                    new ButtonComponent("Submit", submitNewRol),
+                    new CloseButtonComponent()
+                ])
+            ], "inschrijven-intern-modal");
+            modal.show();
+        }
+
+        window.submitNewRol = async (modal) => {
+            if (!document.getElementById("naam").value) {
+                modal.error("Vul een naam in.");
+                return;
+            }
+            const res = await fetch(API_URL + "?token=" + token, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    name: document.getElementById("naam").value
+                })
+            });
+            modal.close();
+
+            const notification = new Notification("Rol toegevoegd.", NotifType.SUCCESS);
+            notification.show();
+            loadActiviteiten();
+        }
+    </script>
+</body>
+</html>

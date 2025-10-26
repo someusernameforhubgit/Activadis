@@ -1,0 +1,1157 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/header.css">
+    <script>
+        window.headerConfig = {
+            title: { subtitle: "Activiteit Details" },
+            navLeft: [
+                { href: "/", icon: "fas fa-home", label: "Home" },
+                { href: "/beheerder", label: "Beheerder" }
+            ]
+        };
+    </script>
+    <script src="/util/header.js"></script>
+    <script src="/beheerder/verifyAdmin.js"></script>
+    <title>Activadis - Activiteit Details</title>
+</head>
+<body>
+<header></header>
+    <section id="mainContainer">
+        <aside id="sidebar">
+            <h1>Navigatie</h1>
+            <ul>
+                <li><a href="/beheerder/">Dashboard</a></li>
+                <li><a href="/beheerder/gebruikers">Gebruikers</a></li>
+                <li><a href="/beheerder/activiteiten">Activiteiten</a></li>
+                <li><a href="/beheerder/rollen">Rollen</a></li>
+            </ul>
+        </aside>
+        <main id="mainContent">
+            <div class="heading split-row">
+                <h2 id="page-title">Activiteit Details</h2>
+                <div>
+                    <button class="btn btn-secondary" onclick="goBack()">
+                        <i class="fas fa-arrow-left"></i> Terug
+                    </button>
+                    <button class="btn btn-primary" id="edit-btn" onclick="editActivity()">
+                        <i class="fas fa-edit"></i> Bewerken
+                    </button>
+                </div>
+            </div>
+
+            <div id="activity-details" class="content-section">
+                <div id="loading" class="loading-container">
+                    <div class="loading-spinner"></div>
+                    <p>Laden van activiteit details...</p>
+                </div>
+                <div id="activity-content" style="display: none;">
+                    <div class="activity-header">
+
+                        <div id="activityImage"></div>
+                        <!-- <div class="activity-image-container">
+                            <img id="activity-image" alt="Activiteit afbeelding" onerror="this.style.display='none'; document.getElementById('image-placeholder').style.display='block'">
+                            <div id="image-placeholder" class="image-placeholder" style="display: none;">
+                                <i class="fas fa-image"></i>
+                                <p>Geen afbeelding beschikbaar</p>
+                            </div>
+                        </div> -->
+                        <div class="activity-summary">
+                            <h3 id="activity-naam-title"></h3>
+                            <div class="activity-meta">
+                                <span class="meta-item"><i class="fas fa-map-marker-alt"></i> <span id="activity-locatie-meta"></span></span>
+                                <span class="meta-item"><i class="fas fa-euro-sign"></i> <span id="activity-kost-meta"></span></span>
+                                <span class="meta-item"><i class="fas fa-users"></i> <span id="activity-deelnemers-meta"></span></span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="activity-details-grid">
+                        <div class="details-section">
+                            <h4>Algemene informatie</h4>
+                            <div class="view-item">
+                                <label>Naam:</label>
+                                <div class="value" id="activity-naam"></div>
+                            </div>
+                            <div class="view-item">
+                                <label>Locatie:</label>
+                                <div class="value" id="activity-locatie"></div>
+                            </div>
+                            <div class="view-item">
+                                <label>Omschrijving:</label>
+                                <div class="value description" id="activity-omschrijving"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="details-section">
+                            <h4>Datum en tijd</h4>
+                            <div class="view-item">
+                                <label>Begin:</label>
+                                <div class="value datetime" id="activity-begin"></div>
+                            </div>
+                            <div class="view-item">
+                                <label>Einde:</label>
+                                <div class="value datetime" id="activity-eind"></div>
+                            </div>
+                            <div class="view-item">
+                                <label>Duur:</label>
+                                <div class="value" id="activity-duration"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="details-section">
+                            <h4>Voorzieningen en kosten</h4>
+                            <div class="view-item">
+                                <label>Inclusief eten:</label>
+                                <div class="value badge" id="activity-eten"></div>
+                            </div>
+                            <div class="view-item">
+                                <label>Kosten per persoon:</label>
+                                <div class="value price" id="activity-kost"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="details-section">
+                            <h4>Deelname</h4>
+                            <div class="view-item">
+                                <label>Minimum deelnemers:</label>
+                                <div class="value" id="activity-min"></div>
+                            </div>
+                            <div class="view-item">
+                                <label>Maximum deelnemers:</label>
+                                <div class="value" id="activity-max"></div>
+                            </div>
+                            <div class="view-item">
+                                <label>Bereik:</label>
+                                <div class="value" id="activity-deelnemers"></div>
+                            </div>
+                        </div>
+                        
+                        <!-- Benodigdheden Section -->
+                        <div class="details-section">
+                            <h4>Benodigdheden</h4>
+                            <div id="benodigdheden-list" class="benodigdheden-list">
+                                <!-- Benodigdheden will be loaded here -->
+                                <div class="loading-spinner-small"></div>
+                                <p>Benodigdheden laden...</p>
+                            </div>
+                            <div id="no-benodigdheden" class="no-benodigdheden" style="display: none;">
+                                <i class="fas fa-clipboard-list"></i>
+                                <p>Geen benodigdheden toegevoegd</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Participants Section -->
+                    <div class="participants-section">
+                        <h3><i class="fas fa-users"></i> Ingeschreven deelnemers</h3>
+                        <div id="participants-loading" class="participants-loading">
+                            <div class="loading-spinner-small"></div>
+                            <p>Deelnemers laden...</p>
+                        </div>
+                        <div id="participants-content" style="display: none;">
+                            <div class="participants-summary">
+                                <span class="participant-count">
+                                    <strong id="total-participants">0</strong> van <strong id="max-participants">0</strong> plaatsen bezet
+                                </span>
+                            </div>
+                            <div id="participants-list" class="participants-list">
+                                <!-- Participants will be loaded here -->
+                            </div>
+                            <div id="no-participants" class="no-participants" style="display: none;">
+                                <i class="fas fa-user-slash"></i>
+                                <p>Nog geen deelnemers ingeschreven</p>
+                            </div>
+                        </div>
+                        <div id="participants-error" class="participants-error" style="display: none;">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <p>Kon deelnemers niet laden</p>
+                        </div>
+                    </div>
+                </div>
+                <div id="error-message" style="display: none;">
+                    <div class="error-container">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <h3>Fout bij laden</h3>
+                        <p id="error-text">Er is een fout opgetreden bij het laden van de activiteit.</p>
+                        <div class="error-actions">
+                            <button class="btn btn-primary" onclick="retryLoad()">Opnieuw proberen</button>
+                            <button class="btn btn-secondary" onclick="goBack()">Terug naar overzicht</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        </section>
+
+    <style>
+        .loading-container {
+            text-align: center;
+            padding: 60px 20px;
+        }
+        
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .error-container {
+            text-align: center;
+            padding: 40px 20px;
+            color: #721c24;
+        }
+        
+        .error-container i {
+            font-size: 3rem;
+            color: #dc3545;
+            margin-bottom: 20px;
+        }
+        
+        .error-container h3 {
+            margin-bottom: 10px;
+            color: #721c24;
+        }
+        
+        .error-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .activity-header {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #eee;
+        }
+        
+        .activity-image-container {
+            flex: 0 0 300px;
+            height: 200px;
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+        }
+        
+        .activity-image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            background: rgba(0, 0, 0, 0.05);
+        }
+        
+        .image-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #6c757d;
+        }
+        
+        .image-placeholder i {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+        
+        .activity-summary {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: start;
+        }
+        
+        .activity-summary h3 {
+            margin: 0 0 15px 0;
+            color: #333;
+            font-size: 1.8rem;
+        }
+        
+        .activity-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1rem;
+            color: #555;
+        }
+        
+        .meta-item i {
+            width: 24px;
+            color: var(--primary-color);
+        }
+        
+        .activity-details-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+        
+        .details-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+        }
+        
+        .details-section h4 {
+            margin: 0 0 20px 0;
+            color: #333;
+            font-size: 1.2rem;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .view-item {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 15px;
+        }
+        
+        .view-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .view-item label {
+            font-weight: bold;
+            color: #555;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+        
+        .view-item .value {
+            color: #333;
+            font-size: 1rem;
+        }
+        
+        .value.description {
+            line-height: 1.6;
+            max-height: 120px;
+            overflow-y: auto;
+        }
+        
+        .value.badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: bold;
+            width: fit-content;
+        }
+        
+        .badge {
+            background-color: rgba(128, 128, 128, 0.1);
+        }
+        
+        .btn-small {
+            padding: 5px 15px;
+            font-size: 0.875rem;
+        }
+        
+        @media (max-width: 1024px) {
+            .activity-details-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .activity-header {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            .activity-image-container {
+                flex: none;
+                width: 100%;
+            }
+            
+            .activity-meta {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+            
+            .error-actions {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+
+    <script>
+        const token = sessionStorage.getItem("JWT");
+        const API_URL = '/api/activiteit';
+        const BENODIGDHEID_URL = '/api/benodigdheid'; // Add benodigdheid API URL
+        let currentActivity = null;
+        let retryCount = 0;
+        const MAX_RETRIES = 3;
+
+        // Helper functions
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function formatTextWithNewlines(text) {
+            if (!text) return '';
+            return escapeHtml(text).replace(/\n/g, '<br>');
+        }
+
+        function getActivityIdFromUrl() {
+              const m = window.location.pathname.match(/\/beheerder\/activiteiten\/(\d+)/);
+              if (m) return parseInt(m[1]);
+              const urlParams = new URLSearchParams(window.location.search);
+              const id = urlParams.get('id');
+              return id ? parseInt(id) : null;
+        }
+
+        function goBack() {
+            if (document.referrer && document.referrer.includes('/beheerder/')) {
+                window.history.back();
+            } else {
+                window.location.href = '/beheerder/activiteiten';
+            }
+        }
+
+        function editActivity() {
+            if (currentActivity) {
+                window.location.href = `/beheerder/activiteiten/${currentActivity.id}/edit`;
+            }
+        }
+
+        function formatDuration(begin, end) {
+            const beginDate = new Date(begin);
+            const endDate = new Date(end);
+            
+            // Validate dates
+            if (isNaN(beginDate.getTime()) || isNaN(endDate.getTime())) {
+                return 'Onbekende duur';
+            }
+            
+            const diffMs = Math.abs(endDate - beginDate);
+            
+            // Convert to different units
+            const diffMinutes = Math.floor(diffMs / (1000 * 60));
+            const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+            const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+            
+            // Format based on duration
+            if (diffDays > 0) {
+                const remainingHours = diffHours % 24;
+                if (remainingHours > 0) {
+                    return `${diffDays} dag${diffDays > 1 ? 'en' : ''} ${remainingHours} uur`;
+                } else {
+                    return `${diffDays} dag${diffDays > 1 ? 'en' : ''}`;
+                }
+            } else if (diffHours > 0) {
+                const remainingMinutes = diffMinutes % 60;
+                if (remainingMinutes > 0) {
+                    return `${diffHours} uur ${remainingMinutes} minuten`;
+                } else {
+                    return `${diffHours} uur`;
+                }
+            } else if (diffMinutes > 0) {
+                return `${diffMinutes} minuten`;
+            } else {
+                return 'Minder dan een minuut';
+            }
+        }
+
+        function retryLoad() {
+            const activityId = getActivityIdFromUrl();
+            if (activityId && retryCount < MAX_RETRIES) {
+                retryCount++;
+                document.getElementById('error-message').style.display = 'none';
+                document.getElementById('loading').style.display = 'block';
+                loadActivity(activityId);
+            } else {
+                showError('Maximaal aantal pogingen bereikt. Probeer later opnieuw.');
+            }
+        }
+
+        function showError(message = 'Er is een fout opgetreden bij het laden van de activiteit.') {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('activity-content').style.display = 'none';
+            document.getElementById('error-text').textContent = message;
+            document.getElementById('error-message').style.display = 'block';
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const activityId = getActivityIdFromUrl();
+            if (activityId) {
+                loadActivity(activityId);
+            } else {
+                showError('Geen activiteit ID gevonden.');
+            }
+        });
+
+        async function loadActivity(id) {
+            if (!id) {
+                showError('Geen geldig activiteit ID gevonden.');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}?id=${id}&token=${token}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        showError('U bent niet geautoriseerd. Log opnieuw in.');
+                        setTimeout(() => window.location.href = '/login', 2000);
+                        return;
+                    } else if (response.status === 404) {
+                        showError('Activiteit niet gevonden.');
+                        return;
+                    } else {
+                        throw new Error(`HTTP ${response.status}`);
+                    }
+                }
+
+                const activity = await response.json();
+                
+                if (!activity || (Array.isArray(activity) && activity.length === 0)) {
+                    showError('Activiteit niet gevonden.');
+                    return;
+                }
+                
+                // Handle both single object and array responses
+                const activityData = Array.isArray(activity) ? 
+                    activity.find(act => act.id == id) : activity;
+                
+                if (activityData) {
+                    currentActivity = activityData;
+                    displayActivity(activityData);
+                } else {
+                    showError('Activiteit niet gevonden.');
+                }
+                
+            } catch (error) {
+                console.error('Error loading activity:', error);
+                const errorMessage = retryCount < MAX_RETRIES ? 
+                    'Fout bij laden van activiteit. Probeer het opnieuw.' : 
+                    'Kan activiteit niet laden na meerdere pogingen.';
+                showError(errorMessage);
+            }
+        }
+
+        async function loadParticipants(activityId) {
+            const participantsLoading = document.getElementById('participants-loading');
+            const participantsContent = document.getElementById('participants-content');
+            const participantsError = document.getElementById('participants-error');
+            const participantsList = document.getElementById('participants-list');
+            const noParticipants = document.getElementById('no-participants');
+
+            try {
+                // Fetch registrations for this activity
+                const response = await fetch(`/api/inschrijving?activiteit=${activityId}&includeDetails=true&token=${token}`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                const registrations = await response.json();
+                
+                // Hide loading, show content
+                participantsLoading.style.display = 'none';
+                participantsContent.style.display = 'block';
+                
+                // Update count
+                document.getElementById('total-participants').textContent = registrations.length;
+                
+                if (registrations.length === 0) {
+                    noParticipants.style.display = 'block';
+                    participantsList.style.display = 'none';
+                    return;
+                }
+                
+                noParticipants.style.display = 'none';
+                participantsList.style.display = 'grid';
+                
+                const participantCards = registrations.map(registration => {
+                    const participantName = registration.participantName || 'Onbekende deelnemer';
+                    const participantEmail = registration.participantEmail || 'Geen e-mail beschikbaar';
+                    const participantInitials = registration.participantInitials || '?';
+                    const participantType = registration.participantType === 'external' ? 'external' : 'internal';
+
+                    return {
+                        name: participantName,
+                        email: participantEmail,
+                        initials: participantInitials,
+                        type: participantType
+                    };
+                });
+
+                participantsList.innerHTML = participantCards.map(participant => `
+                    <div class="participant-item">
+                        <div class="participant-avatar">${escapeHtml(participant.initials)}</div>
+                        <div class="participant-info">
+                            <div class="participant-name">${escapeHtml(participant.name)}</div>
+                            <div class="participant-email">${escapeHtml(participant.email)}</div>
+                        </div>
+                        <span class="participant-type ${participant.type}">
+                            ${participant.type === 'internal' ? 'Intern' : 'Extern'}
+                        </span>
+                    </div>
+                `).join('');
+                
+            } catch (error) {
+                console.error('Error loading participants:', error);
+                participantsLoading.style.display = 'none';
+                participantsError.style.display = 'block';
+            }
+        }
+
+        function displayActivity(activity) {
+            try {
+                const beginDate = new Date(activity.begin);
+                const eindDate = new Date(activity.eind);
+                
+                // Validate dates
+                if (isNaN(beginDate.getTime()) || isNaN(eindDate.getTime())) {
+                    throw new Error('Invalid date format');
+                }
+                
+                // Update page title
+                const activityName = escapeHtml(activity.naam) || 'Onbekende activiteit';
+                document.getElementById('page-title').textContent = `Activiteit: ${activityName}`;
+                document.title = `Activadis - ${activityName}`;
+                
+                // Header section
+                document.getElementById('activity-naam-title').innerHTML = activityName;
+                document.getElementById('activity-locatie-meta').innerHTML = escapeHtml(activity.locatie) || 'Geen locatie';
+                document.getElementById('activity-kost-meta').innerHTML = `€${activity.kost || '0.00'}`;
+                document.getElementById('activity-deelnemers-meta').innerHTML = `${activity.min || 0} - ${activity.max || 0} personen`;
+                
+                // Image carousel
+                let afbeeldingen;
+                
+                // Sort images by sortOrder
+                const sortedImages = activity.afbeeldingen && activity.afbeeldingen[0] != null 
+                    ? [...activity.afbeeldingen].sort((a, b) => {
+                        const orderA = a.sortOrder !== null && a.sortOrder !== undefined ? a.sortOrder : 999;
+                        const orderB = b.sortOrder !== null && b.sortOrder !== undefined ? b.sortOrder : 999;
+                        return orderA - orderB;
+                    })
+                    : [];
+                
+                if (activity.afbeeldingen[0] == null) {
+                    afbeeldingen = '<img src="https://covadis.nl/wp-content/themes/id/resource/image/header/1.svg" alt="Afbeelding van activiteit" class="single-image placeholder">';
+                } else if (sortedImages.length == 1) {
+                    afbeeldingen = '<img src="' + sortedImages[0].afbeeldingUrl + '" alt="Afbeelding van activiteit" class="single-image">';
+                } else {
+                    // Create carousel for multiple images
+                    afbeeldingen = `
+                        <div class="carousel-container">
+                            <div class="carousel-wrapper" style="width: ${sortedImages.length * 100}%;">`;
+
+                    for (let i = 0; i < sortedImages.length; i++) {
+                        afbeeldingen += `
+                            <div class="carousel-slide" style="flex: 0 0 ${100 / sortedImages.length}%;">
+                                <img src="${sortedImages[i].afbeeldingUrl}" alt="Afbeelding ${i + 1} van activiteit" class="carousel-image">
+                            </div>`;
+                    }
+
+                    afbeeldingen += `
+                            </div>
+                            <button class="carousel-btn prev" onclick="moveCarousel(-1)">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <button class="carousel-btn next" onclick="moveCarousel(1)">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                            <div class="carousel-indicators">`;
+
+                    for (let i = 0; i < sortedImages.length; i++) {
+                        afbeeldingen += `
+                            <button class="indicator ${i === 0 ? 'active' : ''}" onclick="goToSlide(${i})"></button>`;
+                    }
+
+                    afbeeldingen += `
+                            </div>
+                        </div>`;
+                }
+
+                document.querySelector('#activityImage').innerHTML = afbeeldingen;
+                
+                // Details sections
+                document.getElementById('activity-naam').innerHTML = activityName;
+                document.getElementById('activity-locatie').innerHTML = escapeHtml(activity.locatie) || 'Niet opgegeven';
+                document.getElementById('activity-omschrijving').innerHTML = formatTextWithNewlines(activity.omschrijving) || 'Geen omschrijving beschikbaar';
+                
+                // Dates
+                document.getElementById('activity-begin').innerHTML = beginDate.toLocaleString('nl-NL', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                
+                document.getElementById('activity-eind').innerHTML = eindDate.toLocaleString('nl-NL', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                
+                const durationElement = document.getElementById('activity-duration');
+                durationElement.innerHTML = formatDuration(activity.begin, activity.eind);
+                durationElement.className = 'value duration';
+                
+                // Eten badge
+                const etenElement = document.getElementById('activity-eten');
+                if (activity.eten) {
+                    etenElement.innerHTML = 'Ja';
+                    etenElement.className = 'value badge yes';
+                } else {
+                    etenElement.innerHTML = 'Nee';
+                    etenElement.className = 'value badge no';
+                }
+                
+                // Cost
+                document.getElementById('activity-kost').innerHTML = `€${parseFloat(activity.kost || 0).toFixed(2)}`;
+                
+                // Participants
+                document.getElementById('activity-min').innerHTML = `${activity.min || 0} personen`;
+                document.getElementById('activity-max').innerHTML = `${activity.max || 0} personen`;
+                document.getElementById('activity-deelnemers').innerHTML = `${activity.min || 0} - ${activity.max || 0} personen`;
+                
+                // Update max participants in summary
+                document.getElementById('max-participants').textContent = activity.max || 0;
+                
+                // Show content and hide loading
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('activity-content').style.display = 'block';
+                
+                // Load participants
+                loadParticipants(activity.id);
+                loadBenodigdheden(activity.id); // Load benodigdheden after loading activity
+            } catch (error) {
+                console.error('Error displaying activity:', error);
+                showError('Fout bij het weergeven van de activiteit gegevens.');
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+        
+        // Load benodigdheden for activity
+        async function loadBenodigdheden(activityId) {
+            try {
+                const response = await fetch(`${BENODIGDHEID_URL}?activiteit=${activityId}`);
+                if (!response.ok) {
+                    throw new Error('Kon benodigdheden niet laden');
+                }
+                const benodigdheden = await response.json();
+                displayBenodigdheden(benodigdheden);
+            } catch (error) {
+                console.error('Error loading benodigdheden:', error);
+                // Don't show error to user, just show empty state
+                document.getElementById('benodigdheden-list').innerHTML = '';
+                document.getElementById('no-benodigdheden').style.display = 'block';
+            }
+        }
+        
+        function displayBenodigdheden(benodigdheden) {
+            const container = document.getElementById('benodigdheden-list');
+            const noBenodigdheden = document.getElementById('no-benodigdheden');
+            
+            container.innerHTML = ''; // Clear loading state
+            
+            if (benodigdheden && benodigdheden.length > 0) {
+                benodigdheden.forEach(item => {
+                    const benodigdheidElement = document.createElement('div');
+                    benodigdheidElement.className = 'benodigdheid-item';
+                    benodigdheidElement.innerHTML = `
+                        <span class="benodigdheid-naam">${escapeHtml(item.naam)}</span>
+                        <span class="benodigdheid-aantal">${item.aantal}x</span>
+                    `;
+                    container.appendChild(benodigdheidElement);
+                });
+                noBenodigdheden.style.display = 'none';
+            } else {
+                noBenodigdheden.style.display = 'block';
+            }
+        }
+
+        // Carousel functionality
+        let currentSlide = 0;
+        let totalSlides = 0;
+
+        function moveCarousel(direction) {
+            const carousel = document.querySelector('.carousel-wrapper');
+            if (!carousel) return;
+
+            totalSlides = document.querySelectorAll('.carousel-slide').length;
+            currentSlide += direction;
+
+            // Loop around if needed
+            if (currentSlide >= totalSlides) {
+                currentSlide = 0;
+            } else if (currentSlide < 0) {
+                currentSlide = totalSlides - 1;
+            }
+
+            // Move the carousel
+            const translateX = -(currentSlide * (100 / totalSlides));
+            carousel.style.transform = `translateX(${translateX}%)`;
+
+            // Update indicators
+            updateIndicators();
+        }
+
+        function goToSlide(slideIndex) {
+            currentSlide = slideIndex;
+            const carousel = document.querySelector('.carousel-wrapper');
+            if (!carousel) return;
+
+            totalSlides = document.querySelectorAll('.carousel-slide').length;
+            const translateX = -(currentSlide * (100 / totalSlides));
+            carousel.style.transform = `translateX(${translateX}%)`;
+
+            updateIndicators();
+        }
+
+        function updateIndicators() {
+            const indicators = document.querySelectorAll('.indicator');
+            indicators.forEach((indicator, index) => {
+                if (index === currentSlide) {
+                    indicator.classList.add('active');
+                    indicator.style.background = 'white';
+                } else {
+                    indicator.classList.remove('active');
+                    indicator.style.background = 'transparent';
+                }
+            });
+        }
+    </script>
+
+    <style>
+        :root {
+            --image-width: 400px;
+        }
+        
+        /* Benodigdheden styles */
+        .benodigdheden-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        
+        .benodigdheid-item {
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            padding: 8px 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+        
+        .benodigdheid-naam {
+            font-weight: 500;
+            color: #333;
+        }
+        
+        .benodigdheid-aantal {
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 12px;
+            padding: 2px 8px;
+            font-size: 0.85em;
+            font-weight: 500;
+        }
+        
+        .no-benodigdheden {
+            text-align: center;
+            padding: 15px 0;
+            color: #6c757d;
+            font-size: 0.9em;
+        }
+        
+        .no-benodigdheden i {
+            font-size: 1.5em;
+            margin-bottom: 8px;
+            color: #adb5bd;
+        }
+
+        /* Activity Image Styles */
+        #activityImage {
+            color: black;
+            margin-bottom: 20px;
+        }
+
+        /* Single Image Styles */
+        .single-image {
+            width: var(--image-width);
+            /* height: 300px; */
+            aspect-ratio: 16/9;
+            border-radius: 8px;
+            object-fit: contain;
+            background: rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            display: block;
+        }
+        
+        /* Carousel Container */
+        .carousel-container {
+            position: relative;
+            max-width: var(--image-width);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            border-radius: 8px;
+        }
+
+        /* Carousel Wrapper */
+        .carousel-wrapper {
+            display: flex;
+            transition: transform 0.3s ease;
+        }
+
+        /* Individual Carousel Slide */
+        .carousel-slide {
+            position: relative;
+        }
+
+        /* Carousel Images */
+        .carousel-image {
+            width: var(--image-width);
+            /* height: 300px; */
+            aspect-ratio: 16/9;
+            object-fit: contain;
+            background: rgba(0, 0, 0, 0.05);
+            display: block;
+        }
+
+        /* Carousel Navigation Buttons */
+        .carousel-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            z-index: 10;
+            transition: background 0.3s ease;
+        }
+
+        .carousel-btn:hover {
+            background: rgba(0, 0, 0, 0.7);
+        }
+
+        .carousel-btn.prev {
+            left: 10px;
+        }
+
+        .carousel-btn.next {
+            right: 10px;
+        }
+
+        /* Carousel Indicators */
+        .carousel-indicators {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+            z-index: 10;
+        }
+
+        .indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 2px solid white;
+            background: transparent;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .indicator.active {
+            background: white;
+        }
+
+        .indicator:hover {
+            background: rgba(255, 255, 255, 0.7);
+        }
+
+        /* Participants Section Styles */
+        .participants-section {
+            margin-top: 30px;
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+        }
+
+        .participants-section h3 {
+            margin: 0 0 20px 0;
+            color: #333;
+            font-size: 1.3rem;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #dee2e6;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .participants-loading {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .loading-spinner-small {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--primary-color);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        .participants-summary {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            border: 1px solid #dee2e6;
+        }
+
+        .participant-count {
+            color: #555;
+            font-size: 1rem;
+        }
+
+        .participants-list {
+            display: grid;
+            gap: 10px;
+        }
+
+        .participant-item {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #dee2e6;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: box-shadow 0.2s;
+        }
+
+        .participant-item:hover {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .participant-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+
+        .participant-info {
+            flex: 1;
+        }
+
+        .participant-name {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 3px;
+        }
+
+        .participant-email {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .participant-type {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+
+        .participant-type.internal {
+            background-color: rgba(40, 167, 69, 0.1);
+            color: #28a745;
+        }
+
+        .participant-type.external {
+            background-color: rgba(23, 162, 184, 0.1);
+            color: #17a2b8;
+        }
+
+        .no-participants {
+            text-align: center;
+            padding: 40px 20px;
+            color: #6c757d;
+        }
+
+        .no-participants i {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+
+        .participants-error {
+            text-align: center;
+            padding: 30px;
+            color: #dc3545;
+        }
+
+        .participants-error i {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+    </style>
+</body>
+</html>

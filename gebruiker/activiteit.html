@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="nl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Activiteit Details - Activadis</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/mainsite.css">
+    <link rel="stylesheet" href="../css/header.css">
+    <link rel="stylesheet" href="../css/nogmeerstyling.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        window.headerConfig = {
+            title: { subtitle: "Activiteit" },
+            navLeft: [
+                { href: "/", icon: "fas fa-home", label: "Home" }
+            ]
+        };
+    </script>
+    <script src="/util/header.js"></script>
+    <script src="../login.js"></script>
+    <script src="../activiteit.js" type="module" defer></script>
+</head>
+
+<body>
+    <!-- Header with Navigation -->
+    <header></header>
+
+    <!-- Loading State -->
+    <div id="loadingState" class="loading-container">
+        <div class="loading-spinner"></div>
+        <p>Activiteit laden...</p>
+    </div>
+
+    <!-- Error State -->
+    <div id="errorState" class="error-container" style="display: none;">
+        <div class="error-content">
+            <i class="fas fa-exclamation-triangle"></i>
+            <h2>Oeps! Er is iets misgegaan</h2>
+            <p id="errorMessage">Activiteit kon niet geladen worden.</p>
+            <button onclick="location.reload()" class="btn btn-primary">
+                <i class="fas fa-redo"></i> Opnieuw proberen
+            </button>
+            <a href="/" class="btn btn-secondary">
+                <i class="fas fa-home"></i> Naar homepagina
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main id="mainContent" style="display: none;">
+        <div class="activity-hero">
+            <div class="container">
+                <div class="hero-content">
+                    <div class="activity-header">
+                        <h1 id="activityTitle" class="activity-title"></h1>
+                        <div class="activity-meta">
+                            <span id="activityLocation" class="location-badge">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span></span>
+                            </span>
+                            <span id="activityPrice" class="price-badge">
+                                <i class="fas fa-euro-sign"></i>
+                                <span></span>
+                            </span>
+                            <span id="activityParticipants" class="participants-badge">
+                                <i class="fas fa-users"></i>
+                                <span></span>
+                            </span>
+                            <span id="activityFood" class="food-badge">
+                                <i class="fas fa-utensils"></i>
+                                <span></span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="activity-content">
+                <!-- Activity Details Card -->
+                <div class="activity-details-card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-info-circle"></i> Activiteit</h2>
+                    </div>
+                    <div id="activityImage">
+
+                    </div>
+                    <div class="card-content">
+                        <div class="detail-grid">
+                            <div class="detail-item">
+                                <div class="detail-icon">
+                                    <i class="fas fa-calendar-alt"></i>
+                                </div>
+                                <div class="detail-info">
+                                    <label>Startdatum & tijd</label>
+                                    <span id="startDateTime"></span>
+                                </div>
+                            </div>
+
+                            <div class="detail-item">
+                                <div class="detail-icon">
+                                    <i class="fas fa-calendar-check"></i>
+                                </div>
+                                <div class="detail-info">
+                                    <label>Einddatum & tijd</label>
+                                    <span id="endDateTime"></span>
+                                </div>
+                            </div>
+
+                            <div class="detail-item">
+                                <div class="detail-icon">
+                                    <i class="fas fa-users"></i>
+                                </div>
+                                <div class="detail-info">
+                                    <label>Deelnemers</label>
+                                    <span id="participants"></span>
+                                </div>
+                            </div>
+
+                            <div class="detail-item">
+                                <div class="detail-icon">
+                                    <i class="fas fa-utensils"></i>
+                                </div>
+                                <div class="detail-info">
+                                    <label>Eten inbegrepen</label>
+                                    <span id="foodIncluded"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="description-section">
+                            <h3>Omschrijving</h3>
+                            <p id="activityDescription"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Registration Card -->
+                <div class="registration-card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-user-plus"></i> Inschrijving</h2>
+                    </div>
+                    <div class="card-content">
+                        <div class="registration-info">
+                            <div class="availability-status" id="availabilityStatus">
+                                <i class="fas fa-check-circle"></i>
+                                <span>Plaatsen beschikbaar</span>
+                            </div>
+                            <div class="registration-details">
+                                <p><strong>Kosten:</strong> <span id="registrationPrice"></span></p>
+                                <p><strong>Aantal inschrijvingen:</strong> <span id="registrationCount"></span></p>
+                            </div>
+                        </div>
+
+                        <div class="registration-actions">
+                            <button id="registerBtn" class="btn btn-primary btn-large">
+                                <i class="fas fa-user-plus"></i>
+                                Inschrijven voor activiteit
+                            </button>
+                            <button id="unregisterBtn" class="btn btn-primary btn-large">
+                                <i class="fas fa-user-minus"></i>
+                                Uitschrijven voor activiteit
+                            </button>
+                        </div>
+
+                        <!-- <div class="registration-note">
+                            <p><i class="fas fa-info-circle"></i> Je moet ingelogd zijn om je in te schrijven voor een
+                                activiteit.</p>
+                        </div> -->
+                    </div>
+                </div>
+
+                <!-- Participants Card (conditionally shown) -->
+                <div class="participants-card" id="participantsCard" style="display: none;">
+                    <div class="card-header">
+                        <h2><i class="fas fa-users"></i> Deelnemers</h2>
+                    </div>
+                    <div class="card-content">
+                        <div id="participants-loading" class="participants-loading">
+                            <div class="loading-spinner"></div>
+                            <p>Deelnemers laden...</p>
+                        </div>
+                        <div id="participants-content" style="display: none;">
+                            <div class="participants-summary">
+                                <p><strong id="total-participants">0</strong> deelnemers ingeschreven</p>
+                            </div>
+                            <div id="participants-list" class="participants-list">
+                                <!-- Participants will be loaded here -->
+                            </div>
+                        </div>
+                        <div id="no-participants" class="no-participants" style="display: none;">
+                            <i class="fas fa-user-slash"></i>
+                            <p>Nog geen deelnemers ingeschreven</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="benodigdheden-card" id="benodigdhedenCard">
+                    <div class="card-header">
+                        <h2><i class="fas fa-clipboard-list"></i> Benodigdheden</h2>
+                    </div>
+                    <div class="card-content">
+                        <div id="benodigdheden-loading" class="benodigdheden-loading">
+                            <div class="loading-spinner"></div>
+                            <p>Benodigdheden laden...</p>
+                        </div>
+                        <div id="benodigdheden-content" style="display: none;">
+                            <div id="benodigdheden-list" class="benodigdheden-list">
+                            </div>
+                            <div id="no-benodigdheden" class="no-benodigdheden" style="display: none;">
+                                <i class="fas fa-clipboard-list"></i>
+                                <p>Geen benodigdheden toegevoegd</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Carousel functionality
+        let currentSlide = 0;
+        let totalSlides = 0;
+
+        window.moveCarousel = function (direction) {
+            const carousel = document.querySelector('.carousel-wrapper');
+            if (!carousel) return;
+
+            totalSlides = document.querySelectorAll('.carousel-slide').length;
+            currentSlide += direction;
+
+            // Loop around if needed
+            if (currentSlide >= totalSlides) {
+                currentSlide = 0;
+            } else if (currentSlide < 0) {
+                currentSlide = totalSlides - 1;
+            }
+
+            // Move the carousel
+            const translateX = -(currentSlide * 100);
+            carousel.style.transform = `translateX(${translateX}%)`;
+
+            // Update indicators
+            updateIndicators();
+        }
+
+        window.goToSlide = function (slideIndex) {
+            currentSlide = slideIndex;
+            const carousel = document.querySelector('.carousel-wrapper');
+            if (!carousel) return;
+
+            totalSlides = document.querySelectorAll('.carousel-slide').length;
+            const translateX = -(currentSlide * 100);
+            carousel.style.transform = `translateX(${translateX}%)`;
+
+            updateIndicators();
+        }
+
+        function updateIndicators() {
+            const indicators = document.querySelectorAll('.indicator');
+            indicators.forEach((indicator, index) => {
+                if (index === currentSlide) {
+                    indicator.classList.add('active');
+                } else {
+                    indicator.classList.remove('active');
+                }
+            });
+        }
+    </script>
+
+    <style>
+        /* Activity Image Styles */
+        #activityImage {
+            margin-bottom: 20px;
+        }
+
+        /* Single Image Styles */
+        .single-image {
+            width: 100%;
+            max-width: 600px;
+            aspect-ratio: 16/9;
+            border-radius: 8px;
+            object-fit: cover;
+            background: rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            display: block;
+            margin: 0 auto;
+        }
+
+        .single-image.placeholder {
+            object-fit: contain;
+            padding: 20px;
+        }
+
+        /* Carousel Container */
+        .carousel-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            border-radius: 8px;
+            /* background: #000; */
+        }
+
+        /* Carousel Wrapper */
+        .carousel-wrapper {
+            display: flex;
+            transition: transform 0.4s ease-in-out;
+        }
+
+        /* Individual Carousel Slide */
+        .carousel-slide {
+            min-width: 100%;
+            position: relative;
+        }
+
+        /* Carousel Images */
+        .carousel-image {
+            width: 100%;
+            aspect-ratio: 16/9;
+            object-fit: contain;
+            background-color: rgba(0, 0, 0, 0.05);
+            display: block;
+        }
+
+        /* Carousel Navigation Buttons */
+        .carousel-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            border: none;
+            padding: 12px 16px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 20px;
+            z-index: 10;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+        }
+
+        .carousel-btn:hover {
+            background: rgba(0, 0, 0, 0.8);
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .carousel-btn:active {
+            transform: translateY(-50%) scale(0.95);
+        }
+
+        .carousel-btn.prev {
+            left: 15px;
+        }
+
+        .carousel-btn.next {
+            right: 15px;
+        }
+
+        /* Carousel Indicators */
+        .carousel-indicators {
+            position: absolute;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            z-index: 10;
+        }
+
+        .indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 2px solid white;
+            background: rgba(255, 255, 255, 0.4);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            padding: 0;
+        }
+
+        .indicator.active {
+            background: white;
+            transform: scale(1.2);
+        }
+
+        .indicator:hover {
+            background: rgba(255, 255, 255, 0.7);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .carousel-btn {
+                padding: 8px 12px;
+                font-size: 16px;
+                width: 36px;
+                height: 36px;
+            }
+
+            .carousel-btn.prev {
+                left: 10px;
+            }
+
+            .carousel-btn.next {
+                right: 10px;
+            }
+
+            .carousel-indicators {
+                bottom: 10px;
+                gap: 8px;
+            }
+
+            .indicator {
+                width: 10px;
+                height: 10px;
+            }
+        }
+    </style>
+</body>
+
+</html>

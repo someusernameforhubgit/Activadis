@@ -1,0 +1,434 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/header.css">
+    <script>
+        window.headerConfig = {
+            title: { subtitle: "Gebruikers Beheer" },
+            navLeft: [
+                { href: "/", icon: "fas fa-home", label: "Home" },
+                { href: "/beheerder", label: "Beheerder", active: true }
+            ]
+        };
+    </script>
+    <script src="/util/header.js"></script>
+    <script src="/util/avatar.js"></script>
+    <script>
+        window.headerConfig = {
+            title: { subtitle: "Gebruikers Beheer" },
+            navLeft: [
+                { href: "/", icon: "fas fa-home", label: "Home" },
+                { href: "/beheerder", label: "Beheerder", active: true }
+            ]
+        };
+    </script>
+    <script src="/util/header.js"></script>
+    <script src="/util/avatar.js"></script>
+    <script src="/beheerder/verifyAdmin.js"></script>
+    <title>Activadis - Gebruikers Beheer</title>
+</head>
+<body>
+<header></header>
+    <section id="mainContainer">
+        <aside id="sidebar">
+            <h1>Navigatie</h1>
+            <ul>
+                <li><a href="/beheerder/">Dashboard</a></li>
+                <li><a href="/beheerder/gebruikers" class="active">Gebruikers</a></li>
+                <li><a href="/beheerder/activiteiten">Activiteiten</a></li>
+                <li><a href="/beheerder/rollen">Rollen</a></li>
+            </ul>
+        </aside>     
+        <main id="mainContent">
+            <div class="heading split-row">
+                <h2>Gebruikers Beheer</h2>
+                <button class="btn btn-primary" onclick="window.location.href='/beheerder/gebruikers/new'">
+                    <i class="fas fa-plus"></i> Nieuwe Gebruiker Toevoegen
+                </button>
+            </div>
+
+            <div id="users-list" class="content-section">
+                <div class="heading split-row" style="align-items: center; margin-bottom: 20px;">
+                    <h3 style="margin: 0;">Alle Gebruikers</h3>
+                    <div class="search-container">
+                        <i class="fas fa-search"></i>
+                        <input 
+                            type="text" 
+                            id="search-input" 
+                            placeholder="Zoek op naam, email..." 
+                            oninput="searchUsers()"
+                        />
+                        <span id="search-results-count"></span>
+                    </div>
+                </div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 50px;"></th>
+                            <th class="sortable" onclick="sortTable('gebruiker')">
+                                Gebruiker <i class="fas fa-sort sort-icon" id="sort-gebruiker"></i>
+                            </th>
+                            <th class="sortable" onclick="sortTable('rol')">
+                                Rol <i class="fas fa-sort sort-icon" id="sort-rol"></i>
+                            </th>
+                            <th class="sortable" style="text-align: center;" onclick="sortTable('admin')">
+                                Beheerder <i class="fas fa-sort sort-icon" id="sort-admin"></i>
+                            </th>
+                            <th class="justify-right">Acties</th>
+                        </tr>
+                    </thead>
+                    <tbody id="users-table-body">
+                    </tbody>
+                </table>
+            </div>
+            
+            <style>
+                .sortable {
+                    cursor: pointer;
+                    user-select: none;
+                    transition: background-color 0.2s;
+                    position: relative;
+                }
+                
+                .sortable:hover {
+                    background-color: rgba(0, 0, 0, 0.05);
+                }
+                
+                .sort-icon {
+                    margin-left: 5px;
+                    opacity: 0.3;
+                    font-size: 0.9em;
+                    transition: all 0.2s;
+                }
+                
+                .sort-icon.active {
+                    opacity: 1;
+                    color: #007bff;
+                    font-weight: bold;
+                    transform: scale(1.1);
+                }
+                
+                .search-container {
+                    position: relative;
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                }
+                
+                .search-container i {
+                    position: absolute;
+                    left: 12px;
+                    color: #666;
+                    pointer-events: none;
+                }
+                
+                #search-input {
+                    padding: 8px 12px 8px 35px;
+                    border: 1px solid #ddd;
+                    border-radius: 4px;
+                    font-size: 14px;
+                    width: 300px;
+                    transition: all 0.2s;
+                }
+                
+                #search-input:focus {
+                    outline: none;
+                    border-color: #faa21b;
+                    box-shadow: 0 0 0 3px rgba(250, 162, 27, 0.1);
+                }
+                
+                #search-results-count {
+                    font-size: 14px;
+                    color: #666;
+                    white-space: nowrap;
+                }
+            </style>
+        </main>
+        <div id="sideContent">
+            <div id="user-stats">
+                <h3>Statistieken</h3>
+                <div class="item split-row">
+                    <div class="item split-row">
+                        <div class="row">
+                            <span style="width: 5px;"></span><p>Totaal</p>
+                        </div>
+                        <p><span id="total-users">-</span></p>
+                    </div>
+                </div>
+                <div class="item split-row">
+                    <div class="row">
+                        <span style="width: 5px;"></span><p>Beheerders</p>
+                    </div>
+                    <p><span id="admin-count">-</span></p>
+                </div>
+                <div class="item split-row">
+                    <div class="row">
+                        <span style="width: 5px;"></span><p>Reguliere gebruikers</p>
+                    </div>
+                    <p><span id="regular-count">-</span></p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script type="module">
+        import {
+            Notification,
+            NotifType
+        } from "../../util/notif.js"
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const edit = urlParams.get('edit');
+        const success = urlParams.get('success');
+
+        if (success) {
+            const message = edit === 'true'
+                ? "Gebruiker succesvol bijgewerkt."
+                : "Gebruiker succesvol toegevoegd.";
+
+            const notification = new Notification(message, NotifType.SUCCESS);
+            notification.show();
+
+            // Remove query parameters without page refresh
+            if (window.history.replaceState) {
+                const cleanUrl = window.location.pathname;
+                window.history.replaceState({}, document.title, cleanUrl);
+            }
+        }
+
+        const token = sessionStorage.getItem("JWT");
+        const API_URL = '/api/gebruiker';
+        
+        let allUsers = [];
+        let filteredUsers = [];
+        let currentSort = { column: null, ascending: true };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadUsers();
+        });
+
+        async function loadUsers() {
+            try {
+                const response = await fetch(API_URL + '?token=' + token);
+                allUsers = await response.json();
+                filteredUsers = allUsers;
+
+                await displayUsers(filteredUsers);
+                updateStats(allUsers);
+                updateSearchCount();
+            } catch (error) {
+                console.error('Error loading users:', error);
+            }
+        }
+        
+        window.searchUsers = async function() {
+            const searchTerm = document.getElementById('search-input').value.toLowerCase().trim();
+            
+            if (searchTerm === '') {
+                filteredUsers = allUsers;
+            } else {
+                filteredUsers = allUsers.filter(user => {
+                    const displayName = getUserDisplayName(user).toLowerCase();
+                    const email = (user.email || '').toLowerCase();
+                    const voornaam = (user.voornaam || '').toLowerCase();
+                    const achternaam = (user.achternaam || '').toLowerCase();
+                    
+                    return displayName.includes(searchTerm) || 
+                           email.includes(searchTerm) ||
+                           voornaam.includes(searchTerm) ||
+                           achternaam.includes(searchTerm);
+                });
+            }
+            
+            // Reset sort when searching
+            currentSort.column = null;
+            currentSort.ascending = true;
+            document.querySelectorAll('.sort-icon').forEach(icon => {
+                icon.className = 'fas fa-sort sort-icon';
+            });
+            
+            await displayUsers(filteredUsers);
+            updateSearchCount();
+        }
+        
+        function updateSearchCount() {
+            const countElement = document.getElementById('search-results-count');
+            const searchTerm = document.getElementById('search-input').value.trim();
+            
+            if (searchTerm !== '') {
+                countElement.textContent = `${filteredUsers.length} van ${allUsers.length} gebruikers`;
+            } else {
+                countElement.textContent = '';
+            }
+        }
+        
+        window.sortTable = async function(column) {
+            console.log('Sorting by:', column);
+            
+            // Three-state toggle: normal -> ascending -> descending -> normal
+            if (currentSort.column === column) {
+                if (currentSort.ascending) {
+                    currentSort.ascending = false; // Go to descending
+                } else {
+                    // Reset to normal (no sort)
+                    currentSort.column = null;
+                    currentSort.ascending = true;
+                    
+                    // Reset all icons
+                    document.querySelectorAll('.sort-icon').forEach(icon => {
+                        icon.className = 'fas fa-sort sort-icon';
+                    });
+                    
+                    // Display original order (but keep search filter)
+                    displayUsers(filteredUsers);
+                    console.log('Reset to original order');
+                    return;
+                }
+            } else {
+                currentSort.column = column;
+                currentSort.ascending = true;
+            }
+            
+            console.log('Sort direction:', currentSort.ascending ? 'ascending' : 'descending');
+            
+            // Reset all icons
+            document.querySelectorAll('.sort-icon').forEach(icon => {
+                icon.className = 'fas fa-sort sort-icon';
+            });
+
+            let rollen = await fetch(`/api/role?token=${token}`, {
+                method: 'GET'
+            });
+            rollen = await rollen.json();
+            rollen = rollen.reduce((acc, role) => {
+                acc[role.id] = role.name;
+                return acc;
+            }, {});
+            
+            // Update active icon
+            const activeIcon = document.getElementById(`sort-${column}`);
+            if (activeIcon) {
+                if (currentSort.ascending) {
+                    activeIcon.className = 'fas fa-sort-up sort-icon active';
+                } else {
+                    activeIcon.className = 'fas fa-sort-down sort-icon active';
+                }
+                console.log('Updated icon for', column, 'to', activeIcon.className);
+            } else {
+                console.error('Icon not found for', column);
+            }
+            
+            // Sort the filtered users (not all users)
+            const sorted = [...filteredUsers].sort((a, b) => {
+                let valueA, valueB;
+                
+                switch(column) {
+                    case 'gebruiker':
+                        valueA = getUserDisplayName(a).toLowerCase();
+                        valueB = getUserDisplayName(b).toLowerCase();
+                        break;
+                    case 'rol':
+                        valueA = rollen[a.role].toLowerCase();
+                        valueB = rollen[b.role].toLowerCase();
+                        break;
+                    case 'admin':
+                        valueA = (a.isAdmin === 1 || a.isAdmin === true) ? 1 : 0;
+                        valueB = (b.isAdmin === 1 || b.isAdmin === true) ? 1 : 0;
+                        break;
+                }
+                
+                if (valueA < valueB) return currentSort.ascending ? -1 : 1;
+                if (valueA > valueB) return currentSort.ascending ? 1 : -1;
+                return 0;
+            });
+            
+            displayUsers(sorted);
+        }
+
+        async function displayUsers(users) {
+            let rollen = await fetch(`/api/role?token=${token}`, {
+                method: 'GET'
+            });
+            rollen = await rollen.json();
+            rollen = rollen.reduce((acc, role) => {
+                acc[role.id] = role.name;
+                return acc;
+            }, {});
+
+            const tbody = document.getElementById('users-table-body');
+            tbody.innerHTML = '';
+
+            users.forEach(user => {
+                const row = document.createElement('tr');
+                row.style.cursor = 'pointer';
+                row.onclick = function() {
+                    window.location.href = `/beheerder/gebruikers/${user.id}`;
+                };
+                
+                const avatarHTML = createAvatarHTML(user, 'table-avatar');
+                const displayName = getUserDisplayName(user);
+                const isDisplayingName = displayName !== user.email;
+                
+                row.innerHTML = `
+                    <td style="padding-right: 0;">${avatarHTML}</td>
+                    <td>
+                        <div style="display: flex; flex-direction: column;">
+                            <span style="font-weight: 500;">${displayName}</span>
+                            ${isDisplayingName ? `<small style="color: #666; font-size: 0.85rem;">${user.email}</small>` : ''}
+                        </div>
+                    </td>
+                    <td>${rollen[user.role]}</td>
+                    <td style="text-align: center;">${(user.isAdmin === 1 || user.isAdmin === true) ? '<i class="fas fa-check" style="color: green;"></i>' : '<i class="fas fa-times" style="color: red;"></i>'}</td>
+                    <td onclick="event.stopPropagation()">
+                        <div class="justify-right" style="display: flex; gap: 5px; flex-wrap: wrap;">
+                            <button class="btn btn-primary btn-small" onclick="window.location.href='/beheerder/gebruikers/${user.id}/edit'">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-danger btn-small" onclick="deleteUser(${user.id})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function updateStats(users) {
+            const totalUsers = users.length;
+            const adminCount = users.filter(user => user.isAdmin === 1 || user.isAdmin === true).length;
+            const regularCount = totalUsers - adminCount;
+
+            document.getElementById('total-users').textContent = totalUsers;
+            document.getElementById('admin-count').textContent = adminCount;
+            document.getElementById('regular-count').textContent = regularCount;
+        }
+
+        window.deleteUser = async (id) => {
+            if (confirm('Weet je zeker dat je deze gebruiker wilt verwijderen?')) {
+                try {
+                    const response = await fetch(`${API_URL}?id=${id}&token=${token}`, {
+                        method: 'DELETE'
+                    });
+
+                    if (response.ok) {
+                        const notification = new Notification("Gebruiker verwijderd.", NotifType.SUCCESS);
+                        notification.show();
+                        await loadUsers();
+                    } else {
+                        const notification = new Notification("Error deleting user.", NotifType.ERROR);
+                        notification.show();
+                    }
+                } catch (error) {
+                    const notification = new Notification("Error deleting user.", NotifType.ERROR);
+                    notification.show();
+                }
+            }
+        }
+    </script>
+</body>
+</html>

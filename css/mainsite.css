@@ -1,0 +1,211 @@
+/* Events Container Styling for Homepage */
+.events {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 20px;
+    padding: 10px 0 20px 0;
+}
+
+.event {
+    background: var(--background-light-color);
+    color: var(--font-secondary-color);
+    border-radius: 15px;
+    /* padding: 25px; */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    border: 1px solid #ccc;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 250px;
+}
+
+.event:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    border-color: var(--primary-color);
+}
+
+.event-info {
+    flex-grow: 1;
+}
+
+.event-title {
+    color: var(--primary-color);
+    font-size: 1.4em;
+    font-weight: 600;
+    margin-bottom: 12px;
+}
+
+.event .location {
+    color: var(--font-secondary-color);
+    font-size: 1.1em;
+    font-weight: 500;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.event .location::before {
+    content: '\f3c5';
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    color: var(--primary-color);
+}
+
+.event .date {
+    color: #666;
+    font-size: 0.9em;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* .event .date::before {
+    content: '\f133';
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    color: var(--primary-color);
+} */
+
+.event .description {
+    color: #777;
+    line-height: 1.5;
+    margin-bottom: 0;
+    font-size: 0.95em;
+}
+
+.event .icons {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-top: auto;
+    /* padding-top: 15px; */
+    padding: 15px 1.25rem 1.25rem 1.25rem;
+    border-top: 1px solid #e9ecef;
+}
+
+.event .icons a,
+.event .icons button {
+    padding: 10px 18px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 14px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: inherit;
+}
+
+.event .icons a {
+    background-color: var(--secondary-color);
+    color: white;
+}
+
+.event .icons a:hover {
+    background-color: #1a2a4a;
+    transform: translateY(-2px);
+}
+
+.event .icons button {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.event .icons button:hover {
+    background-color: #e6921a;
+    transform: translateY(-2px);
+}
+
+/* Main content styling for homepage */
+main {
+    flex: 1;
+    padding: var(--main-padding);
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+/* Responsive adjustments for homepage */
+@media (max-width: 768px) {
+    .events {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    header nav > div {
+        gap: 10px;
+    }
+    
+    header nav a {
+        padding: 6px 12px;
+        font-size: 14px;
+    }
+    
+    .event {
+        padding: 20px;
+        min-height: auto;
+    }
+    
+    .event-title {
+        font-size: 1.2em;
+    }
+}
+
+.logout {
+    display: none;
+}
+
+a {
+    cursor: pointer;
+}
+
+.registration-actions {
+    button {
+        &:disabled {
+            cursor: not-allowed;
+            opacity: 0.6;
+            pointer-events: none;
+        }
+    }
+}
+
+.filters {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    gap: 15px;
+    border-radius: 0 0 25px 25px;
+    padding: 15px 0;
+
+    button {
+        background: rgba(255, 255, 255, 0.25);
+        backdrop-filter: blur(8px);
+        padding: 10px 15px;
+        border-radius: 25px;
+        color: white;
+        text-decoration: none;
+        cursor: pointer;
+        border: none;
+        transition: all 0.3s ease-in-out;
+
+        &:hover {
+            color: var(--primary-color);
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        i {
+            margin-right: 8px;
+        }
+
+        &.selected {
+            color: var(--primary-color);
+            background: rgba(255, 255, 255, 0.3);
+            cursor: default;
+        }
+    }
+}

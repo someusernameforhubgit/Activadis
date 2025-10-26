@@ -1,13 +1,46 @@
 <!doctype html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport"
-          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+        content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Activadis</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/header.css">
+    <link rel="stylesheet" href="../css/mainsite.css">
+    <link rel="stylesheet" href="../css/activity.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        window.headerConfig = {
+            navLeft: [
+                { href: "/", icon: "fas fa-home", label: "Home", active: true }
+            ]
+        };
+    </script>
+    <script src="/util/header.js"></script>
+    <script src="login.js"></script>
+    <script src="index.js"></script>
+    <script src="test.js" type="module"></script>
 </head>
+
 <body>
-    <h1>Activadis</h1>
+    <header></header>
+    <main class="activity-sections">
+        <div class="heading">
+            <h1 id="sectionTitle">Activiteiten</h1>
+            <p id="sectionDescription">Bekijk hier alle aankomende activiteiten waar je je voor kunt inschrijven.</p>
+        </div>
+        <div class="filters">
+            <button onClick="initializePage()" class="selected"><i class="fas fa-calendar-alt"></i>Aankomende Activiteiten</button>
+            <button onClick="initializePage('beschikbaar')"><i class="fas fa-search-plus"></i>Beschikbare Activiteiten</button>
+            <button onClick="initializePage('ingeschreven')"><i class="fas fa-user-check"></i>Ingeschreven Activiteiten</button>
+        </div>
+        <div id="availableActivities" class="events">
+
+        </div>
+    </main>
 </body>
+
 </html>

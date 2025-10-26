@@ -2,12 +2,776 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/header.css">
+    <style>
+        .dashboard-grid {
+            display: grid;
+            gap: 24px;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            margin-top: 24px;
+        }
+
+        .dashboard-grid .content-section {
+            margin: 0;
+        }
+
+        .table-subtext {
+            color: #6b7280;
+            font-size: 0.85rem;
+            margin-top: 4px;
+        }
+
+        .status-chip {
+            align-items: center;
+            background: rgba(255, 159, 67, 0.14);
+            border-radius: 999px;
+            color: #b35400;
+            display: inline-flex;
+            font-size: 0.85rem;
+            font-weight: 600;
+            gap: 6px;
+            padding: 4px 10px;
+        }
+
+        .status-chip.warning {
+            background: rgba(220, 38, 38, 0.12);
+            color: #b91c1c;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+    <script>
+        window.headerConfig = {
+            title: { subtitle: "Beheerder" },
+            navLeft: [
+                { href: "/", icon: "fas fa-home", label: "Home" },
+                { href: "/beheerder", label: "Beheerder", active: true }
+            ]
+        };
+    </script>
+    <script src="/util/header.js"></script>
+    <script src="/beheerder/verifyAdmin.js"></script>
     <title>Activadis - Beheerder</title>
 </head>
 <body>
-    <h1>Activadis - Beheerder</h1>
+    <header></header>
+    <section id="mainContainer">
+        <aside id="sidebar">
+            <h1>Navigatie</h1>
+            <ul>
+                <li><a href="/beheerder/" class="active">Dashboard</a></li>
+                <li><a href="/beheerder/gebruikers">Gebruikers</a></li>
+                <li><a href="/beheerder/activiteiten">Activiteiten</a></li>
+                <li><a href="/beheerder/rollen">Rollen</a></li>
+            </ul>
+        </aside>
+        <main id="mainContent">
+            <div class="heading split-row">
+                <h2>Dashboard</h2>
+            </div>
+            <div id="dashboard-stats">
+                <h3><i class="fas fa-chart-bar"></i> Snel naar</h3>
+                <div id="stats-container">
+                    <!-- <div>
+                        <div><i class="fas fa-calendar-alt"></i> Activiteiten</div>
+                        <span id="activiteiten-count">-</span>
+                    </div>
+                    <div>
+                        <div><i class="fas fa-users"></i> Gebruikers</div>
+                        <span id="gebruikers-count">-</span>
+                    </div>
+                    <div>
+                        <div><i class="fas fa-clipboard-list"></i> Inschrijvingen</div>
+                        <span id="inschrijvingen-count">-</span>
+                    </div>
+                    <div>
+                        <div><i class="fas fa-box"></i> Benodigdheden</div>
+                        <span id="benodigdheden-count">-</span>
+                    </div> -->
+
+                    <a href="activiteiten">
+                        <div>
+                            <div><i class="fas fa-calendar-alt"></i> Activiteiten</div>
+                        </div>
+                    </a>
+                    <a href="activiteiten/new">
+                        <div>
+                            <div><i class="fas fa-calendar-plus"></i> Nieuwe Activiteiten</div>
+                        </div>
+                    </a>
+                    <a href="gebruikers">
+                        <div>
+                            <div><i class="fas fa-users"></i> Gebruikers</div>
+                        </div>
+                    </a>
+                    <a href="gebruikers/new">
+                        <div>
+                            <div><i class="fas fa-user-plus"></i> Nieuwe gebruikers</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <div id="recent-edited-activities" class="content-section">
+                <h3><i class="fas fa-clock"></i> Recent Bewerkte Activiteiten</h3>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Naam</th>
+                            <th>Locatie</th>
+                            <th>Datum</th>
+                            <th>Laatst Bewerkt</th>
+                            <th class="justify-right">Acties</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recent-edited-list">
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="dashboard-grid">
+                <div id="latest-registrations" class="content-section">
+                    <h3><i class="fas fa-user-clock"></i> Laatste Inschrijvingen</h3>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Activiteit</th>
+                                <th>Deelnemer</th>
+                                <th class="justify-right">Acties</th>
+                            </tr>
+                        </thead>
+                        <tbody id="latest-registrations-list">
+                            <tr><td colspan="3" style="text-align: center;">Bezig met laden...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="at-risk-activities" class="content-section">
+                    <h3><i class="fas fa-triangle-exclamation"></i> Activiteiten met tekort</h3>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Activiteit</th>
+                                <th>Status</th>
+                                <th class="justify-right">Acties</th>
+                            </tr>
+                        </thead>
+                        <tbody id="at-risk-activities-list">
+                            <tr><td colspan="3" style="text-align: center;">Bezig met laden...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- <hr class="section-separator thick"> -->
+
+            <!-- <div id="manage-section">
+                <div class="manage-block">
+                    <div class="heading split-row">
+                        <h3>Activiteiten</h3>
+                        <button class="btn btn-primary btn-small" onclick="window.location.href='/beheerder/activiteiten/new'">
+                            <i class="fas fa-plus"></i> Nieuwe Activiteit
+                        </button>
+                    </div>
+                    
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th><i class="fas fa-calendar-check"></i> Naam</th>
+                                <th><i class="fas fa-map-marker-alt"></i> Locatie</th>
+                                <th><i class="fas fa-calendar"></i> Datum</th>
+                                <th><i class="fas fa-euro-sign"></i> Kosten</th>
+                                <th class="justify-right">Acties</th>
+                            </tr>
+                        </thead>
+                        <tbody id="all-activiteiten-list">
+                        </tbody>
+                    </table>
+                </div>
+
+                <hr class="section-separator">
+
+                <div class="manage-block">
+                    <div class="heading split-row">
+                        <h3>Gebruikers</h3>
+                        <button class="btn btn-primary btn-small" onclick="window.location.href='/beheerder/gebruikers/new'">
+                            <i class="fas fa-plus"></i> Nieuwe Gebruiker
+                        </button>
+                    </div>
+                    
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th><i class="fas fa-envelope"></i> Email</th>
+                                <th><i class="fas fa-user-tag"></i> Rol</th>
+                                <th class="justify-right">Acties</th>
+                            </tr>
+                        </thead>
+                        <tbody id="all-gebruikers-list">
+                        </tbody>
+                    </table>
+                </div>
+            </div> -->
+        </main>
+    </section>
+
+    <script type="module">
+        import {
+            Notification,
+            NotifType,
+        } from "../../util/notif.js";
+
+        const token = sessionStorage.getItem("JWT");
+
+        // API Base URLs
+        const API = {
+            activiteit: '/api/activiteit',
+            gebruiker: '/api/gebruiker',
+            inschrijving: '/api/inschrijving',
+            benodigdheid: '/api/benodigdheid'
+        };
+
+        // Helper functions for text handling
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function formatTextWithNewlines(text) {
+            if (!text) return '';
+            return escapeHtml(text).replace(/\n/g, '<br>');
+        }
+
+        const REGISTRATION_TIMESTAMP_FIELDS = [
+            'aangemaaktOp',
+            'aangemaakt',
+            'createdAt',
+            'created_at',
+            'createdOn',
+            'created',
+            'datum',
+            'date',
+            'timestamp'
+        ];
+
+        function parseDate(value) {
+            if (value === null || value === undefined) {
+                return null;
+            }
+
+            if (value instanceof Date) {
+                return Number.isNaN(value.getTime()) ? null : value;
+            }
+
+            if (typeof value === 'number') {
+                const dateFromNumber = new Date(value);
+                return Number.isNaN(dateFromNumber.getTime()) ? null : dateFromNumber;
+            }
+
+            if (typeof value === 'string') {
+                const trimmed = value.trim();
+                if (trimmed === '') {
+                    return null;
+                }
+
+                if (/^-?\d+$/.test(trimmed)) {
+                    let numeric = Number(trimmed);
+                    if (trimmed.length === 10) {
+                        numeric *= 1000;
+                    }
+                    const dateFromDigits = new Date(numeric);
+                    if (!Number.isNaN(dateFromDigits.getTime())) {
+                        return dateFromDigits;
+                    }
+                }
+
+                const dateFromString = new Date(trimmed);
+                if (!Number.isNaN(dateFromString.getTime())) {
+                    return dateFromString;
+                }
+            }
+
+            return null;
+        }
+
+        function formatTimeAgo(date) {
+            if (!date) {
+                return 'Onbekend';
+            }
+
+            const now = new Date();
+            const diffMs = now.getTime() - date.getTime();
+
+            if (diffMs < 0) {
+                return 'Binnenkort';
+            }
+
+            const minutesAgo = Math.floor(diffMs / 60000);
+            if (minutesAgo < 1) {
+                return 'Zojuist';
+            }
+
+            if (minutesAgo < 60) {
+                return `${minutesAgo} min geleden`;
+            }
+
+            const hoursAgo = Math.floor(minutesAgo / 60);
+            if (hoursAgo < 24) {
+                return `${hoursAgo} uur geleden`;
+            }
+
+            const daysAgo = Math.floor(hoursAgo / 24);
+            if (daysAgo < 7) {
+                return `${daysAgo} dag${daysAgo > 1 ? 'en' : ''} geleden`;
+            }
+
+            return date.toLocaleDateString('nl-NL');
+        }
+
+        function formatDateTime(date) {
+            if (!date) {
+                return 'Onbekend';
+            }
+
+            try {
+                return date.toLocaleString('nl-NL', { dateStyle: 'medium', timeStyle: 'short' });
+            } catch (error) {
+                return date.toLocaleString('nl-NL');
+            }
+        }
+
+        function getRegistrationMeta(reg) {
+            let registrationDate = null;
+            for (const key of REGISTRATION_TIMESTAMP_FIELDS) {
+                if (reg[key]) {
+                    const parsed = parseDate(reg[key]);
+                    if (parsed) {
+                        registrationDate = parsed;
+                        break;
+                    }
+                }
+            }
+
+            const numericId = Number.parseInt(reg.id, 10);
+
+            return {
+                date: registrationDate,
+                priority: registrationDate ? 0 : 1,
+                value: registrationDate ? registrationDate.getTime() : (Number.isFinite(numericId) ? numericId : Number.NEGATIVE_INFINITY)
+            };
+        }
+
+        // Load dashboard data on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDashboard();
+        });
+
+        async function loadDashboard() {
+            try {
+                // Load all data
+                const [activiteiten, gebruikers, inschrijvingen, benodigdheden] = await Promise.all([
+                    fetch(API.activiteit + "?token=" + token).then(res => res.json()),
+                    fetch(API.gebruiker + "?token=" + token).then(res => res.json()),
+                    fetch(API.inschrijving + "?token=" + token).then(res => res.json()),
+                    fetch(API.benodigdheid + "?token=" + token).then(res => res.json())
+                ]);
+
+                console.log('Loaded activities:', activiteiten);
+
+                // Update counters - check if elements exist
+                const activiteitenCount = document.getElementById('activiteiten-count');
+                const gebruikersCount = document.getElementById('gebruikers-count');
+                const inschrijvingenCount = document.getElementById('inschrijvingen-count');
+                const benodigdhedenCount = document.getElementById('benodigdheden-count');
+                
+                if (activiteitenCount) activiteitenCount.textContent = activiteiten.length;
+                if (gebruikersCount) gebruikersCount.textContent = gebruikers.length;
+                if (inschrijvingenCount) inschrijvingenCount.textContent = inschrijvingen.length;
+                if (benodigdhedenCount) benodigdhedenCount.textContent = benodigdheden.length;
+
+                // Sort activities by lastEdited and display recently edited ones
+                const sortedByEdit = [...activiteiten].sort((a, b) => {
+                    const dateA = new Date(a.lastEdited || a.begin);
+                    const dateB = new Date(b.lastEdited || b.begin);
+                    return dateB - dateA;
+                });
+                console.log('Sorted activities:', sortedByEdit.slice(0, 3));
+                displayRecentEditedActiviteiten(sortedByEdit.slice(0, 3));
+
+                // Display all activities for management
+                displayAllActiviteiten(activiteiten);
+
+                // Display all users for management
+                displayAllGebruikers(gebruikers);
+
+                displayLatestInschrijvingen(inschrijvingen, activiteiten, gebruikers);
+                displayAtRiskActivities(activiteiten, inschrijvingen);
+
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+            }
+        }
+
+        function displayRecentEditedActiviteiten(activiteiten) {
+            const tbody = document.getElementById('recent-edited-list');
+            if (!tbody) {
+                console.error('Element recent-edited-list not found!');
+                return;
+            }
+            
+            tbody.innerHTML = '';
+            console.log('Displaying activities:', activiteiten.length);
+
+            if (!activiteiten || activiteiten.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Geen activiteiten gevonden</td></tr>';
+                return;
+            }
+
+            activiteiten.forEach(act => {
+                const row = document.createElement('tr');
+                row.style.cursor = 'pointer';
+                row.onclick = function() {
+                    window.location.href = `/beheerder/activiteiten/${act.id}`;
+                };
+                
+                const beginDate = parseDate(act.begin);
+                const lastEditedDate = parseDate(act.lastEdited) || beginDate;
+                const timeAgoText = formatTimeAgo(lastEditedDate);
+                const beginDateText = beginDate ? beginDate.toLocaleDateString('nl-NL') : 'Onbekend';
+                
+                row.innerHTML = `
+                    <td><strong>${escapeHtml(act.naam)}</strong></td>
+                    <td>${escapeHtml(act.locatie)}</td>
+                    <td>${escapeHtml(beginDateText)}</td>
+                    <td><em>${escapeHtml(timeAgoText)}</em></td>
+                    <td onclick="event.stopPropagation()">
+                        <div class="justify-right" style="display: flex; gap: 5px; flex-wrap: wrap;">
+                            <button class="btn btn-primary btn-small" onclick="window.location.href='/beheerder/activiteiten/${act.id}/edit'">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-danger btn-small" onclick="deleteActiviteit(${act.id})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function displayAllActiviteiten(activiteiten) {
+            const tbody = document.getElementById('all-activiteiten-list');
+            if (!tbody) {
+                return;
+            }
+            tbody.innerHTML = '';
+
+            activiteiten.forEach(act => {
+                const row = document.createElement('tr');
+                row.style.cursor = 'pointer';
+                row.onclick = function() {
+                    window.location.href = `/beheerder/activiteiten/${act.id}`;
+                };
+                
+                const beginDate = new Date(act.begin);
+                
+                row.innerHTML = `
+                    <td><strong>${escapeHtml(act.naam)}</strong></td>
+                    <td>${escapeHtml(act.locatie)}</td>
+                    <td>${beginDate.toLocaleDateString()}</td>
+                    <td>€${act.kost}</td>
+                    <td onclick="event.stopPropagation()">
+                        <div class="justify-right" style="display: flex; gap: 5px; flex-wrap: wrap;">
+                            <button class="btn btn-primary btn-small" onclick="window.location.href='/beheerder/activiteiten/${act.id}/edit'">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-danger btn-small" onclick="deleteActiviteit(${act.id})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function displayAllGebruikers(gebruikers) {
+            const tbody = document.getElementById('all-gebruikers-list');
+            if (!tbody) {
+                return;
+            }
+            tbody.innerHTML = '';
+
+            gebruikers.forEach(user => {
+                const row = document.createElement('tr');
+                row.style.cursor = 'pointer';
+                row.onclick = function() {
+                    window.location.href = `/beheerder/gebruikers/${user.id}`;
+                };
+                
+                row.innerHTML = `
+                    <td>${user.email}</td>
+                    <td>${(user.isAdmin === 1 || user.isAdmin === true) ? 'Admin' : 'Gebruiker'}</td>
+                    <td onclick="event.stopPropagation()">
+                        <div class="justify-right" style="display: flex; gap: 5px; flex-wrap: wrap;">
+                            <button class="btn btn-primary btn-small" onclick="window.location.href='/beheerder/gebruikers/${user.id}/edit'">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-danger btn-small" onclick="deleteGebruiker(${user.id})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function displayLatestInschrijvingen(inschrijvingen, activiteiten, gebruikers) {
+            const tbody = document.getElementById('latest-registrations-list');
+            if (!tbody) {
+                return;
+            }
+
+            tbody.innerHTML = '';
+
+            if (!Array.isArray(inschrijvingen) || inschrijvingen.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="3" style="text-align: center;">Nog geen inschrijvingen</td></tr>';
+                return;
+            }
+
+            const activiteitMap = new Map(activiteiten.map(act => [String(act.id), act]));
+            const gebruikerMap = new Map(gebruikers.map(user => [String(user.id), user]));
+
+            const sorted = inschrijvingen
+                .map(reg => ({ reg, meta: getRegistrationMeta(reg) }))
+                .sort((a, b) => {
+                    if (a.meta.priority !== b.meta.priority) {
+                        return a.meta.priority - b.meta.priority;
+                    }
+                    return b.meta.value - a.meta.value;
+                });
+
+            const MAX_ROWS = 6;
+
+            sorted.slice(0, MAX_ROWS).forEach(({ reg, meta }) => {
+                const activiteitKey = String(reg.activiteit);
+                const activiteit = activiteitMap.get(activiteitKey);
+                const beginDate = activiteit ? parseDate(activiteit.begin) : null;
+                const registrationDate = meta.date;
+                const participant = reg.gebruiker !== null && reg.gebruiker !== undefined
+                    ? gebruikerMap.get(String(reg.gebruiker))
+                    : null;
+
+                const participantName = participant
+                    ? `${[participant.firstname, participant.lastname].filter(Boolean).join(' ')}`.trim() || participant.email || 'Intern lid'
+                    : 'Externe deelnemer';
+                const participantType = participant ? 'Intern' : 'Extern';
+                const activityName = activiteit ? activiteit.naam : `Activiteit #${reg.activiteit}`;
+
+                const startText = beginDate
+                    ? `Start: ${formatDateTime(beginDate)}`
+                    : 'Startdatum onbekend';
+                const registrationText = registrationDate
+                    ? `Ingeschreven: ${formatTimeAgo(registrationDate)}`
+                    : '';
+
+                const row = document.createElement('tr');
+                row.style.cursor = 'pointer';
+                row.onclick = () => {
+                    window.location.href = `/beheerder/activiteiten/${reg.activiteit}`;
+                };
+
+                if (registrationDate) {
+                    row.title = `Ingeschreven op ${formatDateTime(registrationDate)}`;
+                }
+
+                row.innerHTML = `
+                    <td>
+                        <strong>${escapeHtml(activityName)}</strong>
+                        <div class="table-subtext">${escapeHtml(startText)}</div>
+                        <div class="table-subtext">${escapeHtml(registrationText)}</div>
+                    </td>
+                    <td>
+                        ${escapeHtml(participantName)}
+                        <div class="table-subtext">${escapeHtml(participantType)}</div>
+                    </td>
+                    <td onclick="event.stopPropagation()">
+                        <div class="justify-right">
+                            <button class="btn btn-primary btn-small" onclick="window.location.href='/beheerder/activiteiten/${reg.activiteit}'">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function displayAtRiskActivities(activiteiten, inschrijvingen) {
+            const tbody = document.getElementById('at-risk-activities-list');
+            if (!tbody) {
+                return;
+            }
+
+            tbody.innerHTML = '';
+
+            if (!Array.isArray(activiteiten) || activiteiten.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="3" style="text-align: center;">Geen activiteiten gevonden</td></tr>';
+                return;
+            }
+
+            const registrationCounts = Array.isArray(inschrijvingen)
+                ? inschrijvingen.reduce((acc, reg) => {
+                    if (reg.activiteit === null || reg.activiteit === undefined) {
+                        return acc;
+                    }
+                    const key = String(reg.activiteit);
+                    acc[key] = (acc[key] || 0) + 1;
+                    return acc;
+                }, {})
+                : {};
+
+            const now = new Date();
+
+            const atRisk = activiteiten
+                .map(act => {
+                    const key = String(act.id);
+                    const beginDate = parseDate(act.begin);
+                    const minRequired = Number.parseInt(act.min, 10);
+                    const current = registrationCounts[key] || 0;
+                    const shortage = Number.isFinite(minRequired) ? Math.max(0, minRequired - current) : 0;
+
+                    return {
+                        activiteit: act,
+                        beginDate,
+                        minRequired,
+                        current,
+                        shortage
+                    };
+                })
+                .filter(item => {
+                    if (!Number.isFinite(item.minRequired) || item.minRequired <= 0) {
+                        return false;
+                    }
+                    if (item.shortage <= 0) {
+                        return false;
+                    }
+                    if (item.beginDate && item.beginDate < now) {
+                        return false;
+                    }
+                    return true;
+                })
+                .sort((a, b) => {
+                    if (b.shortage !== a.shortage) {
+                        return b.shortage - a.shortage;
+                    }
+                    if (a.beginDate && b.beginDate) {
+                        return a.beginDate - b.beginDate;
+                    }
+                    if (a.beginDate) {
+                        return -1;
+                    }
+                    if (b.beginDate) {
+                        return 1;
+                    }
+                    return a.activiteit.naam.localeCompare(b.activiteit.naam);
+                });
+
+            if (atRisk.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="3" style="text-align: center;">Alle activiteiten voldoen aan het minimum aantal deelnemers</td></tr>';
+                return;
+            }
+
+            atRisk.forEach(item => {
+                const { activiteit, beginDate, minRequired, current, shortage } = item;
+                const row = document.createElement('tr');
+                row.style.cursor = 'pointer';
+                row.onclick = () => {
+                    window.location.href = `/beheerder/activiteiten/${activiteit.id}`;
+                };
+
+                const shortageText = `Tekort: ${shortage}`;
+                const capacityText = `Min ${minRequired} | Ingeschreven ${current}`;
+
+                row.innerHTML = `
+                    <td>
+                        <strong>${escapeHtml(activiteit.naam)}</strong>
+                        <div class="table-subtext">${escapeHtml(beginDate ? formatDateTime(beginDate) : 'Startdatum onbekend')}</div>
+                    </td>
+                    <td>
+                        <span class="status-chip warning">
+                            <i class="fas fa-user-slash"></i>
+                            ${escapeHtml(shortageText)}
+                        </span>
+                        <div class="table-subtext">${escapeHtml(capacityText)}</div>
+                    </td>
+                    <td onclick="event.stopPropagation()">
+                        <div class="justify-right">
+                            <button class="btn btn-primary btn-small" onclick="window.location.href='/beheerder/activiteiten/${activiteit.id}/edit'">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        window.deleteActiviteit = async (id) => {
+            if (confirm('Weet je zeker dat je deze activiteit wilt verwijderen?')) {
+                try {
+                    const response = await fetch(`${API.activiteit}?id=${id}&token=${token}`, {
+                        method: 'DELETE'
+                    });
+
+                    if (response.ok) {
+                        const notification = new Notification("Activiteit verwijderd.", NotifType.SUCCESS);
+                        notification.show();
+                        loadDashboard(); // Refresh data
+                    } else {
+                        const notification = new Notification("Error deleting activiteit.", NotifType.ERROR);
+                        notification.show();
+                    }
+                } catch (error) {
+                    console.error('Error deleting activiteit:', error);
+                    const notification = new Notification("Error deleting activiteit.", NotifType.ERROR);
+                    notification.show();
+                }
+            }
+        }
+
+        window.deleteGebruiker = async (id) => {
+            if (confirm('Weet je zeker dat je deze gebruiker wilt verwijderen?')) {
+                try {
+                    const response = await fetch(`${API.gebruiker}?id=${id}&token=${token}`, {
+                        method: 'DELETE'
+                    });
+
+                    if (response.ok) {
+                        const notification = new Notification("Gebruiker verwijderd.", NotifType.SUCCESS);
+                        notification.show();
+                        loadDashboard(); // Refresh data
+                    } else {
+                        const notification = new Notification("Error deleting gebruiker.", NotifType.ERROR);
+                        notification.show();
+                    }
+                } catch (error) {
+                    console.error('Error deleting gebruiker:', error);
+                    const notification = new Notification("Error deleting gebruiker.", NotifType.ERROR);
+                    notification.show();
+                }
+            }
+        }
+    </script>
 </body>
 </html>
