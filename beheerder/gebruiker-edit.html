@@ -32,6 +32,7 @@
                 <li><a href="/beheerder/">Dashboard</a></li>
                 <li><a href="/beheerder/gebruikers">Gebruikers</a></li>
                 <li><a href="/beheerder/activiteiten">Activiteiten</a></li>
+                <li><a href="/beheerder/rollen">Rollen</a></li>
             </ul>
         </aside>
         <main id="mainContent">
@@ -376,7 +377,14 @@
                     throw new Error(`HTTP ${response.status}`);
                 }
 
-                const roles = await response.json();
+                let roles = await response.json();
+                roles = roles.sort((a, b) => {
+                    let valueA = a.name.toLowerCase();
+                    let valueB = b.name.toLowerCase();
+                    if (valueA < valueB) return -1;
+                    if (valueA > valueB) return 1;
+                    return 0;
+                });
 
                 // Add role options
                 console.log('Loading roles:', roles, 'Selected role ID:', selectedRoleId);

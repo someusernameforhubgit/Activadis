@@ -26,8 +26,9 @@
             <h1>Navigatie</h1>
             <ul>
                 <li><a href="/beheerder/">Dashboard</a></li>
-                    <li><a href="/beheerder/gebruikers">Gebruikers</a></li>
-                    <li><a href="/beheerder/activiteiten">Activiteiten</a></li>
+                <li><a href="/beheerder/gebruikers">Gebruikers</a></li>
+                <li><a href="/beheerder/activiteiten">Activiteiten</a></li>
+                <li><a href="/beheerder/rollen">Rollen</a></li>
             </ul>
         </aside>
         <main id="mainContent">
@@ -655,20 +656,30 @@
                 
                 // Image carousel
                 let afbeeldingen;
+                
+                // Sort images by sortOrder
+                const sortedImages = activity.afbeeldingen && activity.afbeeldingen[0] != null 
+                    ? [...activity.afbeeldingen].sort((a, b) => {
+                        const orderA = a.sortOrder !== null && a.sortOrder !== undefined ? a.sortOrder : 999;
+                        const orderB = b.sortOrder !== null && b.sortOrder !== undefined ? b.sortOrder : 999;
+                        return orderA - orderB;
+                    })
+                    : [];
+                
                 if (activity.afbeeldingen[0] == null) {
                     afbeeldingen = '<img src="https://covadis.nl/wp-content/themes/id/resource/image/header/1.svg" alt="Afbeelding van activiteit" class="single-image placeholder">';
-                } else if (activity.afbeeldingen.length == 1) {
-                    afbeeldingen = '<img src="' + activity.afbeeldingen[0].afbeeldingUrl + '" alt="Afbeelding van activiteit" class="single-image">';
+                } else if (sortedImages.length == 1) {
+                    afbeeldingen = '<img src="' + sortedImages[0].afbeeldingUrl + '" alt="Afbeelding van activiteit" class="single-image">';
                 } else {
                     // Create carousel for multiple images
                     afbeeldingen = `
                         <div class="carousel-container">
-                            <div class="carousel-wrapper" style="width: ${activity.afbeeldingen.length * 100}%;">`;
+                            <div class="carousel-wrapper" style="width: ${sortedImages.length * 100}%;">`;
 
-                    for (let i = 0; i < activity.afbeeldingen.length; i++) {
+                    for (let i = 0; i < sortedImages.length; i++) {
                         afbeeldingen += `
-                            <div class="carousel-slide" style="flex: 0 0 ${100 / activity.afbeeldingen.length}%;">
-                                <img src="${activity.afbeeldingen[i].afbeeldingUrl}" alt="Afbeelding ${i + 1} van activiteit" class="carousel-image">
+                            <div class="carousel-slide" style="flex: 0 0 ${100 / sortedImages.length}%;">
+                                <img src="${sortedImages[i].afbeeldingUrl}" alt="Afbeelding ${i + 1} van activiteit" class="carousel-image">
                             </div>`;
                     }
 
@@ -682,7 +693,7 @@
                             </button>
                             <div class="carousel-indicators">`;
 
-                    for (let i = 0; i < activity.afbeeldingen.length; i++) {
+                    for (let i = 0; i < sortedImages.length; i++) {
                         afbeeldingen += `
                             <button class="indicator ${i === 0 ? 'active' : ''}" onclick="goToSlide(${i})"></button>`;
                     }

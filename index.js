@@ -36,6 +36,9 @@ app.get('/verleden', (req, res) => {
 app.get('/activiteit/:id', (req, res) => {
     res.sendFile('activiteit.html', { root: './gebruiker' });
 });
+app.get('/profiel', (req, res) => {
+    res.sendFile('profiel.html', { root: './gebruiker' });
+});
 
 // Admin Routes
 app.get('/beheerder' , (req, res) => {
@@ -67,6 +70,18 @@ app.get('/beheerder/activiteiten/:id', (req, res) => {
 });
 app.get('/beheerder/activiteiten/:id/edit', (req, res) => {
     res.sendFile('activiteit-edit.html', { root: './beheerder' });
+});
+app.get('/beheerder/rollen', (req, res) => {
+    res.sendFile('rollen.html', { root: './beheerder' });
+});
+app.get('/beheerder/rollen/new', (req, res) => {
+    res.sendFile('rollen-edit.html', { root: './beheerder' });
+});
+app.get('/beheerder/rollen/:id', (req, res) => {
+    res.sendFile('functie-view.html', { root: './beheerder' });
+});
+app.get('/beheerder/rollen/:id/edit', (req, res) => {
+    res.sendFile('rollen-edit.html', { root: './beheerder' });
 });
 
 // Database

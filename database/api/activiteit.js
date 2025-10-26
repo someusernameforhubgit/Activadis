@@ -1,4 +1,5 @@
 import { verifyAdmin } from "../../util/jwt-auth.js";
+import mail from "../../util/mail.js";
 const url = "/api/activiteit";
 
 export default function ActiviteitAPI(app, database) {
@@ -41,7 +42,7 @@ export default function ActiviteitAPI(app, database) {
         if (missingFields.length === 0) {
             try {
                 const activiteit = await database.query(
-                    "INSERT INTO activiteit (naam, locatie, eten, omschrijving, begin, eind, kost, max, min, afbeelding, hidden, showParticipants) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                    "INSERT INTO activiteit (naam, locatie, eten, omschrijving, begin, eind, kost, max, min, afbeelding, hidden, showParticipants, lastEdited) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())",
                     [
                         req.body.naam,
                         req.body.locatie,
@@ -93,7 +94,7 @@ export default function ActiviteitAPI(app, database) {
         if (missingFields.length === 0) {
             try {
                 const activiteit = await database.query(
-                    "UPDATE activiteit SET naam = ?, locatie = ?, eten = ?, omschrijving = ?, begin = ?, eind = ?, kost = ?, max = ?, min = ?, afbeelding = ?, hidden = ?, showParticipants = ? WHERE id = ?", 
+                    "UPDATE activiteit SET naam = ?, locatie = ?, eten = ?, omschrijving = ?, begin = ?, eind = ?, kost = ?, max = ?, min = ?, afbeelding = ?, hidden = ?, showParticipants = ?, lastEdited = NOW() WHERE id = ?", 
                     [
                         req.body.naam,
                         req.body.locatie,
@@ -124,8 +125,55 @@ export default function ActiviteitAPI(app, database) {
     app.delete(url, async (req, res) => {
         if (!(await verifyAdmin(req.query.token))) return res.status(401).send("Unauthorized");
         if (req.query.id) {
-            const activiteit = await database.query("DELETE FROM activiteit WHERE id = ?", [req.query.id]);
-            res.send(activiteit);
+            try {
+                const activityId = req.query.id;
+                
+                // Delete related records first to avoid foreign key constraint errors
+                // Delete benodigdheden
+                await database.query("DELETE FROM benodigdheid WHERE activiteit = ?", [activityId]);
+                
+                // Delete afbeeldingen
+                await database.query("DELETE FROM afbeeldingen WHERE activiteitId = ?", [activityId]);
+                
+                // Delete inschrijvingen
+                // Get all registrations for this activity
+                const inschrijvingen = await database.query("SELECT * FROM inschrijving WHERE activiteit = ?", [activityId]);
+
+                const userEmails = [];
+                for (const inschrijving of inschrijvingen) {
+                    if (inschrijving.gebruiker) {
+                        const [user] = await database.query("SELECT email FROM gebruiker WHERE id = ?", [inschrijving.gebruiker]);
+                        if (user && user.email) userEmails.push(user.email);
+                    } else if (inschrijving.externe) {
+                        const [externe] = await database.query("SELECT email FROM externen WHERE id = ?", [inschrijving.externe]);
+                        if (externe && externe.email) userEmails.push(externe.email);
+                    }
+                }
+                
+                // Delete registrations
+                await database.query("DELETE FROM inschrijving WHERE activiteit = ?", [activityId]);
+
+                const activiteitNaam = await database.query("SELECT naam FROM activiteit WHERE id = ?", [activityId]);
+                
+                for (const email of userEmails) {
+                    await mail(
+                        email,
+                        "Activiteit geannuleerd",
+                        `
+                    <h1>U was ingeschreven voor ${activiteitNaam}</h1><br>
+                    <p>Deze activiteit is verwijderd door een beheerder</p>
+                    `
+                    );
+                }
+                
+                // Finally, delete the activity itself
+                const activiteit = await database.query("DELETE FROM activiteit WHERE id = ?", [activityId]);
+                
+                res.send(activiteit);
+            } catch (error) {
+                console.error('Error deleting activity:', error);
+                res.status(500).send("Error deleting activity and related records");
+            }
         } else {
             res.status(400).send("No id provided");
         }

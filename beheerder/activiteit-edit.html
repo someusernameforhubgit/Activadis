@@ -1,8 +1,10 @@
 <!doctype html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta name="viewport"
+        content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="/css/header.css">
@@ -19,8 +21,9 @@
     <script src="/beheerder/verifyAdmin.js"></script>
     <title>Activadis - Activiteit Bewerken</title>
 </head>
+
 <body>
-<header></header>
+    <header></header>
     <section id="mainContainer">
         <aside id="sidebar">
             <h1>Navigatie</h1>
@@ -28,6 +31,7 @@
                 <li><a href="/beheerder/">Dashboard</a></li>
                 <li><a href="/beheerder/gebruikers">Gebruikers</a></li>
                 <li><a href="/beheerder/activiteiten">Activiteiten</a></li>
+                <li><a href="/beheerder/rollen">Rollen</a></li>
             </ul>
         </aside>
         <main id="mainContent">
@@ -63,12 +67,14 @@
                             <label for="activity-showParticipants">Toon deelnemers op hoofdsite</label>
                             <div class="row">
                                 <input type="checkbox" id="activity-showParticipants">
-                                <small class="field-help">Wanneer ingeschakeld zien ingelogde gebruikers de deelnemerslijst.</small>
+                                <small class="field-help">Wanneer ingeschakeld zien ingelogde gebruikers de
+                                    deelnemerslijst.</small>
                             </div>
                         </div>
                         <div class="form-group full-width">
                             <label for="activity-omschrijving">Omschrijving *</label>
-                            <textarea id="activity-omschrijving" required rows="4" maxlength="2000" placeholder="Beschrijf de activiteit in detail..."></textarea>
+                            <textarea id="activity-omschrijving" required rows="4" maxlength="2000"
+                                placeholder="Beschrijf de activiteit in detail..."></textarea>
                             <small class="field-help">Maximaal 2000 karakters</small>
                             <div class="field-error" id="omschrijving-error"></div>
                         </div>
@@ -94,23 +100,11 @@
                         </div>
                         <div class="form-group full-width">
                             <label for="activity-kost">Kosten (€)</label>
-                            <input type="number" id="activity-kost" step="0.01" min="0" max="9999.99" placeholder="0 (laat leeg voor gratis)">
+                            <input type="number" id="activity-kost" step="0.01" min="0" max="9999.99"
+                                placeholder="0 (laat leeg voor gratis)">
                             <div class="field-error" id="kost-error"></div>
                         </div>
-                        <!-- <div class="form-group full-width">
-                            <label for="activity-afbeelding">Afbeelding URL</label>
-                            <input type="url" id="activity-afbeelding" maxlength="500" placeholder="https://voorbeeld.com/afbeelding.jpg">
-                            <div class="field-error" id="afbeelding-error"></div>
-                        </div> -->
-                        <div class="form-group">
-                            <label for="activity-afbeelding">Afbeeldingen</label>
-                            <div>
-                                <input type="text" name="" id="activity-afbeeldingUrl" placeholder="Image URL">
-                                <button type="button" class="btn btn-primary" id="add-afbeelding" onclick="addImage()">+</button>
-                            </div>
-                            <div id="activity-afbeeldingen">
-                            </div>
-                        </div>
+
                         <div class="form-group">
                             <label for="benodigdheden">Benodigdheden</label>
                             <div id="benodigdheden">
@@ -129,6 +123,29 @@
                                 <button type="button" class="btn btn-primary" id="add-benodigdheid">+</button>
                             </div>
                         </div>
+
+                        <div class="form-group full-width">
+                            <label for="activity-afbeelding">Afbeeldingen</label>
+                            <div class="imgage-uploadfields">
+                                <div>
+                                    <input type="text" name="" id="activity-afbeeldingUrl" placeholder="Image URL">
+                                    <button type="button" class="btn btn-primary" id="add-afbeelding"
+                                        onclick="addImage()">+</button>
+                                </div>
+                                <div>
+                                    <input type="file" id="activity-afbeeldingFile" accept="image/*">
+                                    <button type="button" class="btn btn-primary" id="upload-afbeelding"
+                                        onclick="uploadImage()">Upload</button>
+                                </div>
+                            </div>
+                            <small class="field-help">Upload een afbeelding of voer een URL in. Max 5MB, formaten: JPEG,
+                                PNG, GIF, WebP</small>
+                            <div id="activity-afbeeldingen">
+                            </div>
+                        </div>
+
+
+
                     </div>
                     <div class="form-actions">
                         <button type="button" class="btn btn-secondary" onclick="goBack()">Annuleren</button>
@@ -202,14 +219,14 @@
         .form-group select:focus {
             outline: none;
             border-color: var(--primary-color);
-            box-shadow: 0 0 0 2px rgba(0,123,255,.25);
+            box-shadow: 0 0 0 2px rgba(0, 123, 255, .25);
         }
 
         .form-group input.error,
         .form-group textarea.error,
         .form-group select.error {
             border-color: #dc3545;
-            box-shadow: 0 0 0 2px rgba(220,53,69,.25);
+            box-shadow: 0 0 0 2px rgba(220, 53, 69, .25);
         }
 
         .field-error {
@@ -245,8 +262,13 @@
         }
 
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
 
         .error-container {
@@ -316,11 +338,68 @@
             align-items: center;
             gap: 10px;
             margin-bottom: 10px;
+            padding: 10px;
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: move;
+            transition: background-color 0.2s;
+        }
+
+        .image-item:hover {
+            background-color: #f0f0f0;
+        }
+
+        .image-item.dragging {
+            opacity: 0.5;
+            background-color: #e0e0e0;
+        }
+
+        .image-item.drag-over {
+            border-top: 3px solid var(--primary-color);
         }
 
         .image-picture {
             max-width: 50px;
             max-height: 50px;
+        }
+
+        .image-item-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .drag-handle {
+            cursor: move;
+            color: #999;
+            font-size: 1.2em;
+        }
+
+        .image-order {
+            font-weight: bold;
+            color: #666;
+            min-width: 30px;
+        }
+
+        /* Image upload fields styling */
+        .imgage-uploadfields {
+            display: flex;
+            gap: 10px;
+        }
+
+        #activity-afbeeldingUrl {
+            height: 100%;
+        }
+
+        #activity-afbeeldingFile {
+            display: inline-block;
+        }
+
+        .image-item-content p {
+            margin: 0;
+            flex: 1;
         }
     </style>
 
@@ -575,7 +654,7 @@
         }
 
         // Main functions
-        document.addEventListener('DOMContentLoaded', async function() {
+        document.addEventListener('DOMContentLoaded', async function () {
             document.querySelector("#add-benodigdheid").addEventListener("click", addBenodigdheid);
             const activityId = getActivityIdFromUrl();
 
@@ -610,7 +689,7 @@
 
             // Add real-time validation
             document.querySelectorAll('#activity-form input, #activity-form textarea').forEach(field => {
-                field.addEventListener('blur', function() {
+                field.addEventListener('blur', function () {
                     const fieldName = this.id.replace('activity-', '');
                     if (validationRules[fieldName]) {
                         let value = this.value;
@@ -620,8 +699,8 @@
                         validateField(this.id, value);
                     }
                 });
-                
-                field.addEventListener('input', function() {
+
+                field.addEventListener('input', function () {
                     // Clear error when user starts typing
                     this.classList.remove('error');
                     const errorElement = document.getElementById(this.id.replace('activity-', '') + '-error');
@@ -654,7 +733,7 @@
                 }
             }
 
-            beginDateInput.addEventListener('change', function() {
+            beginDateInput.addEventListener('change', function () {
                 validateDateInput(this, 'activity-begin');
                 // Update minimum end time when begin time changes
                 const beginTime = this.value;
@@ -668,7 +747,7 @@
                 }
             });
 
-            endDateInput.addEventListener('change', function() {
+            endDateInput.addEventListener('change', function () {
                 validateDateInput(this, 'activity-eind');
                 // Also check that end time is after begin time
                 const beginTime = beginDateInput.value;
@@ -701,7 +780,7 @@
                         'Content-Type': 'application/json'
                     }
                 });
-                
+
                 if (!response.ok) {
                     if (response.status === 401) {
                         showError('U bent niet geautoriseerd. Log opnieuw in.');
@@ -716,16 +795,16 @@
                 }
 
                 const activity = await response.json();
-                
+
                 if (!activity || (Array.isArray(activity) && activity.length === 0)) {
                     showError('Activiteit niet gevonden.');
                     return;
                 }
-                
+
                 // Handle both single object and array responses
-                const activityData = Array.isArray(activity) ? 
+                const activityData = Array.isArray(activity) ?
                     activity.find(act => act.id == id) : activity;
-                
+
                 if (activityData) {
                     currentActivity = activityData;
                     populateForm(activityData);
@@ -737,8 +816,8 @@
                 loadBenodigdheden(benodigdheden);
             } catch (error) {
                 console.error('Error loading activity:', error);
-                const errorMessage = retryCount < MAX_RETRIES ? 
-                    'Fout bij laden van activiteit. Probeer het opnieuw.' : 
+                const errorMessage = retryCount < MAX_RETRIES ?
+                    'Fout bij laden van activiteit. Probeer het opnieuw.' :
                     'Kan activiteit niet laden na meerdere pogingen.';
                 showError(errorMessage);
             }
@@ -753,7 +832,7 @@
                 document.getElementById('activity-eten').checked = Boolean(activity.eten);
                 document.getElementById('activity-showParticipants').checked = Boolean(Number(activity.showParticipants));
                 document.getElementById('activity-omschrijving').value = activity.omschrijving || '';
-                
+
                 // Handle date formatting safely - preserve local time, avoid timezone conversion
                 if (activity.begin) {
                     const beginDate = new Date(activity.begin);
@@ -767,7 +846,7 @@
                         document.getElementById('activity-begin').value = `${year}-${month}-${day}T${hours}:${minutes}`;
                     }
                 }
-                
+
                 if (activity.eind) {
                     const eindDate = new Date(activity.eind);
                     if (!isNaN(eindDate.getTime())) {
@@ -780,32 +859,54 @@
                         document.getElementById('activity-eind').value = `${year}-${month}-${day}T${hours}:${minutes}`;
                     }
                 }
-                
+
                 document.getElementById('activity-kost').value = activity.kost || '';
                 document.getElementById('activity-max').value = activity.max || '';
                 document.getElementById('activity-min').value = activity.min || '';
                 // document.getElementById('activity-afbeelding').value = activity.afbeelding || '';
 
-                if(activity.afbeeldingen[0] == null){
+                if (activity.afbeeldingen[0] == null) {
                     document.getElementById('activity-afbeeldingen').innerHTML = '<p>Geen afbeelding toegevoegd.</p>';
-                }else{
+                } else {
                     document.getElementById('activity-afbeeldingen').innerHTML = "";
 
-                    activity.afbeeldingen.forEach(afbeelding => {
-                        document.getElementById('activity-afbeeldingen').innerHTML += `
-                            <div class="image-item">
-                                <img src="${afbeelding.afbeeldingUrl}" alt="activiteit afbeelding" class="image-picture">
+                    // Sort images by sortOrder
+                    const sortedImages = [...activity.afbeeldingen].sort((a, b) => {
+                        const orderA = a.sortOrder !== null && a.sortOrder !== undefined ? a.sortOrder : 999;
+                        const orderB = b.sortOrder !== null && b.sortOrder !== undefined ? b.sortOrder : 999;
+                        return orderA - orderB;
+                    });
+
+                    sortedImages.forEach((afbeelding, index) => {
+                        const imageDiv = document.createElement('div');
+                        imageDiv.className = 'image-item';
+                        imageDiv.draggable = true;
+                        imageDiv.dataset.imageId = afbeelding.id;
+                        imageDiv.dataset.order = index;
+
+                        imageDiv.innerHTML = `
+                            <span class="drag-handle"><i class="fas fa-grip-vertical"></i></span>
+                            <span class="image-order">#${index + 1}</span>
+                            <div class="image-item-content">
+                                <img src="${afbeelding.afbeeldingUrl}" alt="activiteit afbeelding" class="image-picture" onerror="this.style.display='none';">
                                 <p>${afbeelding.afbeeldingUrl}</p>
-                                <button type="button" onClick="removeImage(event, '${afbeelding.id}')">X</button>
                             </div>
+                            <button type="button" class="btn btn-danger btn-small" onClick="removeImage(event, '${afbeelding.id}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
                         `;
-                    })
+
+                        document.getElementById('activity-afbeeldingen').appendChild(imageDiv);
+                    });
+
+                    // Initialize drag and drop
+                    initializeDragAndDrop();
                 }
-                
+
                 // Show form and hide loading
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('activity-form').style.display = 'block';
-                
+
             } catch (error) {
                 console.error('Error populating form:', error);
                 showError('Fout bij het vullen van het formulier.');
@@ -815,7 +916,7 @@
 
         async function handleSubmit(e) {
             e.preventDefault();
-            
+
             if (!validateForm()) {
                 // Scroll to first error
                 const firstError = document.querySelector('.field-error.show');
@@ -962,7 +1063,7 @@
             } catch (error) {
                 console.error('Error saving activity:', error);
                 let errorMessage = 'Er is een fout opgetreden bij het opslaan.';
-                
+
                 // Parse the actual server error message
                 if (error.message.includes('required fields') || error.message.includes('missing')) {
                     errorMessage = 'Niet alle verplichte velden zijn correct ingevuld: ' + error.message;
@@ -979,7 +1080,7 @@
                     // Use the actual error message from the server
                     errorMessage = error.message;
                 }
-                
+
                 const notification = new Notification(errorMessage, NotifType.ERROR);
                 notification.show();
             } finally {
@@ -988,7 +1089,7 @@
             }
         }
 
-        async function removeImage(event, afbeeldingId) {
+        window.removeImage = async function (event, afbeeldingId) {
             event.preventDefault();
 
             console.log('Removing image with ID:', afbeeldingId);
@@ -1020,13 +1121,31 @@
                 console.log('Image successfully deleted');
 
                 // Remove the image from the UI
-                const imageElement = event.target.closest('div');
+                const imageElement = event.target.closest('.image-item');
                 if (imageElement) {
                     imageElement.remove();
                 }
 
+                // Check if there are any images left and update UI accordingly
+                const imageContainer = document.getElementById('activity-afbeeldingen');
+                const remainingImages = imageContainer.querySelectorAll('.image-item');
+
+                if (remainingImages.length === 0) {
+                    imageContainer.innerHTML = '<p>Geen afbeelding toegevoegd.</p>';
+                } else {
+                    // Reorder the remaining images to have sequential numbers
+                    updateImageOrder();
+                    await saveImageOrder();
+                }
+
+                // Show success notification
+                const notification = new Notification("Afbeelding succesvol verwijderd.", NotifType.SUCCESS);
+                notification.show();
+
             } catch (error) {
                 console.error('Error deleting image:', error);
+                const notification = new Notification("Fout bij het verwijderen van de afbeelding.", NotifType.ERROR);
+                notification.show();
             }
         }
 
@@ -1047,11 +1166,35 @@
                 return;
             }
 
+            // Check if URL starts with https://
+            if (!afbeeldingUrl.startsWith('https://')) {
+                const notification = new Notification("URL moet beginnen met https://", NotifType.ERROR);
+                notification.show();
+                return;
+            }
+
             // Basic URL validation
             try {
                 new URL(afbeeldingUrl);
             } catch (error) {
                 const notification = new Notification("Voer een geldige URL in.", NotifType.ERROR);
+                notification.show();
+                return;
+            }
+
+            // Validate image extension
+            const validExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp'];
+            const urlLower = afbeeldingUrl.toLowerCase();
+
+            // Remove query parameters for extension check
+            const urlWithoutParams = urlLower.split('?')[0];
+
+            const hasValidExtension = validExtensions.some(ext => urlWithoutParams.endsWith(ext));
+
+            if (!hasValidExtension) {
+                const notification = new Notification(
+                    NotifType.ERROR
+                );
                 notification.show();
                 return;
             }
@@ -1098,14 +1241,31 @@
                         imageContainer.innerHTML = '';
                     }
 
+                    // Get current number of images to set the order
+                    const currentImages = imageContainer.querySelectorAll('.image-item');
+                    const newOrder = currentImages.length;
+
                     const newImageDiv = document.createElement('div');
                     newImageDiv.className = 'image-item';
+                    newImageDiv.draggable = true;
+                    newImageDiv.dataset.imageId = result;
+                    newImageDiv.dataset.order = newOrder;
+
                     newImageDiv.innerHTML = `
-                        <img src="${afbeeldingUrl}" alt="activiteit afbeelding" class="image-picture" onerror="this.style.display='none';">
-                        <p>${afbeeldingUrl}</p>
-                        <button type="button" onClick="removeImage(event, '${result}')">X</button>
+                        <span class="drag-handle"><i class="fas fa-grip-vertical"></i></span>
+                        <span class="image-order">#${newOrder + 1}</span>
+                        <div class="image-item-content">
+                            <img src="${afbeeldingUrl}" alt="activiteit afbeelding" class="image-picture" onerror="this.style.display='none';">
+                            <p>${afbeeldingUrl}</p>
+                        </div>
+                        <button type="button" class="btn btn-danger btn-small" onClick="removeImage(event, '${result}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
                     `;
                     imageContainer.appendChild(newImageDiv);
+
+                    // Initialize drag and drop for the new item
+                    initializeDragAndDrop();
 
                 } catch (error) {
                     console.error('Error adding image:', error);
@@ -1153,7 +1313,7 @@
         }
 
         // Make this function globally accessible
-        window.removeNewActivityImage = function(tempId) {
+        window.removeNewActivityImage = function (tempId) {
             // Remove from array
             newActivityImages = newActivityImages.filter(img => img.tempId != tempId);
 
@@ -1161,6 +1321,128 @@
             displayNewActivityImages();
 
             console.log('Image removed from new activity array:', newActivityImages);
+        }
+
+        // Upload image function
+        window.uploadImage = async function () {
+            const fileInput = document.getElementById('activity-afbeeldingFile');
+            const file = fileInput.files[0];
+
+            if (!file) {
+                const notification = new Notification("Selecteer een afbeelding om te uploaden.", NotifType.ERROR);
+                notification.show();
+                return;
+            }
+
+            // Validate file type
+            const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+            if (!allowedTypes.includes(file.type)) {
+                const notification = new Notification("Ongeldig bestandstype. Alleen JPEG, PNG, GIF en WebP zijn toegestaan.", NotifType.ERROR);
+                notification.show();
+                return;
+            }
+
+            // Validate file size (5MB max)
+            if (file.size > 5 * 1024 * 1024) {
+                const notification = new Notification("Bestand is te groot. Maximum 5MB toegestaan.", NotifType.ERROR);
+                notification.show();
+                return;
+            }
+
+            // Show uploading state
+            const uploadBtn = document.getElementById('upload-afbeelding');
+            const originalText = uploadBtn.textContent;
+            uploadBtn.disabled = true;
+            uploadBtn.textContent = 'Uploaden...';
+
+            try {
+                const formData = new FormData();
+                formData.append('image', file);
+
+                // If editing existing activity, include activiteitId
+                if (isEditMode && currentActivity) {
+                    formData.append('activiteitId', currentActivity.id);
+                }
+
+                const response = await fetch(`/api/upload-image?token=${token}`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        const notification = new Notification("U bent niet geautoriseerd. Log opnieuw in.", NotifType.ERROR);
+                        notification.show();
+                        setTimeout(() => window.location.href = '/login', 2000);
+                        return;
+                    }
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                const result = await response.json();
+                console.log('Upload result:', result);
+
+                // Clear the file input
+                fileInput.value = '';
+
+                if (isEditMode && currentActivity) {
+                    // For existing activities, add to UI immediately
+                    const imageContainer = document.getElementById('activity-afbeeldingen');
+
+                    // Clear any 'geen afbeelding' text if it exists
+                    const noImageText = imageContainer.querySelector('p');
+                    if (noImageText && noImageText.textContent.includes('Geen afbeelding')) {
+                        imageContainer.innerHTML = '';
+                    }
+
+                    // Get current number of images to set the order
+                    const currentImages = imageContainer.querySelectorAll('.image-item');
+                    const newOrder = currentImages.length;
+
+                    const newImageDiv = document.createElement('div');
+                    newImageDiv.className = 'image-item';
+                    newImageDiv.draggable = true;
+                    newImageDiv.dataset.imageId = result.imageId;
+                    newImageDiv.dataset.order = newOrder;
+
+                    newImageDiv.innerHTML = `
+                        <span class="drag-handle"><i class="fas fa-grip-vertical"></i></span>
+                        <span class="image-order">#${newOrder + 1}</span>
+                        <div class="image-item-content">
+                            <img src="${result.imageUrl}" alt="activiteit afbeelding" class="image-picture" onerror="this.style.display='none';">
+                            <p>${result.imageUrl}</p>
+                        </div>
+                        <button type="button" class="btn btn-danger btn-small" onClick="removeImage(event, '${result.imageId}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    `;
+                    imageContainer.appendChild(newImageDiv);
+
+                    // Initialize drag and drop for the new item
+                    initializeDragAndDrop();
+                } else {
+                    // For new activities, add to temporary array
+                    const imageData = {
+                        url: result.imageUrl,
+                        tempId: Date.now() + Math.random(),
+                        uploaded: true,
+                        filename: result.filename
+                    };
+                    newActivityImages.push(imageData);
+                    displayNewActivityImages();
+                }
+
+                const notification = new Notification("Afbeelding succesvol geüpload.", NotifType.SUCCESS);
+                notification.show();
+
+            } catch (error) {
+                console.error('Error uploading image:', error);
+                const notification = new Notification("Fout bij het uploaden van de afbeelding.", NotifType.ERROR);
+                notification.show();
+            } finally {
+                uploadBtn.disabled = false;
+                uploadBtn.textContent = originalText;
+            }
         }
 
         function addBenodigdheid() {
@@ -1213,6 +1495,132 @@
             }
             row.remove();
         }
+
+        // Drag and Drop functionality for image ordering
+        let draggedElement = null;
+
+        function initializeDragAndDrop() {
+            const imageItems = document.querySelectorAll('.image-item');
+
+            imageItems.forEach(item => {
+                item.addEventListener('dragstart', handleDragStart);
+                item.addEventListener('dragover', handleDragOver);
+                item.addEventListener('drop', handleDrop);
+                item.addEventListener('dragend', handleDragEnd);
+                item.addEventListener('dragenter', handleDragEnter);
+                item.addEventListener('dragleave', handleDragLeave);
+            });
+        }
+
+        function handleDragStart(e) {
+            draggedElement = this;
+            this.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/html', this.innerHTML);
+        }
+
+        function handleDragOver(e) {
+            if (e.preventDefault) {
+                e.preventDefault();
+            }
+            e.dataTransfer.dropEffect = 'move';
+            return false;
+        }
+
+        function handleDragEnter(e) {
+            if (this !== draggedElement) {
+                this.classList.add('drag-over');
+            }
+        }
+
+        function handleDragLeave(e) {
+            this.classList.remove('drag-over');
+        }
+
+        function handleDrop(e) {
+            if (e.stopPropagation) {
+                e.stopPropagation();
+            }
+
+            if (draggedElement !== this) {
+                const allItems = Array.from(document.querySelectorAll('.image-item'));
+                const draggedIndex = allItems.indexOf(draggedElement);
+                const targetIndex = allItems.indexOf(this);
+
+                if (draggedIndex < targetIndex) {
+                    this.parentNode.insertBefore(draggedElement, this.nextSibling);
+                } else {
+                    this.parentNode.insertBefore(draggedElement, this);
+                }
+
+                updateImageOrder();
+            }
+
+            return false;
+        }
+
+        function handleDragEnd(e) {
+            this.classList.remove('dragging');
+
+            document.querySelectorAll('.image-item').forEach(item => {
+                item.classList.remove('drag-over');
+            });
+
+            // Save the new order to the server
+            saveImageOrder();
+        }
+
+        function updateImageOrder() {
+            const imageItems = document.querySelectorAll('.image-item');
+            imageItems.forEach((item, index) => {
+                const orderSpan = item.querySelector('.image-order');
+                if (orderSpan) {
+                    orderSpan.textContent = `#${index + 1}`;
+                }
+                item.dataset.order = index;
+            });
+        }
+
+        async function saveImageOrder() {
+            if (!isEditMode || !currentActivity) {
+                console.log('Not in edit mode, order will be saved when activity is created');
+                return;
+            }
+
+            const imageItems = document.querySelectorAll('.image-item');
+            const orderUpdates = [];
+
+            imageItems.forEach((item, index) => {
+                const imageId = item.dataset.imageId;
+                if (imageId) {
+                    orderUpdates.push({
+                        id: imageId,
+                        sortOrder: index
+                    });
+                }
+            });
+
+            try {
+                const response = await fetch(`/api/afbeelding/update-order?token=${token}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ orders: orderUpdates })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                console.log('Image order saved successfully');
+            } catch (error) {
+                console.error('Error saving image order:', error);
+                const notification = new Notification("Fout bij het opslaan van de volgorde.", NotifType.ERROR);
+                notification.show();
+            }
+        }
     </script>
 </body>
+
 </html>

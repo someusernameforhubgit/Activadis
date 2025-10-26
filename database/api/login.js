@@ -9,6 +9,11 @@ export default function LoginAPI(app, database) {
         if (gebruiker.length === 0) {
             return res.send({});
         }
+        if (!gebruiker[0].hash) {
+            return res.send({
+                reset: true
+            });
+        }
         const hash = hashPassword(password, gebruiker[0].salt);
         if (hash !== gebruiker[0].hash) {
             return res.send({});

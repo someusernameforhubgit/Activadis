@@ -486,7 +486,7 @@ ul {
     gap: 20px;
 }
 
-#stats-container > div {
+#stats-container > a {
     background: var(--background-light-color);
     padding: 20px;
     border-radius: 8px;
@@ -497,7 +497,7 @@ ul {
     font-weight: 500;
 }
 
-#stats-container > div:hover {
+#stats-container > a:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
     border-color: var(--primary-color);
@@ -526,7 +526,7 @@ ul {
     color: var(--font-secondary-color);
     margin-bottom: 20px;
     font-weight: 600;
-    border-bottom: 2px solid var(--primary-color);
+    /* border-bottom: 2px solid var(--primary-color); */
     padding-bottom: 10px;
 }
 
@@ -1000,7 +1000,7 @@ ul {
 }
 
 .activity-hero {
-    background: linear-gradient(135deg, var(--background-color-dark) 0%, var(--secondary-color) 100%);
+    /* background: linear-gradient(135deg, var(--background-color-dark) 0%, var(--secondary-color) 100%); */
     color: var(--font-primary-color);
     padding: 60px 0 40px 0;
     margin-bottom: 30px;
@@ -1022,7 +1022,9 @@ ul {
 }
 
 .location-badge,
-.price-badge {
+.price-badge,
+.food-badge,
+.participants-badge {
     background: rgba(255, 255, 255, 0.1);
     color: var(--font-primary-color);
     padding: 10px 20px;
@@ -1035,7 +1037,9 @@ ul {
 }
 
 .location-badge i,
-.price-badge i {
+.price-badge i,
+.food-badge i,
+.participants-badge i {
     color: var(--primary-color);
 }
 
@@ -1436,6 +1440,11 @@ ul {
                 font-size: 1rem;
                 color: red;
 
+                a {
+                    color: red;
+                    text-decoration: underline;
+                }
+
                 &.show {
                     display: block;
                 }
@@ -1464,6 +1473,15 @@ ul {
         }
 
         input {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-family: inherit;
+            font-size: 14px;
+            width: 100%;
+        }
+
+        textarea {
             padding: 10px;
             border: 1px solid #ddd;
             border-radius: 5px;

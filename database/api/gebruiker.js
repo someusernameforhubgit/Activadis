@@ -255,9 +255,97 @@ export default function GebruikerAPI(app, database) {
         }
     });
 
+    app.put(url + "/profile", async (req, res) => {
+        const verified = await verifyToken(req.query.token);
+        if (!verified) {
+            return res.status(401).send("Unauthorized");
+        }
+
+        const { email, currentPassword, newPassword } = req.body || {};
+
+        if (!currentPassword) {
+            return res.status(400).send("Huidig wachtwoord is verplicht");
+        }
+
+        try {
+            const gebruiker = (await database.query(
+                "SELECT id, email, hash, salt FROM gebruiker WHERE id = ?",
+                [verified.id]
+            ))[0];
+
+            if (!gebruiker) {
+                return res.status(404).send("Gebruiker niet gevonden");
+            }
+
+            const currentHash = hashPassword(currentPassword, gebruiker.salt || "");
+            if (currentHash !== gebruiker.hash) {
+                return res.status(400).send("Huidig wachtwoord is onjuist");
+            }
+
+            const updates = [];
+            const params = [];
+            let hasChanges = false;
+            let emailChanged = false;
+            let passwordChanged = false;
+
+            if (typeof email === "string" && email.trim() && email.trim().toLowerCase() !== (gebruiker.email || "").toLowerCase()) {
+                const normalizedEmail = email.trim();
+                const emailExists = await database.query(
+                    "SELECT id FROM gebruiker WHERE LOWER(email) = LOWER(?) AND id <> ?",
+                    [normalizedEmail, verified.id]
+                );
+
+                if (emailExists.length > 0) {
+                    return res.status(400).send("Email is al in gebruik");
+                }
+
+                updates.push("email = ?");
+                params.push(normalizedEmail);
+                hasChanges = true;
+                emailChanged = true;
+            }
+
+            if (typeof newPassword === "string" && newPassword.length > 0) {
+                if (!checkPassword(newPassword)) {
+                    return res.status(400).send("Wachtwoord voldoet niet aan de eisen");
+                }
+
+                const salt = crypto.randomBytes(16).toString("hex");
+                const hash = hashPassword(newPassword, salt);
+                updates.push("hash = ?");
+                params.push(hash);
+                updates.push("salt = ?");
+                params.push(salt);
+                hasChanges = true;
+                passwordChanged = true;
+            }
+
+            if (!hasChanges) {
+                return res.status(400).send("Geen wijzigingen gevonden");
+            }
+
+            params.push(verified.id);
+            await database.query(
+                `UPDATE gebruiker SET ${updates.join(", ")} WHERE id = ?`,
+                params
+            );
+
+            res.send({
+                success: true,
+                emailChanged,
+                passwordChanged
+            });
+        } catch (error) {
+            console.error("Error updating profiel:", error);
+            res.status(500).send("Kon profiel niet bijwerken");
+        }
+    });
+
     app.delete(url, async (req, res) => {
         if (!(await verifyAdmin(req.query.token))) return res.status(401).send("Unauthorized");
         if (req.query.id) {
+            await database.query("DELETE FROM inschrijving WHERE gebruiker = ?", [req.query.id]);
+
             const gebruiker = await database.query("DELETE FROM gebruiker WHERE id = ?", [req.query.id]);
             res.send(gebruiker);
         } else {
