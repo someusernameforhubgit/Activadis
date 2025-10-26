@@ -1,6 +1,6 @@
 import {verifyAdmin, verifyToken} from "../../util/jwt-auth.js";
 import jwt from "jsonwebtoken";
-import mail from "../../util/mail.js";
+import mail, {templates} from "../../util/mail.js";
 const url = "/api/inschrijving";
 
 export default function InschrijvingAPI(app, database) {
@@ -136,14 +136,11 @@ export default function InschrijvingAPI(app, database) {
                 const email = (await database.query("SELECT email FROM gebruiker WHERE id = ?", [req.body.gebruiker]))[0].email;
                 const activiteitNaam = (await database.query("SELECT naam FROM activiteit WHERE id = ?", [req.body.activiteit]))[0].naam;
 
+                const emailC = templates.activitySignedUp(activiteitNaam, reset_link);
                 await mail(
                     email,
-                    "Inschrijving",
-                    `
-                    <h1>U bent ingeschreven voor ${activiteitNaam}</h1><br>
-                    <p>U bent ingeschreven voor de activiteit <a href="${reset_link}">${activiteitNaam}</a></p>
-                    <p>U kunt zich uitschrijven door op de link te klikken.</p>
-                    `
+                    emailC.subject,
+                    emailC.content
                 );
             } catch (error) {
                 console.error('Error creating inschrijving:', error);
@@ -169,14 +166,11 @@ export default function InschrijvingAPI(app, database) {
 
             if (existingInschrijving.length > 0) {
                 // res.status(409).send("You are already registered for this activity");
+                const emailC = templates.alreadySignedUp(activiteitNaam);
                 await mail(
                     req.body.email,
-                    `Inschrijving voor ${activiteitNaam}`,
-                    `
-                    <h1>U heeft U proberen in te schrijven voor ${activiteitNaam}</h1><br>
-                    <p>Maar U was al voor deze activiteit ingeschreven.</p>
-                    <p>U hoeft verder geen actie to ondernemen.</p>
-                    `
+                    emailC.subject,
+                    emailC.content
                 );
                 res.send("Inschrijving aangebracht");
                 return;
@@ -185,14 +179,11 @@ export default function InschrijvingAPI(app, database) {
             const token = await jwt.sign({email: req.body.email, voornaam: req.body.voornaam, achternaam: req.body.achternaam, activiteit: req.body.activiteit, opmerking: req.body.opmerking || null, edit: true}, process.env.JWT_SECRET, {expiresIn: "1h"})
             const reset_link = `${process.env.PROTOCOL}://${process.env.HOSTNAME}/activiteit/${req.body.activiteit}?token=${token}`;
 
+            const emailC = templates.confirmSignUp(activiteitNaam, reset_link);
             await mail(
                 req.body.email,
-                `Inschrijving voor ${activiteitNaam}`,
-                `
-                    <h1>U wilt u inschrijven voor ${activiteitNaam}</h1><br>
-                    <p>Om dit te bevestigen klik <a href="${reset_link}">hier</a></p>
-                    <p>Als U dit niet was, dan kan U deze email negeren.</p>
-                    `
+                emailC.subject,
+                emailC.content
             );
             res.send("Inschrijving aangebracht");
         } else if (hasAllRequiredFieldsToken) {
@@ -282,12 +273,11 @@ export default function InschrijvingAPI(app, database) {
             const email = (await database.query("SELECT email FROM gebruiker WHERE id = ?", [req.body.gebruiker]))[0].email;
             const activiteitNaam = (await database.query("SELECT naam FROM activiteit WHERE id = ?", [req.body.activiteit]))[0].naam;
 
+            const emailC = templates.activitySignedOut(activiteitNaam);
             await mail(
                 email,
-                "Uitschrijving",
-                `
-                    <h1>U bent uitgeschreven voor ${activiteitNaam}</h1><br>
-                    `
+                emailC.subject,
+                emailC.content
             );
         } else if (hasAllRequiredFieldsExternen) {
             const existingUser = await database.query(
@@ -309,14 +299,11 @@ export default function InschrijvingAPI(app, database) {
 
             if (existingInschrijving.length === 0) {
                 // res.status(404).send("You are not registered for this activity");
+                const emailC = templates.alreadySignedOut(activiteitNaam);
                 await mail(
                     req.body.email,
-                    `Uitschrijving voor ${activiteitNaam}`,
-                    `
-                    <h1>U heeft U proberen uit te schrijven voor ${activiteitNaam}</h1><br>
-                    <p>Maar U was niet voor deze activiteit ingeschreven.</p>
-                    <p>U hoeft verder geen actie to ondernemen.</p>
-                    `
+                    emailC.subject,
+                    emailC.content
                 );
                 res.send("Uitschrijving aangebracht");
                 return;
@@ -325,14 +312,11 @@ export default function InschrijvingAPI(app, database) {
             const token = await jwt.sign({email: req.body.email, activiteit: req.body.activiteit, "delete": true}, process.env.JWT_SECRET, {expiresIn: "1h"})
             const reset_link = `${process.env.PROTOCOL}://${process.env.HOSTNAME}/activiteit/${req.body.activiteit}?token=${token}`;
 
+            const emailC = templates.confirmSignOut(activiteitNaam, reset_link);
             await mail(
                 req.body.email,
-                `Uitschrijving voor ${activiteitNaam}`,
-                `
-                    <h1>U wilt u uitschrijven voor ${activiteitNaam}</h1><br>
-                    <p>Om dit te bevestigen klik <a href="${reset_link}">hier</a></p>
-                    <p>Als U dit niet was, dan kan U deze email negeren.</p>
-                    `
+                emailC.subject,
+                emailC.content
             );
             res.send("Uitschrijving aangebracht");
         } else if (hasAllRequiredFieldsToken) {

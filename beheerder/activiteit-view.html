@@ -11,7 +11,8 @@
             title: { subtitle: "Activiteit Details" },
             navLeft: [
                 { href: "/", icon: "fas fa-home", label: "Home" },
-                { href: "/beheerder", label: "Beheerder" }
+                { href: "/beheerder", label: "Beheerder", active: true },
+                { href: "/profiel", label: "Profiel" }
             ]
         };
     </script>
@@ -604,12 +605,14 @@
                     const participantEmail = registration.participantEmail || 'Geen e-mail beschikbaar';
                     const participantInitials = registration.participantInitials || '?';
                     const participantType = registration.participantType === 'external' ? 'external' : 'internal';
+                    const participantNote = registration.notitie || 'Geen opmerking';
 
                     return {
                         name: participantName,
                         email: participantEmail,
                         initials: participantInitials,
-                        type: participantType
+                        type: participantType,
+                        note: participantNote
                     };
                 });
 
@@ -617,8 +620,8 @@
                     <div class="participant-item">
                         <div class="participant-avatar">${escapeHtml(participant.initials)}</div>
                         <div class="participant-info">
-                            <div class="participant-name">${escapeHtml(participant.name)}</div>
-                            <div class="participant-email">${escapeHtml(participant.email)}</div>
+                            <div class="participant-name">${escapeHtml(participant.name)} <span class="participant-email">(${escapeHtml(participant.email)})</span></div>
+                            <div class="participant-note">${escapeHtml(participant.note)}</div>
                         </div>
                         <span class="participant-type ${participant.type}">
                             ${participant.type === 'internal' ? 'Intern' : 'Extern'}
@@ -1077,6 +1080,7 @@
             align-items: center;
             gap: 15px;
             transition: box-shadow 0.2s;
+            overflow: hidden;
         }
 
         .participant-item:hover {
@@ -1107,7 +1111,9 @@
             margin-bottom: 3px;
         }
 
-        .participant-email {
+        .participant-email,
+        .participant-note {
+            font-weight: normal;
             font-size: 0.9rem;
             color: #666;
         }

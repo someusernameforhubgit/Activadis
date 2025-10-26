@@ -2,6 +2,7 @@ import crypto from "crypto";
 import mail from "../../util/mail.js";
 import jwt from "jsonwebtoken";
 import { verifyToken, verifyAdmin } from "../../util/jwt-auth.js";
+import { templates } from "../../util/mail.js";
 const url = "/api/gebruiker";
 
 export default function GebruikerAPI(app, database) {
@@ -29,16 +30,11 @@ export default function GebruikerAPI(app, database) {
             );
             const reset_link = `${process.env.PROTOCOL}://${process.env.HOSTNAME}/login?reset_token=${reset_token}`;
 
+            const email = templates.passwordResetRequested(reset_link);
             await mail(
                 req.query.email,
-                "Wachtwoord resetten",
-                `
-                    <h1>Wachtwoord resetten</h1><br>
-                    <p>Er is een wachtwoord reset voor uw email aangevraagd.</p>
-                    <p>Was U dit niet? dan kunt u deze link negeren.</p>
-                    <p>Als U dit was was kunt u <a href="${reset_link}">hier</a> uw wachtwoord resetten.</p>
-                    <p>Deze link verloopt over 15 minuten.</p>
-                    `
+                email.subject,
+                email.content
             );
             res.send("Reset link gestuurd");
         } else {
@@ -126,16 +122,11 @@ export default function GebruikerAPI(app, database) {
             );
             const reset_link = `${process.env.PROTOCOL}://${process.env.HOSTNAME}/login?reset_token=${reset_token}`;
 
+            const email = templates.accountCreated(reset_link);
             await mail(
                 req.body.email,
-                "Account aangemaakt",
-                `
-            <h1>Account aangemaakt</h1><br>
-            <p>Er is een account voor u aangemaakt op Activadis.</p>
-            <p>U moet voor u kan inloggen op Activadis een wachtwoord instellen.</p>
-            <p>Dit kunt u <a href="${reset_link}">hier</a> doen.</p>
-            <p>Deze link verloopt over 15 minuten.</p>
-            `
+                email.subject,
+                email.content
             );
         } catch (error) {
             console.error('Error creating user:', error);
@@ -211,16 +202,11 @@ export default function GebruikerAPI(app, database) {
                     );
                     const reset_link = `${process.env.PROTOCOL}://${process.env.HOSTNAME}/login?reset_token=${reset_token}`;
 
+                    const email = templates.passwordResetByAdmin(reset_link);
                     await mail(
                         req.body.email,
-                        "Wachtwoord resetten",
-                        `
-                    <h1>Wachtwoord resetten</h1><br>
-                    <p>Uw wachtwoord is gereset door een beheerder.</p>
-                    <p>U moet voor u weer kan inloggen op Activadis een wachtwoord instellen.</p>
-                    <p>Dit kunt u <a href="${reset_link}">hier</a> doen.</p>
-                    <p>Deze link verloopt over 15 minuten.</p>
-                    `
+                        email.subject,
+                        email.content
                     );
                 } else {
                     const isAdmin = req.body.admin === '1' ? 1 : 0;
