@@ -215,8 +215,11 @@ async function loadMainsiteParticipants(activityId, { allowParticipants, isLogge
         participantsContent.style.display = 'block';
         participantsList.innerHTML = internalParticipants.map(participant => `
             <div class="participant-item">
-                <div class="participant-avatar">${participant.participantInitials}</div>
-                <div class="participant-name">${participant.participantName}</div>
+                <div class="participant-avatar">${escapeHtml(participant.participantInitials)}</div>
+                <div class="participant-info">
+                    <div class="participant-name">${escapeHtml(participant.participantName)}</div>
+                    <div class="participant-note">${escapeHtml(participant.notitie || 'Geen opmerking')}</div>
+                </div>
             </div>
         `).join('');
 
