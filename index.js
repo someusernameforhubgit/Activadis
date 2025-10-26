@@ -36,6 +36,9 @@ app.get('/verleden', (req, res) => {
 app.get('/activiteit/:id', (req, res) => {
     res.sendFile('activiteit.html', { root: './gebruiker' });
 });
+app.get('/profiel', (req, res) => {
+    res.sendFile('profiel.html', { root: './gebruiker' });
+});
 
 // Admin Routes
 app.get('/beheerder' , (req, res) => {

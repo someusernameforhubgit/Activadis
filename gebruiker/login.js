@@ -6,6 +6,40 @@ function withHeader(callback) {
     }
 }
 
+function normalizePath(path) {
+    if (!path || path === "#" || path.startsWith("javascript:")) {
+        return null;
+    }
+
+    try {
+        const url = new URL(path, window.location.origin);
+        path = url.pathname;
+    } catch (error) {
+        path = path.startsWith("/") ? path : `/${path}`;
+    }
+
+    path = path.replace(/\/index\.html$/i, "/");
+
+    if (path !== "/" && path.endsWith("/")) {
+        path = path.slice(0, -1);
+    }
+
+    return path || "/";
+}
+
+function updateNavActiveStates(navElement) {
+    if (!navElement) {
+        return;
+    }
+
+    const currentPath = normalizePath(window.location.pathname) || "/";
+    navElement.querySelectorAll("a").forEach((link) => {
+        const linkPath = normalizePath(link.getAttribute("href"));
+        const isActive = linkPath !== null && linkPath === currentPath;
+        link.classList.toggle("active", isActive);
+    });
+}
+
 document.addEventListener("DOMContentLoaded", async () => {
     const filters = document.querySelector(".filters");
     const token = sessionStorage.getItem("JWT");
@@ -21,6 +55,15 @@ document.addEventListener("DOMContentLoaded", async () => {
 
             const nameEl = document.querySelector(".name");
             if (nameEl) nameEl.textContent = "";
+
+            const navLeft = document.querySelector(".nav-left");
+            if (navLeft) {
+                const profileLink = navLeft.querySelector('[data-profile-link="true"]');
+                if (profileLink) {
+                    profileLink.remove();
+                }
+                updateNavActiveStates(navLeft);
+            }
         });
     };
 
@@ -56,24 +99,35 @@ document.addEventListener("DOMContentLoaded", async () => {
             nameEl.textContent = `${gebruikerData.firstname || ""} ${gebruikerData.lastname || ""}`.trim();
         }
 
-        // Only show beheerder link for admins (role === 1)
-        if (gebruikerData.role === 1) {
-            const navLeft = document.querySelector(".nav-left");
-            if (navLeft && !navLeft.querySelector('a[href="/beheerder"]')) {
-                const beheerderLink = document.createElement("a");
-                beheerderLink.href = "/beheerder";
-                beheerderLink.textContent = "Beheerder";
-                navLeft.appendChild(beheerderLink);
-            }
-        } else {
-            // Remove beheerder link if user is not an admin
-            const navLeft = document.querySelector(".nav-left");
-            if (navLeft) {
+        const isAdmin = gebruikerData.role === 1 || gebruikerData.isAdmin === 1 || gebruikerData.isAdmin === true;
+
+        const navLeft = document.querySelector(".nav-left");
+
+        if (navLeft) {
+            if (isAdmin) {
+                if (!navLeft.querySelector('a[href="/beheerder"]')) {
+                    const beheerderLink = document.createElement("a");
+                    beheerderLink.href = "/beheerder";
+                    beheerderLink.textContent = "Beheerder";
+                    navLeft.appendChild(beheerderLink);
+                }
+            } else {
                 const beheerderLink = navLeft.querySelector('a[href="/beheerder"]');
                 if (beheerderLink) {
                     beheerderLink.remove();
                 }
             }
+
+            let profileLink = navLeft.querySelector('[data-profile-link="true"]');
+            if (!profileLink) {
+                profileLink = document.createElement("a");
+                profileLink.href = "/profiel";
+                profileLink.textContent = "Profiel";
+                profileLink.dataset.profileLink = "true";
+                navLeft.appendChild(profileLink);
+            }
+
+            updateNavActiveStates(navLeft);
         }
     });
 });
