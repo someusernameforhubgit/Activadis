@@ -115,6 +115,30 @@ function calculateAvailableSpots(min, max, current = 0) {
     return Math.max(0, max - current);
 }
 
+// Function to update activity status (participants count and food info)
+async function updateActivityStatus() {
+    try {
+        const response = await fetch(`/api/activiteit?id=${activityId}`);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        
+        const data = await response.json();
+        if (!data) return;
+        
+        // Update food badge
+        const foodBadge = document.getElementById('activityFood');
+        if (foodBadge) {
+            foodBadge.innerHTML = data.eten ?
+                '<i class="fas fa-utensils"></i> Eten inbegrepen' :
+                '<i class="fas fa-utensils"></i> Eten niet inbegrepen';
+        }
+        
+        return data;
+    } catch (error) {
+        console.error('Error updating activity status:', error);
+        return null;
+    }
+}
+
 // Function to load and display participants (if enabled)
 async function loadMainsiteParticipants(activityId, { allowParticipants, isLoggedIn }) {
     const participantsCard = document.getElementById('participantsCard');
@@ -143,6 +167,9 @@ async function loadMainsiteParticipants(activityId, { allowParticipants, isLogge
     participantsLoading.style.display = 'block';
 
     try {
+        // First update the activity status (participants count and food info)
+        await updateActivityStatus();
+        
         const activeJwt = sessionStorage.getItem('JWT') || jwt;
         const includeDetails = isLoggedIn && activeJwt ? 'true' : 'false';
         const tokenParam = isLoggedIn && activeJwt ? `&token=${activeJwt}` : '';
@@ -295,6 +322,7 @@ async function populateActivityData(data) {
     const inschrijvingenData = await inschrijvingen.json();
     const availableSpots = calculateAvailableSpots(data.min, data.max, inschrijvingenData.length);
     document.getElementById('registrationCount').textContent = inschrijvingenData.length;
+    document.getElementById('activityParticipants').querySelector('span:last-child').textContent = `${inschrijvingenData.length} deelnemer${inschrijvingenData.length !== 1 ? 's' : ''}`;
 
     // Update availability status
     const statusElement = document.getElementById('availabilityStatus');
@@ -511,6 +539,13 @@ async function loadPage() {
         showError('Geen activiteit ID opgegeven in de URL.');
         return;
     }
+    
+    // Set up beforeunload to clean up interval
+    window.addEventListener('beforeunload', () => {
+        if (refreshInterval) {
+            clearInterval(refreshInterval);
+        }
+    });
 
     await loadButtons();
 
@@ -647,7 +682,22 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
+// Set up periodic refresh of activity status
+let refreshInterval;
+
+function setupStatusRefresh() {
+    // Clear any existing interval
+    if (refreshInterval) {
+        clearInterval(refreshInterval);
+    }
+    
+    // Update immediately and then every 30 seconds
+    updateActivityStatus();
+    refreshInterval = setInterval(updateActivityStatus, 30000);
+}
+
 // Event listeners
 document.addEventListener('DOMContentLoaded', function() {
     loadPage();
+    setupStatusRefresh();
 });

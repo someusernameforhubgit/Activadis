@@ -1,4 +1,5 @@
 import { verifyAdmin } from "../../util/jwt-auth.js";
+import mail from "../../util/mail.js";
 const url = "/api/activiteit";
 
 export default function ActiviteitAPI(app, database) {
@@ -135,7 +136,35 @@ export default function ActiviteitAPI(app, database) {
                 await database.query("DELETE FROM afbeeldingen WHERE activiteitId = ?", [activityId]);
                 
                 // Delete inschrijvingen
+                // Get all registrations for this activity
+                const inschrijvingen = await database.query("SELECT * FROM inschrijving WHERE activiteit = ?", [activityId]);
+
+                const userEmails = [];
+                for (const inschrijving of inschrijvingen) {
+                    if (inschrijving.gebruiker) {
+                        const [user] = await database.query("SELECT email FROM gebruiker WHERE id = ?", [inschrijving.gebruiker]);
+                        if (user && user.email) userEmails.push(user.email);
+                    } else if (inschrijving.externe) {
+                        const [externe] = await database.query("SELECT email FROM externen WHERE id = ?", [inschrijving.externe]);
+                        if (externe && externe.email) userEmails.push(externe.email);
+                    }
+                }
+                
+                // Delete registrations
                 await database.query("DELETE FROM inschrijving WHERE activiteit = ?", [activityId]);
+
+                const activiteitNaam = await database.query("SELECT naam FROM activiteit WHERE id = ?", [activityId]);
+                
+                for (const email of userEmails) {
+                    await mail(
+                        email,
+                        "Activiteit geannuleerd",
+                        `
+                    <h1>U was ingeschreven voor ${activiteitNaam}</h1><br>
+                    <p>Deze activiteit is verwijderd door een beheerder</p>
+                    `
+                    );
+                }
                 
                 // Finally, delete the activity itself
                 const activiteit = await database.query("DELETE FROM activiteit WHERE id = ?", [activityId]);

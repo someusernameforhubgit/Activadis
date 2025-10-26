@@ -129,6 +129,18 @@ class ColumnComponent extends ModalComponent {
     }
 }
 
+class HiddenComponent extends ModalComponent {
+    constructor(id, value) {
+        super();
+        this.id = id;
+        this.value = value;
+    }
+
+    element(modal) {
+        return `<input id="${this.id}" type="hidden" name="${this.id}" value="${this.value}">`;
+    }
+}
+
 class Modal {
     constructor(fields, id) {
         this.fields = fields;
@@ -201,5 +213,6 @@ export {
     ColumnComponent,
     RowComponent,
     CloseButtonComponent,
-    TextFieldComponent
+    TextFieldComponent,
+    HiddenComponent
 }

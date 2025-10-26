@@ -17,7 +17,7 @@
     </script>
     <script src="/util/header.js"></script>
     <script src="/beheerder/verifyAdmin.js"></script>
-    <title>Activadis - Activiteiten Beheer</title>
+    <title>Activadis - Rollen Beheer</title>
 </head>
 <body>
 <header></header>
@@ -27,49 +27,27 @@
             <ul>
                 <li><a href="/beheerder/">Dashboard</a></li>
                 <li><a href="/beheerder/gebruikers">Gebruikers</a></li>
-                <li><a href="/beheerder/activiteiten" class="active">Activiteiten</a></li>
-                <li><a href="/beheerder/rollen">Rollen</a></li>
+                <li><a href="/beheerder/activiteiten">Activiteiten</a></li>
+                <li><a href="/beheerder/rollen" class="active">Rollen</a></li>
             </ul>
         </aside>
         <main id="mainContent">
             <div class="heading split-row">
-                <h2>Activiteiten Beheer</h2>
-                <button class="btn btn-primary" onclick="window.location.href='/beheerder/activiteiten/new'">
-                    <i class="fas fa-plus"></i> Nieuwe Activiteit Toevoegen
+                <h2>Rollen Beheer</h2>
+                <button class="btn btn-primary" onclick="newRol()">
+                    <i class="fas fa-plus"></i> Nieuwe Rol Toevoegen
                 </button>
             </div>
 
-            <div id="activiteiten-list" class="content-section">
+            <div id="functie-list" class="content-section">
                 <div class="heading split-row" style="align-items: center; margin-bottom: 20px;">
-                    <h3 style="margin: 0;">Alle Activiteiten</h3>
-                    <div class="search-container">
-                        <i class="fas fa-search"></i>
-                        <input 
-                            type="text" 
-                            id="search-input" 
-                            placeholder="Zoek op naam, locatie, omschrijving..." 
-                            oninput="searchActiviteiten()"
-                        />
-                        <span id="search-results-count"></span>
-                    </div>
+                    <h3 style="margin: 0;">Alle Rollen</h3>
                 </div>
                 <table class="data-table">
                     <thead>
                         <tr>
                             <th class="sortable" onclick="sortTable('naam')">
                                 Naam <i class="fas fa-sort sort-icon" id="sort-naam"></i>
-                            </th>
-                            <th class="sortable" onclick="sortTable('locatie')">
-                                Locatie <i class="fas fa-sort sort-icon" id="sort-locatie"></i>
-                            </th>
-                            <th class="sortable" onclick="sortTable('begin')">
-                                Begin <i class="fas fa-sort sort-icon" id="sort-begin"></i>
-                            </th>
-                            <th class="sortable" onclick="sortTable('eind')">
-                                Eind <i class="fas fa-sort sort-icon" id="sort-eind"></i>
-                            </th>
-                            <th class="sortable" onclick="sortTable('status')">
-                                Status <i class="fas fa-sort sort-icon" id="sort-status"></i>
                             </th>
                             <th class="justify-right">Acties</th>
                         </tr>
@@ -152,14 +130,25 @@
             NotifType
         } from "../../util/notif.js";
 
+        import {
+            Modal,
+            TitleComponent,
+            ButtonComponent,
+            InputFieldComponent,
+            ColumnComponent,
+            RowComponent,
+            CloseButtonComponent,
+            HiddenComponent
+        } from '../util/modal.js';
+
         const urlParams = new URLSearchParams(window.location.search);
         const edit = urlParams.get('edit');
         const success = urlParams.get('success');
 
         if (success) {
             const message = edit === 'true' 
-                ? "Activiteit succesvol bijgewerkt." 
-                : "Activiteit succesvol toegevoegd.";
+                ? "Functie succesvol bijgewerkt."
+                : "Functie succesvol toegevoegd.";
             
             const notification = new Notification(message, NotifType.SUCCESS);
             notification.show();
@@ -172,7 +161,7 @@
         }
 
         const token = sessionStorage.getItem("JWT");
-        const API_URL = '/api/activiteit';
+        const API_URL = '/api/role';
         
         let allActiviteiten = [];
         let filteredActiviteiten = [];
@@ -208,42 +197,11 @@
                 filteredActiviteiten = allActiviteiten;
                 
                 displayActiviteiten(filteredActiviteiten);
-                updateSearchCount();
+                // updateSearchCount();
                 // updateStats(allActiviteiten);
             } catch (error) {
-                console.error('Error loading activiteiten:', error);
+                console.error('Error loading functies:', error);
             }
-        }
-        
-        window.searchActiviteiten = function() {
-            const searchTerm = document.getElementById('search-input').value.toLowerCase().trim();
-            
-            if (searchTerm === '') {
-                filteredActiviteiten = allActiviteiten;
-            } else {
-                filteredActiviteiten = allActiviteiten.filter(act => {
-                    // Search in multiple fields
-                    const searchableText = [
-                        act.naam,
-                        act.locatie,
-                        act.omschrijving,
-                        new Date(act.begin).toLocaleDateString('nl-NL'),
-                        new Date(act.eind).toLocaleDateString('nl-NL')
-                    ].join(' ').toLowerCase();
-                    
-                    return searchableText.includes(searchTerm);
-                });
-            }
-            
-            // Reset sort when searching
-            currentSort.column = null;
-            currentSort.ascending = true;
-            document.querySelectorAll('.sort-icon').forEach(icon => {
-                icon.className = 'fas fa-sort sort-icon';
-            });
-            
-            displayActiviteiten(filteredActiviteiten);
-            updateSearchCount();
         }
         
         function updateSearchCount() {
@@ -303,6 +261,8 @@
             } else {
                 console.error('Icon not found for', column);
             }
+
+            console.log("column: " + column)
             
             // Sort the filtered activities (not all activities)
             const sorted = [...filteredActiviteiten].sort((a, b) => {
@@ -310,8 +270,8 @@
                 
                 switch(column) {
                     case 'naam':
-                        valueA = a.naam.toLowerCase();
-                        valueB = b.naam.toLowerCase();
+                        valueA = a.name.toLowerCase();
+                        valueB = b.name.toLowerCase();
                         break;
                     case 'locatie':
                         valueA = a.locatie.toLowerCase();
@@ -345,27 +305,17 @@
             tbody.innerHTML = '';
 
             activiteiten.forEach(act => {
-                const beginDate = new Date(act.begin);
-                const eindDate = new Date(act.eind);
-                const isUpcoming = eindDate > new Date();
-                
                 const row = document.createElement('tr');
                 row.style.cursor = 'pointer';
                 row.onclick = function() {
-                    window.location.href = `/beheerder/activiteiten/${act.id}`;
+                    editRollen(act.id);
                 };
                 
                 row.innerHTML = `
-                    <td><strong>${escapeHtml(act.naam)}</strong></td>
-                    <td>${escapeHtml(act.locatie)}</td>
-                    <td>${beginDate.toLocaleDateString("en-UK")}<br><small>${beginDate.toLocaleTimeString('nl-NL', {hour: '2-digit', minute: '2-digit'})}</small></td>
-                    <td>${eindDate.toLocaleDateString("en-UK")}<br><small>${eindDate.toLocaleTimeString('nl-NL', {hour: '2-digit', minute: '2-digit'})}</small></td>
-                    <td>${isUpcoming ? 
-                        '<span style="color: #28a745;"><i class="fas fa-arrow-up"></i> Aankomend</span>' :
-                        '<span style="color: #6c757d;"><i class="fas fa-check"></i> Afgelopen</span>'}</td>
+                    <td><strong>${escapeHtml(act.name)}</strong></td>
                     <td onclick="event.stopPropagation()">
                         <div class="justify-right" style="display: flex; gap: 5px; flex-wrap: wrap;">
-                            <button class="btn btn-primary btn-small" onclick="window.location.href='/beheerder/activiteiten/${act.id}/edit'">
+                            <button class="btn btn-primary btn-small" onclick="editRollen(${act.id})">
                                 <i class="fas fa-edit"></i>
                             </button>
                             <button class="btn btn-danger btn-small" onclick="deleteActiviteit(${act.id})">
@@ -376,6 +326,46 @@
                 `;
                 tbody.appendChild(row);
             });
+        }
+
+        window.editRollen = async (id) => {
+            // get role name from id
+            const res = await fetch(API_URL + "?id=" + id + "&token=" + token);
+            const data = await res.json();
+            const modal = new Modal([
+                new TitleComponent("Rol bijwerken"),
+                new HiddenComponent("id", id),
+                new InputFieldComponent("naam", "Naam", "Vul de naam van de rol in.", true),
+                new RowComponent([
+                    new ButtonComponent("Submit", submitEditRol),
+                    new CloseButtonComponent()
+                ])
+            ], "inschrijven-intern-modal");
+            modal.show();
+
+            document.getElementById("naam").value = data.name;
+        }
+
+        async function submitEditRol(modal) {
+            if (!document.getElementById("naam").value) {
+                modal.error("Vul een naam in.");
+                return;
+            }
+            const res = await fetch(API_URL + "?token=" + token, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    id: document.getElementById("id").value,
+                    name: document.getElementById("naam").value
+                })
+            });
+            modal.close();
+
+            const notification = new Notification("Rol bijgewerkt.", NotifType.SUCCESS);
+            notification.show();
+            loadActiviteiten();
         }
 
         function updateStats(activiteiten) {
@@ -392,25 +382,70 @@
         }
 
         window.deleteActiviteit = async (id) => {
-            if (confirm('Weet je zeker dat je deze activiteit wilt verwijderen?')) {
-                try {
-                    const response = await fetch(`${API_URL}?id=${id}&token=${token}`, {
-                        method: 'DELETE'
-                    });
+            const modal = new Modal([
+                new TitleComponent("Weet je zeker dat je deze rol wilt verwijderen?"),
+                new RowComponent([
+                    new ButtonComponent("Verwijderen", async () => {
+                        try {
+                            const response = await fetch(`${API_URL}?id=${id}&token=${token}`, {
+                                method: 'DELETE'
+                            });
 
-                    if (response.ok) {
-                        const notification = new Notification("Activiteit verwijderd.", NotifType.SUCCESS);
-                        notification.show();
-                        loadActiviteiten();
-                    } else {
-                        const notification = new Notification("Error deleting activiteit.", NotifType.ERROR);
-                        notification.show();
-                    }
-                } catch (error) {
-                    const notification = new Notification("Error deleting activiteit.", NotifType.ERROR);
-                    notification.show();
-                }
+                            if (response.ok) {
+                                const notification = new Notification("Rol verwijderd.", NotifType.SUCCESS);
+                                notification.show();
+                                loadActiviteiten();
+                            } else if (response.status === 400) {
+                                modal.error("Rol kan niet worden verwijderd, er zijn nog gebruikers met deze rol.");
+                                return;
+                            } else {
+                                const notification = new Notification("Error deleting rol.", NotifType.ERROR);
+                                notification.show();
+                            }
+
+                            modal.close();
+                        } catch (error) {
+                            const notification = new Notification("Error deleting rol.", NotifType.ERROR);
+                            notification.show();
+                        }
+                    }),
+                    new CloseButtonComponent()
+                ])
+            ], "delete-activiteit-modal");
+            modal.show();
+        }
+
+        window.newRol = () => {
+            const modal = new Modal([
+                new TitleComponent("Nieuwe Rol"),
+                new InputFieldComponent("naam", "Naam", "Vul de naam van de rol in.", true),
+                new RowComponent([
+                    new ButtonComponent("Submit", submitNewRol),
+                    new CloseButtonComponent()
+                ])
+            ], "inschrijven-intern-modal");
+            modal.show();
+        }
+
+        window.submitNewRol = async (modal) => {
+            if (!document.getElementById("naam").value) {
+                modal.error("Vul een naam in.");
+                return;
             }
+            const res = await fetch(API_URL + "?token=" + token, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    name: document.getElementById("naam").value
+                })
+            });
+            modal.close();
+
+            const notification = new Notification("Rol toegevoegd.", NotifType.SUCCESS);
+            notification.show();
+            loadActiviteiten();
         }
     </script>
 </body>

@@ -1022,7 +1022,9 @@ ul {
 }
 
 .location-badge,
-.price-badge {
+.price-badge,
+.food-badge,
+.participants-badge {
     background: rgba(255, 255, 255, 0.1);
     color: var(--font-primary-color);
     padding: 10px 20px;
@@ -1035,7 +1037,9 @@ ul {
 }
 
 .location-badge i,
-.price-badge i {
+.price-badge i,
+.food-badge i,
+.participants-badge i {
     color: var(--primary-color);
 }
 

@@ -88,7 +88,10 @@ async function submitForm(e) {
             errorMessage.classList.remove("display-none");
             errorMessage.textContent = "Wachtwoord of email onjuist";
             errorMessage.style.color = "red";
-            throw new Error("Wachtwoord of email onjuist");
+        } else if (data.reset) {
+            errorMessage.classList.remove("display-none");
+            errorMessage.textContent = "Uw wachtwoord is gereset door een beheerder, check uw mail.";
+            errorMessage.style.color = "red";
         } else {
             sessionStorage.setItem("JWT", data.token);
             window.location.href = "/";
