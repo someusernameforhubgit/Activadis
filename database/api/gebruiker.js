@@ -258,6 +258,8 @@ export default function GebruikerAPI(app, database) {
     app.delete(url, async (req, res) => {
         if (!(await verifyAdmin(req.query.token))) return res.status(401).send("Unauthorized");
         if (req.query.id) {
+            await database.query("DELETE FROM inschrijving WHERE gebruiker = ?", [req.query.id]);
+
             const gebruiker = await database.query("DELETE FROM gebruiker WHERE id = ?", [req.query.id]);
             res.send(gebruiker);
         } else {

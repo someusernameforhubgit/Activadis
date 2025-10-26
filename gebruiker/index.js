@@ -83,6 +83,7 @@ function renderActivities() {
                         <div class="event-details">
                             <h2 class="event-title">${escapeHtml(activity.naam)}</h2>
                             <h3 class="location">${escapeHtml(activity.locatie)}</h3>
+                            <p class="date">Deelnemers: ${activity.min} - ${activity.max}</p>
                             <p class="date">Begin: ${beginDate.toLocaleString('nl-NL')}</p>
                             <p class="date">Einde: ${endDate.toLocaleString('nl-NL')}</p>
                             ${activity.omschrijving ? `<p class="description">${escapeHtml(truncateText(activity.omschrijving, MAX_DESCRIPTION_LENGTH))}</p>` : ''}

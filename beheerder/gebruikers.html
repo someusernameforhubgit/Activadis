@@ -40,6 +40,7 @@
                 <li><a href="/beheerder/">Dashboard</a></li>
                 <li><a href="/beheerder/gebruikers" class="active">Gebruikers</a></li>
                 <li><a href="/beheerder/activiteiten">Activiteiten</a></li>
+                <li><a href="/beheerder/rollen">Rollen</a></li>
             </ul>
         </aside>     
         <main id="mainContent">
@@ -70,6 +71,9 @@
                             <th style="width: 50px;"></th>
                             <th class="sortable" onclick="sortTable('gebruiker')">
                                 Gebruiker <i class="fas fa-sort sort-icon" id="sort-gebruiker"></i>
+                            </th>
+                            <th class="sortable" onclick="sortTable('rol')">
+                                Rol <i class="fas fa-sort sort-icon" id="sort-rol"></i>
                             </th>
                             <th class="sortable" style="text-align: center;" onclick="sortTable('admin')">
                                 Admin <i class="fas fa-sort sort-icon" id="sort-admin"></i>
@@ -213,7 +217,7 @@
                 allUsers = await response.json();
                 filteredUsers = allUsers;
 
-                displayUsers(filteredUsers);
+                await displayUsers(filteredUsers);
                 updateStats(allUsers);
                 updateSearchCount();
             } catch (error) {
@@ -221,7 +225,7 @@
             }
         }
         
-        window.searchUsers = function() {
+        window.searchUsers = async function() {
             const searchTerm = document.getElementById('search-input').value.toLowerCase().trim();
             
             if (searchTerm === '') {
@@ -247,7 +251,7 @@
                 icon.className = 'fas fa-sort sort-icon';
             });
             
-            displayUsers(filteredUsers);
+            await displayUsers(filteredUsers);
             updateSearchCount();
         }
         
@@ -262,7 +266,7 @@
             }
         }
         
-        window.sortTable = function(column) {
+        window.sortTable = async function(column) {
             console.log('Sorting by:', column);
             
             // Three-state toggle: normal -> ascending -> descending -> normal
@@ -295,6 +299,15 @@
             document.querySelectorAll('.sort-icon').forEach(icon => {
                 icon.className = 'fas fa-sort sort-icon';
             });
+
+            let rollen = await fetch(`/api/role?token=${token}`, {
+                method: 'GET'
+            });
+            rollen = await rollen.json();
+            rollen = rollen.reduce((acc, role) => {
+                acc[role.id] = role.name;
+                return acc;
+            }, {});
             
             // Update active icon
             const activeIcon = document.getElementById(`sort-${column}`);
@@ -318,6 +331,10 @@
                         valueA = getUserDisplayName(a).toLowerCase();
                         valueB = getUserDisplayName(b).toLowerCase();
                         break;
+                    case 'rol':
+                        valueA = rollen[a.role].toLowerCase();
+                        valueB = rollen[b.role].toLowerCase();
+                        break;
                     case 'admin':
                         valueA = (a.isAdmin === 1 || a.isAdmin === true) ? 1 : 0;
                         valueB = (b.isAdmin === 1 || b.isAdmin === true) ? 1 : 0;
@@ -332,7 +349,16 @@
             displayUsers(sorted);
         }
 
-        function displayUsers(users) {
+        async function displayUsers(users) {
+            let rollen = await fetch(`/api/role?token=${token}`, {
+                method: 'GET'
+            });
+            rollen = await rollen.json();
+            rollen = rollen.reduce((acc, role) => {
+                acc[role.id] = role.name;
+                return acc;
+            }, {});
+
             const tbody = document.getElementById('users-table-body');
             tbody.innerHTML = '';
 
@@ -355,6 +381,7 @@
                             ${isDisplayingName ? `<small style="color: #666; font-size: 0.85rem;">${user.email}</small>` : ''}
                         </div>
                     </td>
+                    <td>${rollen[user.role]}</td>
                     <td style="text-align: center;">${(user.isAdmin === 1 || user.isAdmin === true) ? '<i class="fas fa-check" style="color: green;"></i>' : '<i class="fas fa-times" style="color: red;"></i>'}</td>
                     <td onclick="event.stopPropagation()">
                         <div class="justify-right" style="display: flex; gap: 5px; flex-wrap: wrap;">
