@@ -1,0 +1,135 @@
+main.profile-page {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 32px 16px 64px;
+}
+
+.heading {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 24px;
+}
+
+.profile-card {
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 12px 32px rgba(23, 40, 80, 0.08);
+    padding: 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+
+    h1, h2, h3, h4, h5, h6, p {
+        color: var(--font-secondary-color);
+    }
+}
+
+.profile-card h1 {
+    font-size: 2rem;
+    margin-bottom: 8px;
+}
+
+.profile-card p.description {
+    color: #5c6370;
+    margin: 0;
+}
+
+.form-section {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.form-section h2 {
+    font-size: 1.25rem;
+    margin: 0;
+}
+
+.form-grid {
+    display: grid;
+    gap: 16px;
+}
+
+@media (min-width: 640px) {
+    .form-grid.two-columns {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-group label {
+    font-weight: 600;
+    color: #1c1e26;
+}
+
+.form-group input {
+    border: 1px solid #d6d9e0;
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 1rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.restrictions {
+    font-size: 0.875rem;
+    color: #5c6370;
+    margin: 0;
+}
+
+.actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-top: 0;
+    padding: 0;
+    border: 0;
+
+    &:last-child {
+        margin-bottom: 0;
+    }
+}
+
+.actions button {
+    background-color: var(--primary-color);
+    border: none;
+    color: #ffffff;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.actions button:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+    box-shadow: none;
+}
+
+.status-text {
+    font-size: 0.9rem;
+    color: #5c6370;
+}
+
+.section-divider {
+    opacity: 0.2;
+    margin: 24px 0;
+}
+
+@media (max-width: 480px) {
+    .profile-card {
+        padding: 24px;
+    }
+}
