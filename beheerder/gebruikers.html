@@ -72,7 +72,7 @@
                                 Gebruiker <i class="fas fa-sort sort-icon" id="sort-gebruiker"></i>
                             </th>
                             <th class="sortable" style="text-align: center;" onclick="sortTable('admin')">
-                                Admin <i class="fas fa-sort sort-icon" id="sort-admin"></i>
+                                Beheerder <i class="fas fa-sort sort-icon" id="sort-admin"></i>
                             </th>
                             <th class="justify-right">Acties</th>
                         </tr>
@@ -133,8 +133,8 @@
                 
                 #search-input:focus {
                     outline: none;
-                    border-color: #007bff;
-                    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+                    border-color: #faa21b;
+                    box-shadow: 0 0 0 3px rgba(250, 162, 27, 0.1);
                 }
                 
                 #search-results-count {
@@ -150,20 +150,20 @@
                 <div class="item split-row">
                     <div class="item split-row">
                         <div class="row">
-                            <div class="fa-container"><i class="fas fa-users"></i></div><p>Totaal</p>
+                            <span style="width: 5px;"></span><p>Totaal</p>
                         </div>
                         <p><span id="total-users">-</span></p>
                     </div>
                 </div>
                 <div class="item split-row">
                     <div class="row">
-                        <div class="fa-container"><i class="fas fa-crown"></i></div><p>Admins</p>
+                        <span style="width: 5px;"></span><p>Beheerders</p>
                     </div>
                     <p><span id="admin-count">-</span></p>
                 </div>
                 <div class="item split-row">
                     <div class="row">
-                        <div class="fa-container"><i class="fas fa-user"></i></div><p>Reguliere gebruikers</p>
+                        <span style="width: 5px;"></span><p>Reguliere gebruikers</p>
                     </div>
                     <p><span id="regular-count">-</span></p>
                 </div>
