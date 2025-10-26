@@ -148,6 +148,7 @@
     background: #f8f9fa;
     border-radius: 6px;
     transition: transform 0.2s, box-shadow 0.2s;
+    overflow: hidden;
 }
 
 .participant-item:hover {

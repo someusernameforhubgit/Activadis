@@ -1,5 +1,5 @@
 import { verifyAdmin } from "../../util/jwt-auth.js";
-import mail from "../../util/mail.js";
+import mail, {templates} from "../../util/mail.js";
 const url = "/api/activiteit";
 
 export default function ActiviteitAPI(app, database) {
@@ -153,16 +153,14 @@ export default function ActiviteitAPI(app, database) {
                 // Delete registrations
                 await database.query("DELETE FROM inschrijving WHERE activiteit = ?", [activityId]);
 
-                const activiteitNaam = await database.query("SELECT naam FROM activiteit WHERE id = ?", [activityId]);
-                
+                const activiteitNaam = (await database.query("SELECT naam FROM activiteit WHERE id = ?", [activityId]))[0].naam;
+
+                const emailC = templates.activityDeleted(activiteitNaam);
                 for (const email of userEmails) {
                     await mail(
                         email,
-                        "Activiteit geannuleerd",
-                        `
-                    <h1>U was ingeschreven voor ${activiteitNaam}</h1><br>
-                    <p>Deze activiteit is verwijderd door een beheerder</p>
-                    `
+                        emailC.subject,
+                        emailC.content
                     );
                 }
                 
